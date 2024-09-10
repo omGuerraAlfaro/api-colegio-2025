@@ -1,0 +1,103 @@
+"descuento_asignado": 0, //195.000
+
+"descuento_asignado": 2.564102564, //190000
+
+"descuento_asignado": 5.128205128, //185000
+
+"descuento_asignado": 7.692307692, //180000
+
+"descuento_asignado": 10.25641026, //175000
+
+"descuento_asignado": 12.82051282, //170000
+
+"descuento_asignado": 15.38461538, //165000
+
+"descuento_asignado": 17.94871795, //160000
+
+"descuento_asignado": 20.51282051, //155000
+
+"descuento_asignado": 23.07692308, //150000
+
+"descuento_asignado": 25.64102564, //145000
+
+"descuento_asignado": 28.20512821, //140000
+
+"descuento_asignado": 38.46153846, //120000
+
+"descuento_asignado": 50, //97500
+
+"descuento_asignado": 0,
+
+null -> 0
+
+50.000 -> 1
+
+100.000 -> 2
+
+120.000 -> 3
+
+160.000 -> 4
+
+100.000 -> 5
+
+90.000 -> 6
+
+60.000 -> 7
+
+pre -> 1
+
+kind -> 2
+
+prim -> 3
+
+segun -> 4
+
+terc -> 5
+
+cuar -> 6
+
+quin -> 7
+
+sext -> 8
+
+sept -> 9
+
+octA -> 10
+
+octB -> 11
+
+
+{
+    "primer_nombre": "",
+    "segundo_nombre": "",
+    "primer_apellido": "",
+    "segundo_apellido": "",
+    "fecha_nacimiento": "2012-04-25",
+    "rut": "",
+    "dv": "",
+    "telefono": "",
+    "correo_electronico": "",
+    "estado_civil": "sin datos",
+    "nacionalidad": "Chilena",
+    "actividad": "sin datos",
+    "escolaridad": "sin datos",
+    "descuento_asignado": 0,
+    "estudiantes": [
+      {
+        "primer_nombre": "",
+        "segundo_nombre": "",
+        "primer_apellido": "",
+        "segundo_apellido": "",
+        "fecha_nacimiento": "2016-12-16",
+        "rut": "",
+        "dv": "",
+        "telefono_contacto": "",
+        "genero": "F",
+        "alergico": "Ninguno",
+        "vive_con": "Padres",
+        "enfermedad_cronica": "",
+        "cursoId": 6,
+        "pae_id": null
+      }
+    ]
+},
