@@ -11,9 +11,10 @@ import { ApoderadoDireccion } from './ApoderadoDireccion.entity';
 import { Direccion } from './Direccion.entity';
 import { Usuarios } from './User.entity';
 import { Boleta } from './Boleta.entity';
+import { ApoderadoSuplenteEstudiante } from './ApoderadoSuplenteEstudiante.entity';
 
 @Entity()
-export class Apoderado {
+export class ApoderadoSuplente {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -62,28 +63,11 @@ export class Apoderado {
     @OneToMany(() => Boleta, boleta => boleta.apoderado)
     boletas: Boleta[];
 
-    @OneToMany(() => ApoderadoEstudiante, apoderadoEstudiante => apoderadoEstudiante.apoderado)
-    estudiantesConnection: ApoderadoEstudiante[];
+    @OneToMany(() => ApoderadoSuplenteEstudiante, apoderadoEstudiante => apoderadoEstudiante.apoderado)
+    estudiantesConnection: ApoderadoSuplenteEstudiante[];
 
     @OneToMany(() => ApoderadoDireccion, apoderadoDireccion => apoderadoDireccion.direccion)
     direccionConnection: ApoderadoDireccion[];
-
-    @OneToOne(() => Usuarios, usuario => usuario.apoderado)
-    usuario: Usuarios;
-
-    addStudent(student: Estudiante) {
-        const connection = new ApoderadoEstudiante();
-        connection.apoderado = this;
-        connection.estudiante = student;
-        this.estudiantesConnection.push(connection);
-    }
-
-    addAddress(address: Direccion) {
-        const connection = new ApoderadoDireccion();
-        connection.apoderado = this;
-        connection.direccion = address;
-        this.direccionConnection.push(connection);
-    }
 
     estudiantes?: Estudiante[];
 }

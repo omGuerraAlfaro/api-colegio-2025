@@ -102,26 +102,6 @@ export class BoletaService {
         const savedBoleta = await this.boletaRepository.save(boleta);
         boletas.push(savedBoleta);
       }
-      if (estudiante.infoPae) {
-        for (const mes of meses) {
-          const boletaPae = this.boletaRepository.create({
-            apoderado_id: apoderado.id,
-            // pago_id: , // Dejar como NULL o establecer si es necesario
-            estado_id: 1, // Suponiendo que 1 es un estado válido, por ejemplo 'Pendiente'
-            detalle: `Boleta de PAE de ${mes}`,
-            subtotal: 100, // Establece tu lógica para el subtotal
-            iva: 19, // Establece tu lógica para el IVA
-            total: 119, // Total incluyendo el IVA, ajusta según tu lógica
-            descuento: 0, // Aplica descuento si es necesario
-            nota: `Generada automáticamente para el mes de ${mes}`,
-            fecha_vencimiento: new Date(), // Fecha actual, puedes ajustarla para que coincida con el mes de la boleta si es necesario
-          });
-
-          // Guarda la boleta en la base de datos
-          const savedBoletaPae = await this.boletaRepository.save(boletaPae);
-          boletasPae.push(savedBoletaPae);
-        }
-      }
     }
 
     // Retorna las boletas creadas
@@ -147,8 +127,6 @@ export class BoletaService {
         }
 
         const rutApoderado = apoderado.rut;
-        const descuentoApoderdado = apoderado.descuento_asignado;
-        //trae de apoderado un descuento y este despues se calcula el subtotal con el descuento => total.
 
         for (const estudiante of apoderado.estudiantes) {
           const rutEstudiante = estudiante.rut;
@@ -167,7 +145,7 @@ export class BoletaService {
               subTotal = total
             } else {
               mesIndex += 1;
-              total = descuentoApoderdado;
+              total = 1000; //cambiar
               subTotal = total
             }
 
@@ -177,13 +155,10 @@ export class BoletaService {
               apoderado: apoderado,
               rut_estudiante: rutEstudiante,
               rut_apoderado: rutApoderado,
-              // pago_id: , // ESTE CAMPO SE MODIFICA AL MOMENTO DE PAGAR
               estado_id: 1, // 1 es 'Pendiente'
               detalle: `Boleta de ${mes}`,
-              subtotal: subTotal, // lógica para el subtotal
-              iva: 19, // lógica para el IVA
-              total: total, // Total incluyendo el IVA, ajustar lógica
-              descuento: descuentoApoderdado, // Aplica descuento. CASE para mensualidades.
+              subtotal: subTotal,
+              total: total,
               nota: `Boleta mes de ${mes}`,
               fecha_vencimiento: fechaVencimiento,
             });
@@ -192,37 +167,6 @@ export class BoletaService {
             const savedBoleta = await this.boletaRepository.save(boleta);
             boletas.push(savedBoleta);
 
-          }
-          if (estudiante.infoPae) {
-            for (const mesPae of mesesPae) {
-              const fechaActual = new Date();
-              let anio = fechaActual.getFullYear();
-              let mesIndex = mesesPae.indexOf(mesPae) + 2;
-              const { valor, descripcion } = estudiante.infoPae;
-              let subtotal = valor;
-              let total = subtotal;
-
-              const fechaVencimiento = new Date(anio, mesIndex, 1);
-
-              const boletaPae = this.boletaRepository.create({
-                apoderado: apoderado,
-                rut_estudiante: rutEstudiante,
-                rut_apoderado: rutApoderado,
-                // pago_id: , // ESTE CAMPO SE MODIFICA AL MOMENTO DE PAGAR
-                estado_id: 1, // 1 es 'Pendiente'
-                detalle: `Boleta de PAE de ${mesPae}, descripcion: ${descripcion}`,
-                subtotal: subtotal,
-                iva: 19,
-                total: total,
-                descuento: 0,
-                nota: `Boleta PAE mes de ${mesPae}`,
-                fecha_vencimiento: fechaVencimiento,
-              });
-
-              // Guarda la boleta en la base de datos
-              const savedBoletaPae = await this.boletaRepository.save(boletaPae);
-              boletasPae.push(savedBoletaPae);
-            }
           }
         }
         return { boletas, boletasPae };

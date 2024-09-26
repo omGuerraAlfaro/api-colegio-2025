@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { ApoderadoEstudiante } from './ApoderadoEstudiante.entity';
 import { EstudianteCurso } from './CursoEstudiante.entity';
-import { InfoPae } from './InfoPae.entity';
 import { AnotacionesEstudiante } from './AnotacionesEstudiantes.entity';
 
 @Entity()
@@ -17,20 +16,23 @@ export class Estudiante {
     @PrimaryGeneratedColumn()
     id: number;
 
-    @Column({ type: 'varchar', length: 50 })
+    @Column({ type: 'varchar', length: 150 })
     primer_nombre: string;
 
-    @Column({ type: 'varchar', length: 50, nullable: true })
+    @Column({ type: 'varchar', length: 150, nullable: true })
     segundo_nombre: string;
 
-    @Column({ type: 'varchar', length: 50 })
+    @Column({ type: 'varchar', length: 150 })
     primer_apellido: string;
 
-    @Column({ type: 'varchar', length: 50, nullable: true })
+    @Column({ type: 'varchar', length: 150, nullable: true })
     segundo_apellido: string;
 
-    @Column()
+    @Column({ type: 'date', nullable: true })
     fecha_nacimiento: Date;
+
+    @Column({ type: 'date', nullable: true })
+    fecha_matricula: Date;
 
     @Column({ type: 'varchar', length: 10 })
     rut: string;
@@ -45,7 +47,10 @@ export class Estudiante {
     genero: string;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
-    alergico: string;
+    alergico_alimento: string;
+
+    @Column({ type: 'varchar', length: 100, nullable: true })
+    alergico_medicamentos: string;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
     vive_con: string;
@@ -53,8 +58,29 @@ export class Estudiante {
     @Column({ type: 'varchar', length: 100, nullable: true })
     enfermedad_cronica: string;
 
-    // @Column({ type: 'int', nullable: true })
-    // pae_id: number | null;
+    @Column({ type: 'varchar', length: 100, nullable: true })
+    prevision: string;
+
+    @Column({ type: 'varchar', length: 100, nullable: true })
+    nacionalidad: string;
+
+    @Column({ type: 'boolean', default: false })
+    es_pae: boolean;
+
+    @Column({ type: 'varchar', length: 100, nullable: true })
+    consultorio_clinica: string;
+
+    @Column({ type: 'boolean', default: false })
+    vacuna_covid: boolean;
+
+    @Column({ type: 'boolean', default: false })
+    fotografia: boolean;
+
+    @Column({ type: 'boolean', default: false })
+    apto_ed_fisica: boolean;
+
+    @Column({ type: 'varchar', length: 100, nullable: true })
+    observaciones: string;
 
     @OneToMany(() => AnotacionesEstudiante, anotacioneEstudiante => anotacioneEstudiante.estudiante)
     anotacionesConnection: AnotacionesEstudiante[];
@@ -64,8 +90,4 @@ export class Estudiante {
 
     @OneToMany(() => EstudianteCurso, cursoEstudiante => cursoEstudiante.estudiante)
     cursoConnection: EstudianteCurso[];
-
-    @ManyToOne(() => InfoPae, infoPae => infoPae.id)
-    @JoinColumn({ name: 'pae_id' }) 
-    infoPae: InfoPae;
 }
