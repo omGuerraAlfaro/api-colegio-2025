@@ -1,4 +1,4 @@
-import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, InternalServerErrorException, Logger, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Apoderado } from 'src/models/Apoderado.entity';
 import { Profesor } from 'src/models/Profesor.entity';
@@ -9,6 +9,8 @@ import { hash, compare } from 'bcrypt';
 
 @Injectable()
 export class UsuarioService {
+  private readonly logger = new Logger(UsuarioService.name);
+
   constructor(
     @InjectRepository(Usuarios)
     private readonly usuarioRepository: Repository<Usuarios>,
@@ -25,11 +27,11 @@ export class UsuarioService {
   }
 
   async findOne(id: number): Promise<Usuarios[]> {
-    return this.usuarioRepository.find({where: {id: id}});
+    return this.usuarioRepository.find({ where: { id: id } });
   }
 
   async findOneByRut(rut: string): Promise<Usuarios[]> {
-    return this.usuarioRepository.find({where: {rut: rut}});
+    return this.usuarioRepository.find({ where: { rut: rut } });
   }
 
   async findUserWithApoderadoAndAlumnos(userId: number): Promise<Usuarios> {
@@ -83,21 +85,20 @@ export class UsuarioService {
     for (const apoderado of apoderados) {
       const username = this.generateUsername(apoderado.primer_nombre, apoderado.primer_apellido);
       const plainPassword = apoderado.rut;
-      const hashedPassword = await hash(plainPassword, 5); // Hash the password
+      const hashedPassword = await hash(plainPassword, 5);
 
       const existingUser = await this.usuarioRepository.findOne({ where: { username } });
       if (existingUser) {
-        // Si el usuario ya existe, puedes decidir saltarte este apoderado o actualizar el usuario existente.
         continue;
       }
 
       const usuario = new Usuarios();
       usuario.username = username;
-      usuario.password = hashedPassword; // Store the hashed password
-      usuario.correo_electronico = apoderado.correo_electronico; 
+      usuario.password = hashedPassword;
+      usuario.correo_electronico = apoderado.correo_electronico;
       usuario.apoderado_id = apoderado.id;
       usuario.rut = apoderado.rut;
-      
+
 
       const savedUser = await this.usuarioRepository.save(usuario);
       createdUsers.push(savedUser);
@@ -108,60 +109,82 @@ export class UsuarioService {
 
 
   async createUsersForAllProfesores(): Promise<Usuarios[]> {
-    const profesores = await this.profesorRepository.find();
-    const createdUsers: Usuarios[] = [];
+    try {
+      const profesores = await this.profesorRepository.find();
+      const createdUsers: Usuarios[] = [];
 
-    for (const profesor of profesores) {
-      const username = this.generateUsername(profesor.primer_nombre, profesor.primer_apellido);
-      const plainPassword = profesor.rut;
-      const hashedPassword = await hash(plainPassword, 5);
+      for (const profesor of profesores) {
+        const username = this.generateUsername(profesor.primer_nombre, profesor.primer_apellido);
+        const plainPassword = profesor.rut;
+        const hashedPassword = await hash(plainPassword, 5);
 
-      const existingUser = await this.usuarioRepository.findOne({ where: { username } });
-      if (existingUser) {
-        // Si el usuario ya existe, puedes decidir saltarte este profesor o actualizar el usuario existente.
-        continue;
+        const existingUser = await this.usuarioRepository.findOne({ where: { username } });
+        if (existingUser) {
+          // Si el usuario ya existe, puedes decidir saltarte este profesor o actualizar el usuario existente.
+          continue;
+        }
+
+        const usuario = new Usuarios();
+        usuario.username = username + '.profesor';
+        usuario.password = hashedPassword;
+        usuario.correo_electronico = profesor.correo_electronico;
+        usuario.profesor_id = profesor.id;
+        usuario.rut = profesor.rut;
+
+        const savedUser = await this.usuarioRepository.save(usuario);
+        createdUsers.push(savedUser);
       }
 
-      const usuario = new Usuarios();
-      usuario.username = username + '.profesor';
-      usuario.password = hashedPassword;
-      usuario.correo_electronico = profesor.correo_electronico;
-      usuario.profesor_id = profesor.id;
-      usuario.rut = profesor.rut;
+      return createdUsers;
 
-      const savedUser = await this.usuarioRepository.save(usuario);
-      createdUsers.push(savedUser);
+    } catch (error) {
+      this.logger.error(`Error creating InscripcionMatricula: ${error.message}`, error.stack);
+      throw new InternalServerErrorException({
+        message: 'Error creating the inscripcion matricula.',
+        details: error.message,
+        stack: error.stack,
+      });
     }
-
-    return createdUsers;
   }
 
   async createUsersForAllAdministradores(): Promise<Usuarios[]> {
-    const administradores = await this.administradorRepository.find();
-    const createdUsers: Usuarios[] = [];
+    try {
+      const administradores = await this.administradorRepository.find();
+      const createdUsers: Usuarios[] = [];
 
-    for (const administrador of administradores) {
-      const username = this.generateUsername(administrador.primer_nombre, administrador.primer_apellido);
-      const plainPassword = administrador.rut;
-      const hashedPassword = await hash(plainPassword, 5);
+      for (const administrador of administradores) {
+        const username = this.generateUsername(administrador.primer_nombre, administrador.primer_apellido);
+        const plainPassword = administrador.rut;
+        const hashedPassword = await hash(plainPassword, 5);
 
-      const existingUser = await this.usuarioRepository.findOne({ where: { username } });
-      if (existingUser) {
-        continue;
+        const existingUser = await this.usuarioRepository.findOne({ where: { username } });
+        if (existingUser) {
+          continue;
+        }
+
+        const usuario = new Usuarios();
+        usuario.username = username;
+        usuario.password = hashedPassword;
+        usuario.correo_electronico = administrador.correo_electronico;
+        usuario.administrador_id = administrador.id;
+        usuario.rut = administrador.rut;
+        usuario.genero = administrador.genero;
+
+        const savedUser = await this.usuarioRepository.save(usuario);
+        createdUsers.push(savedUser);
       }
 
-      const usuario = new Usuarios();
-      usuario.username = username;
-      usuario.password = hashedPassword;
-      usuario.correo_electronico = administrador.correo_electronico; 
-      usuario.administrador_id = administrador.id;
+      return createdUsers;
 
-      const savedUser = await this.usuarioRepository.save(usuario);
-      createdUsers.push(savedUser);
+    } catch (error) {
+      this.logger.error(`Error creating user: ${error.message}`, error.stack);
+      throw new InternalServerErrorException({
+        message: 'Error creating the user.',
+        details: error.message,
+        stack: error.stack,
+      });
     }
-
-    return createdUsers;
-}
+  }
 
 
   private generateUsername(primerNombre: string, primerApellido: string): string {

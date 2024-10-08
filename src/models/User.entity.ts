@@ -36,6 +36,9 @@ export class Usuarios {
 
     @Column({ name: 'profesor_id', nullable: true })
     profesor_id: number;
+    
+    @Column({ type: 'varchar', length: 10, nullable: true })
+    genero: string;
 
     @ManyToOne(() => Profesor, profesor => profesor.usuario)
     @JoinColumn({ name: 'profesor_id' })

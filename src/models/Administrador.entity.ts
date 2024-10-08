@@ -39,6 +39,9 @@ export class Administrador {
     @Column({ type: 'varchar', length: 100, nullable: true })
     correo_electronico: string;
 
+    @Column({ type: 'varchar', length: 10, nullable: true })
+    genero: string;
+
     @OneToOne(() => Usuarios, usuario => usuario.administrador)
     usuario: Usuarios;
 
