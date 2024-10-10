@@ -37,8 +37,8 @@ export class InscripcionMatricula {
     @Column({ type: 'date', nullable: true })
     fecha_nacimiento_alumno: Date;
     
-    @Column({ type: 'varchar', length: 10, nullable: true })
-    curso_alumno: string;
+    @Column({ type: 'numeric', nullable: true })
+    curso_alumno: number;
     
     @Column({ type: 'varchar', length: 150 })
     primer_nombre_apoderado: string;

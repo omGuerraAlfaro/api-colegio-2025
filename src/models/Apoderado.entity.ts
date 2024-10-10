@@ -18,16 +18,16 @@ export class Apoderado {
     id: number;
 
     @Column({ type: 'varchar', length: 150 })
-    primer_nombre: string;
+    primer_nombre_apoderado: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    segundo_nombre: string;
+    segundo_nombre_apoderado: string;
 
     @Column({ type: 'varchar', length: 150 })
-    primer_apellido: string;
+    primer_apellido_apoderado: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    segundo_apellido: string;
+    segundo_apellido_apoderado: string;
 
     @Column({ nullable: true })
     fecha_nacimiento: Date;
@@ -39,10 +39,10 @@ export class Apoderado {
     dv: string;
 
     @Column({ type: 'varchar', length: 15, nullable: true })
-    telefono: string;
+    telefono_apoderado: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    correo_electronico: string;
+    correo_apoderado: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
     estado_civil: string;
@@ -51,13 +51,19 @@ export class Apoderado {
     nacionalidad: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    actividad: string;
+    profesion_oficio: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
     escolaridad: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    parentesco: string;
+    parentesco_apoderado: string;
+
+    @Column({ type: 'varchar', length: 150, nullable: true })
+    direccion: string;
+
+    @Column({ type: 'varchar', length: 150, nullable: true })
+    comuna: string;
 
     @OneToMany(() => Boleta, boleta => boleta.apoderado)
     boletas: Boleta[];

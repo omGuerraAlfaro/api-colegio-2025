@@ -83,7 +83,7 @@ export class UsuarioService {
     const createdUsers: Usuarios[] = [];
 
     for (const apoderado of apoderados) {
-      const username = this.generateUsername(apoderado.primer_nombre, apoderado.primer_apellido);
+      const username = this.generateUsername(apoderado.primer_nombre_apoderado, apoderado.primer_apellido_apoderado);
       const plainPassword = apoderado.rut;
       const hashedPassword = await hash(plainPassword, 5);
 
@@ -95,7 +95,7 @@ export class UsuarioService {
       const usuario = new Usuarios();
       usuario.username = username;
       usuario.password = hashedPassword;
-      usuario.correo_electronico = apoderado.correo_electronico;
+      usuario.correo_electronico = apoderado.correo_apoderado;
       usuario.apoderado_id = apoderado.id;
       usuario.rut = apoderado.rut;
 

@@ -4,6 +4,15 @@ import { Repository } from 'typeorm';
 import { v4 as uuidv4 } from 'uuid';
 import { InscripcionMatricula } from 'src/models/InscripcionMatricula.entity';
 import { CorreoService } from '../Correo/correo.service';
+import { Apoderado } from 'src/models/Apoderado.entity';
+import { ApoderadoService } from '../Apoderado/apoderado.service';
+import { ApoderadoDTO } from 'src/dto/apoderado.dto';
+import { InscripcionDto } from 'src/dto/matricula.dto';
+import { Estudiante } from 'src/models/Estudiante.entity';
+import { ApoderadoEstudiante } from 'src/models/ApoderadoEstudiante.entity';
+import { EstudianteCurso } from 'src/models/CursoEstudiante.entity';
+import { ApoderadoSuplente } from 'src/models/ApoderadoSuplente.entity';
+import { ApoderadoSuplenteEstudiante } from 'src/models/ApoderadoSuplenteEstudiante.entity';
 
 @Injectable()
 export class InscripcionMatriculaService {
@@ -12,6 +21,18 @@ export class InscripcionMatriculaService {
   constructor(
     @InjectRepository(InscripcionMatricula)
     private readonly inscripcionMatriculaRepository: Repository<InscripcionMatricula>,
+    @InjectRepository(Apoderado)
+    private readonly apoderadoRepository: Repository<Apoderado>,
+    @InjectRepository(ApoderadoSuplente)
+    private readonly apoderadoSuplenteRepository: Repository<ApoderadoSuplente>,
+    @InjectRepository(Estudiante)
+    private readonly estudianteRepository: Repository<Estudiante>,
+    @InjectRepository(ApoderadoEstudiante)
+    private readonly apoderadoEstudianteRepository: Repository<ApoderadoEstudiante>,
+    @InjectRepository(ApoderadoSuplenteEstudiante)
+    private readonly apoderadoSuplenteEstudianteRepository: Repository<ApoderadoSuplenteEstudiante>,
+    @InjectRepository(EstudianteCurso)
+    private readonly estudianteCursoRepository: Repository<EstudianteCurso>,
     private readonly correoService: CorreoService,
 
   ) { }
@@ -177,6 +198,52 @@ export class InscripcionMatriculaService {
       result += characters.charAt(Math.floor(Math.random() * characters.length));
     }
     return result;
+  }
+
+  async createMatricula(inscripcionMatricula: InscripcionDto): Promise<any> {
+    try {
+
+      const apoderado = this.apoderadoRepository.create(inscripcionMatricula);
+      const savedApoderado = await this.apoderadoRepository.save(apoderado);
+      const apoderadoSuplente = this.apoderadoSuplenteRepository.create(inscripcionMatricula);
+      const savedApoderadoSuplente = await this.apoderadoSuplenteRepository.save(apoderadoSuplente);
+  
+      const savedEstudiantes = [];
+      for (const estudianteData of inscripcionMatricula.estudiantes) {
+        const estudiante = this.estudianteRepository.create(estudianteData);
+        const savedEstudiante = await this.estudianteRepository.save(estudiante);
+        savedEstudiantes.push(savedEstudiante);
+  
+        const apoderadoEstudiante = new ApoderadoEstudiante();
+        apoderadoEstudiante.apoderado_id = savedApoderado.id;
+        apoderadoEstudiante.estudiante_id = savedEstudiante.id;
+        await this.apoderadoEstudianteRepository.save(apoderadoEstudiante);
+
+        const apoderadoSuplenteEstudiante = new ApoderadoSuplenteEstudiante();
+        apoderadoSuplenteEstudiante.apoderado_suplente_id = savedApoderadoSuplente.id;
+        apoderadoSuplenteEstudiante.estudiante_id = savedEstudiante.id;
+        await this.apoderadoSuplenteEstudianteRepository.save(apoderadoSuplenteEstudiante);
+  
+        const estudianteCurso = new EstudianteCurso();
+        estudianteCurso.curso_id = estudianteData.cursoId;
+        estudianteCurso.estudiante_id = savedEstudiante.id;
+        await this.estudianteCursoRepository.save(estudianteCurso);
+      }
+  
+      return {
+        apoderado: savedApoderado,
+        apoderadoSuplente: savedApoderadoSuplente,
+        estudiantes: savedEstudiantes
+      };
+
+    } catch (error) {
+      this.logger.error(`Error creating InscripcionMatricula: ${error.message}`, error.stack);
+      throw new InternalServerErrorException({
+        message: 'Error creating the inscripcion matricula.',
+        details: error.message,
+        stack: error.stack,
+      });
+    }
   }
 
   async remove(id: number): Promise<void> {

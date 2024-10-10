@@ -19,46 +19,52 @@ export class ApoderadoSuplente {
     id: number;
 
     @Column({ type: 'varchar', length: 150 })
-    primer_nombre: string;
+    primer_nombre_apoderado_suplente: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    segundo_nombre: string;
+    segundo_nombre_apoderado_suplente: string;
 
     @Column({ type: 'varchar', length: 150 })
-    primer_apellido: string;
+    primer_apellido_apoderado_suplente: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    segundo_apellido: string;
+    segundo_apellido_apoderado_suplente: string;
 
     @Column({ nullable: true })
     fecha_nacimiento: Date;
 
     @Column({ type: 'varchar', length: 10 })
-    rut: string;
+    rut_apoderado_suplente: string;
 
     @Column({ type: 'char', length: 1 })
-    dv: string;
+    dv_apoderado_suplente: string;
 
     @Column({ type: 'varchar', length: 15, nullable: true })
-    telefono: string;
+    telefono_apoderado_suplente: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    correo_electronico: string;
+    correo_apoderado_suplente: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    estado_civil: string;
+    estado_civil_suplente: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
     nacionalidad: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    actividad: string;
+    profesion_oficio_suplente: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
     escolaridad: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    parentesco: string;
+    parentesco_apoderado_suplente: string;
+
+    @Column({ type: 'varchar', length: 150, nullable: true })
+    direccion_suplente: string;
+
+    @Column({ type: 'varchar', length: 150, nullable: true })
+    comuna_suplente: string;
 
     @OneToMany(() => Boleta, boleta => boleta.apoderado)
     boletas: Boleta[];

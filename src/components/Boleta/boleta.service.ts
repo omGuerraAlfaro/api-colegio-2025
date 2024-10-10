@@ -90,11 +90,7 @@ export class BoletaService {
           // pago_id: , // Dejar como NULL o establecer si es necesario
           estado_id: 1, // Suponiendo que 1 es un estado válido, por ejemplo 'Pendiente'
           detalle: `Boleta de ${mes}`,
-          subtotal: 100, // Establece tu lógica para el subtotal
-          iva: 19, // Establece tu lógica para el IVA
           total: 119, // Total incluyendo el IVA, ajusta según tu lógica
-          descuento: 0, // Aplica descuento si es necesario
-          nota: `Generada automáticamente para el mes de ${mes}`,
           fecha_vencimiento: new Date(), // Fecha actual, puedes ajustarla para que coincida con el mes de la boleta si es necesario
         });
 
@@ -157,9 +153,7 @@ export class BoletaService {
               rut_apoderado: rutApoderado,
               estado_id: 1, // 1 es 'Pendiente'
               detalle: `Boleta de ${mes}`,
-              subtotal: subTotal,
               total: total,
-              nota: `Boleta mes de ${mes}`,
               fecha_vencimiento: fechaVencimiento,
             });
 
@@ -207,15 +201,15 @@ export class BoletaService {
       throw new Error('No hay suficientes boletas futuras para repactar.');
     }
 
-    const montoPorMes = boletaActual.subtotal / meses;
+    // const montoPorMes = boletaActual.subtotal / meses;
 
     for (const [index, boletaFutura] of boletasFuturas.entries()) {
-      const subtotalActualizado = Number(boletaFutura.subtotal) + montoPorMes;
+      // const subtotalActualizado = Number(boletaFutura.subtotal) + montoPorMes;
 
-      boletaFutura.subtotal = subtotalActualizado;
-      const subSubtotal = subtotalActualizado - (subtotalActualizado * boletaActual.descuento) / 100;
-      boletaFutura.total = subSubtotal;
-      boletaFutura.nota += ` Incluye repactación de la boleta actual - Cuota ${index + 1}.`;
+      // boletaFutura.subtotal = subtotalActualizado;
+      // const subSubtotal = subtotalActualizado - (subtotalActualizado * boletaActual.descuento) / 100;
+      // boletaFutura.total = subSubtotal;
+      // boletaFutura.nota += ` Incluye repactación de la boleta actual - Cuota ${index + 1}.`;
       await this.boletaRepository.save(boletaFutura);
     }
 
@@ -367,14 +361,14 @@ export class BoletaService {
             apoderado: {
               id: boleta.apoderado.id,
               nombreCompleto: [
-                boleta.apoderado.primer_nombre,
-                boleta.apoderado.segundo_nombre,
-                boleta.apoderado.primer_apellido,
-                boleta.apoderado.segundo_apellido
+                boleta.apoderado.primer_nombre_apoderado,
+                boleta.apoderado.segundo_nombre_apoderado,
+                boleta.apoderado.primer_apellido_apoderado,
+                boleta.apoderado.segundo_apellido_apoderado
               ].filter(Boolean).join(' '),
               rut: rutApoderado,
-              telefono: boleta.apoderado.telefono,
-              correo_electronico: boleta.apoderado.correo_electronico,
+              telefono: boleta.apoderado.telefono_apoderado,
+              correo_electronico: boleta.apoderado.correo_apoderado,
             },
             boletasPendientes: [],
             boletasPagadas: []

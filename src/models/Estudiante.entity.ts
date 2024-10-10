@@ -17,19 +17,19 @@ export class Estudiante {
     id: number;
 
     @Column({ type: 'varchar', length: 150 })
-    primer_nombre: string;
+    primer_nombre_alumno: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    segundo_nombre: string;
+    segundo_nombre_alumno: string;
 
     @Column({ type: 'varchar', length: 150 })
-    primer_apellido: string;
+    primer_apellido_alumno: string;
 
     @Column({ type: 'varchar', length: 150, nullable: true })
-    segundo_apellido: string;
+    segundo_apellido_alumno: string;
 
     @Column({ type: 'date', nullable: true })
-    fecha_nacimiento: Date;
+    fecha_nacimiento_alumno: Date;
 
     @Column({ type: 'date', nullable: true })
     fecha_matricula: Date;
@@ -40,26 +40,23 @@ export class Estudiante {
     @Column({ type: 'char', length: 1 })
     dv: string;
 
-    @Column({ type: 'varchar', length: 15, nullable: true })
-    telefono_contacto: string;
-
     @Column({ type: 'varchar', length: 10, nullable: true })
-    genero: string;
+    genero_alumno: string;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
-    alergico_alimento: string;
+    alergia_alimento_alumno: string;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
-    alergico_medicamentos: string;
+    alergia_medicamento_alumno: string;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
     vive_con: string;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
-    enfermedad_cronica: string;
+    enfermedad_cronica_alumno: string;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
-    prevision: string;
+    prevision_alumno: string;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
     nacionalidad: string;
@@ -68,19 +65,16 @@ export class Estudiante {
     es_pae: boolean;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
-    consultorio_clinica: string;
+    consultorio_clinica_alumno: string;
 
     @Column({ type: 'boolean', default: false })
-    vacuna_covid: boolean;
+    autorizacion_fotografias: boolean;
 
     @Column({ type: 'boolean', default: false })
-    fotografia: boolean;
-
-    @Column({ type: 'boolean', default: false })
-    apto_ed_fisica: boolean;
+    apto_educacion_fisica: boolean;
 
     @Column({ type: 'varchar', length: 100, nullable: true })
-    observaciones: string;
+    observaciones_alumno: string;
 
     @OneToMany(() => AnotacionesEstudiante, anotacioneEstudiante => anotacioneEstudiante.estudiante)
     anotacionesConnection: AnotacionesEstudiante[];

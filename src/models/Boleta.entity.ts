@@ -1,6 +1,7 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Apoderado } from './Apoderado.entity';
 import { EstadoBoleta } from './EstadoBoleta.entity';
+import { Estudiante } from './Estudiante.entity';
 
 @Entity('boleta')
 export class Boleta {
@@ -9,6 +10,9 @@ export class Boleta {
 
     @Column()
     apoderado_id: number;
+
+    @Column()
+    estudiante_id: number;
 
     @Column()
     rut_estudiante: string;
@@ -28,24 +32,16 @@ export class Boleta {
     @Column({ nullable: true })
     fecha_vencimiento: Date;
 
-    @Column('decimal', { precision: 10, scale: 2 })
-    subtotal: number;
-
-    @Column('decimal', { precision: 10, scale: 2 })
-    iva: number;
-
-    @Column('decimal', { precision: 10, scale: 2 })
+    @Column()
     total: number;
-
-    @Column('decimal', { precision: 10, scale: 2, nullable: true })
-    descuento: number;
-
-    @Column({ nullable: true })
-    nota: string;
  
     @ManyToOne(() => Apoderado, apoderado => apoderado.id)
     @JoinColumn({ name: 'apoderado_id' })
     apoderado: Apoderado;
+
+    @ManyToOne(() => Estudiante, estudiante => estudiante.id)
+    @JoinColumn({ name: 'estudiante_id' })
+    estudiante: Estudiante;
 
     @ManyToOne(() => EstadoBoleta, estado => estado.id)
     @JoinColumn({ name: 'estado_id' })

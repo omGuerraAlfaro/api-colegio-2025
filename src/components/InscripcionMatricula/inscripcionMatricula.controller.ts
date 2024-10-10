@@ -15,6 +15,7 @@ import {
 import { ApiTags } from '@nestjs/swagger';
 import { InscripcionMatriculaService } from './inscripcionMatricula.service';
 import { InscripcionMatricula } from 'src/models/InscripcionMatricula.entity';
+import { InscripcionDto } from 'src/dto/matricula.dto';
 
 @ApiTags('inscripcion-matricula')
 @Controller('inscripcion-matricula')
@@ -34,6 +35,11 @@ export class InscripcionMatriculaController {
   @Post()
   create(@Body() inscripcionMatricula: InscripcionMatricula) {
     return this.inscripcionMatriculaService.create(inscripcionMatricula);
+  }
+
+  @Post('crear-matricula')
+  createMatricula(@Body() inscripcionMatricula: InscripcionDto) {
+    return this.inscripcionMatriculaService.createMatricula(inscripcionMatricula);
   }
 
   @Delete(':id')
