@@ -78,7 +78,6 @@ export class ApoderadoService {
       .createQueryBuilder("apoderado")
       .leftJoinAndSelect("apoderado.estudiantesConnection", "apoderadoEstudiante")
       .leftJoinAndSelect("apoderadoEstudiante.estudiante", "estudiante")
-      .leftJoinAndSelect("estudiante.infoPae", "infoPae")
       .where("apoderado.rut = :apoderadoRut", { apoderadoRut })
       .getOne();
 

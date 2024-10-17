@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { BoletaService } from './boleta.service';
 import { ApiTags } from '@nestjs/swagger';
-import { UpdateBoletaDto } from 'src/dto/updateBoleta.dto';
+import { CrearBoletaDto, UpdateBoletaDto, UpdateBoletaDto2 } from 'src/dto/updateBoleta.dto';
 import { Boleta } from 'src/models/Boleta.entity';
 
 @ApiTags('Boletas')
@@ -48,9 +48,17 @@ export class BoletaController {
         return await this.boletaService.findBoletasByRutApoderado(rut);
     }
 
-    @Get('conteoEstudiante/:rut')
-    getBoletasEstudiante(@Param('rut') rut: string) {
-        return this.boletaService.createAnnualBoletasForApoderadoRut(rut);
+    @Get('apoderado/:rut')
+    async getBoletaSimply(@Param('rut') rut: string) {
+        return await this.boletaService.findBoletasByRutApoderadoOnly(rut);
+    }
+
+    @Post('crear-boletas-apoderado/:rut')
+    createBoletasEstudiante(
+        @Param('rut') rut: string,
+        @Body() crearBoletaDto: CrearBoletaDto
+    ) {
+        return this.boletaService.createAnnualBoletasForApoderadoByRut(rut, crearBoletaDto);
     }
 
     @Post('generar-boletas')
@@ -83,6 +91,11 @@ export class BoletaController {
         const { idBoleta, estado, idPago } = updateBoletaDto;
         const result = await this.boletaService.updateBoletaStatus(idBoleta, estado, idPago);
         return result;
+    }
+
+    @Put(':id')
+    async updateBoletaAll(@Param('id') id: number, @Body() updateBoletaDto: UpdateBoletaDto2) {
+        return this.boletaService.updateBoleta(id, updateBoletaDto);
     }
 
     @Get('id/:id')

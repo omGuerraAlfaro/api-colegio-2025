@@ -4,6 +4,7 @@ import { Boleta } from 'src/models/Boleta.entity';
 import { LessThan, MoreThan, Repository } from 'typeorm';
 import { Apoderado } from 'src/models/Apoderado.entity';
 import { ApoderadoService } from '../Apoderado/apoderado.service';
+import { CrearBoletaDto, UpdateBoletaDto, UpdateBoletaDto2 } from 'src/dto/updateBoleta.dto';
 
 @Injectable()
 export class BoletaService {
@@ -18,7 +19,11 @@ export class BoletaService {
   async findBoletasByRutEstudiante(rut_estudiante: string): Promise<Boleta[]> {
     return await this.boletaRepository.find({ where: { rut_estudiante } });
   }
-  
+
+  async findBoletasByRutApoderadoOnly(rut_apoderado: string): Promise<Boleta[]> {
+    return await this.boletaRepository.find({ where: { rut_apoderado } });
+  }
+
   async findBoletasByRutApoderado(rut_apoderado: string) {
     const boletas = await this.boletaRepository.find({ where: { rut_apoderado: rut_apoderado } });
 
@@ -70,39 +75,87 @@ export class BoletaService {
     await this.boletaRepository.query(`ALTER TABLE boletas AUTO_INCREMENT = ${newId}`);
   }
 
-  async createAnnualBoletasForApoderadoRut(rut: string) { //malo
-    // Obtén los estudiantes asociados al apoderado
-    const apoderado = await this.apoderadoService.findStudentsWithApoderadoId(rut);
-
-    if (!apoderado.estudiantes || apoderado.estudiantes.length === 0) {
-      throw new Error('No se encontraron estudiantes para el apoderado con el RUT proporcionado.');
-    }
-
-    const meses = ['matricula', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-
-    const boletas = [];
-    const boletasPae = [];
-
-    for (const estudiante of apoderado.estudiantes) {
-      for (const mes of meses) {
-        const boleta = this.boletaRepository.create({
-          apoderado_id: apoderado.id,
-          // pago_id: , // Dejar como NULL o establecer si es necesario
-          estado_id: 1, // Suponiendo que 1 es un estado válido, por ejemplo 'Pendiente'
-          detalle: `Boleta de ${mes}`,
-          total: 119, // Total incluyendo el IVA, ajusta según tu lógica
-          fecha_vencimiento: new Date(), // Fecha actual, puedes ajustarla para que coincida con el mes de la boleta si es necesario
-        });
-
-        // Guarda la boleta en la base de datos
-        const savedBoleta = await this.boletaRepository.save(boleta);
-        boletas.push(savedBoleta);
+  async createAnnualBoletasForApoderadoByRut(rut: string, crearBoletaDto: CrearBoletaDto) {
+    try {
+      // Validar los valores de matrícula y mensualidad
+      if (crearBoletaDto.valor_matricula <= 0 || crearBoletaDto.valor_mensualidad <= 0) {
+        throw new Error('Los valores de matrícula y mensualidad deben ser mayores que cero.');
       }
+
+      // Obtén los estudiantes asociados al apoderado
+      const apoderado = await this.apoderadoService.findStudentsWithApoderadoId(rut);
+      if (!apoderado.estudiantes || apoderado.estudiantes.length === 0) {
+        throw new Error('No se encontraron estudiantes para el apoderado con el RUT proporcionado.');
+      }
+
+      // Define the months excluding February
+      const meses = ['matricula', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+
+      const boletas = apoderado.estudiantes.flatMap(estudiante =>
+        meses.map(mes => {
+          // If the month is February, skip creating a boleta
+          if (mes === 'febrero' && !crearBoletaDto.valor_mensualidad) {
+            return; // Skip creating the boleta for February
+          }
+          return this.createBoleta(apoderado.id, apoderado.rut, estudiante.id, estudiante.rut, mes, crearBoletaDto);
+        })
+      );
+
+      // Filter out any undefined values (e.g., if a boleta was not created)
+      const validBoletas = boletas.filter(boleta => boleta !== undefined);
+
+      // Guarda todas las boletas en una sola operación
+      const savedBoletas = await this.boletaRepository.save(validBoletas);
+
+      // Retorna las boletas creadas
+      return savedBoletas;
+    } catch (error) {
+      console.error("Se ha producido un error:", error);
+      throw error;
+    }
+  }
+
+  private createBoleta(apoderadoId: number, apoderadoRut: string, estudianteId: number, estudianteRut: string, mes: string, crearBoletaDto: CrearBoletaDto) {
+    const total = mes === 'matricula' ? crearBoletaDto.valor_matricula : crearBoletaDto.valor_mensualidad;
+
+    if (mes === 'matricula') {
+      const fechaVencimiento = new Date(new Date().getFullYear(), 0, 5);
+      return this.boletaRepository.create({
+        apoderado_id: apoderadoId,
+        estudiante_id: estudianteId,
+        rut_estudiante: estudianteRut,
+        rut_apoderado: apoderadoRut,
+        estado_id: 1, // Pendiente
+        detalle: 'Matricula colegiatura',
+        total,
+        fecha_vencimiento: fechaVencimiento,
+      });
+    } else if (mes !== 'febrero') {
+      const monthIndex = this.getMonthIndex(mes);
+      const fechaVencimiento = new Date(new Date().getFullYear(), monthIndex, 5);
+
+      return this.boletaRepository.create({
+        apoderado_id: apoderadoId,
+        estudiante_id: estudianteId,
+        rut_estudiante: estudianteRut,
+        rut_apoderado: apoderadoRut,
+        estado_id: 1, // Pendiente
+        detalle: 'Mensualidad colegiatura mes de ' + mes,
+        total,
+        fecha_vencimiento: fechaVencimiento,
+      });
     }
 
-    // Retorna las boletas creadas
-    return boletas;
+    return undefined;
   }
+
+  private getMonthIndex(mes: string): number {
+    const meses = ['matricula', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const index = meses.indexOf(mes);
+    return index !== -1 ? index : 0;
+  }
+
+
 
   async createAnnualBoletasForMultipleApoderados() {
     try {
@@ -222,6 +275,19 @@ export class BoletaService {
 
   async updateBoletaStatus(idBoleta: number, nuevoEstado: number, idPago: string): Promise<void> {
     await this.boletaRepository.update(idBoleta, { estado_id: nuevoEstado, pago_id: idPago });
+  }
+
+  async updateBoleta(id: number, updateBoletaDto: UpdateBoletaDto2): Promise<Boleta> {
+    const boleta = await this.boletaRepository.findOneBy({ id });
+
+    if (!boleta) {
+      throw new NotFoundException(`Boleta with ID ${id} not found`);
+    }
+
+    // Actualizar los campos de la boleta
+    Object.assign(boleta, updateBoletaDto);
+
+    return this.boletaRepository.save(boleta);
   }
 
   async findBoletaById(id: number): Promise<Boleta> {

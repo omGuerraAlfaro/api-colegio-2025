@@ -34,6 +34,9 @@ export class Boleta {
 
     @Column()
     total: number;
+
+    @Column({ type: 'boolean', default: true })
+    estado_boleta: boolean;
  
     @ManyToOne(() => Apoderado, apoderado => apoderado.id)
     @JoinColumn({ name: 'apoderado_id' })
