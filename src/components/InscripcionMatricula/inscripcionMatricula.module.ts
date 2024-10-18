@@ -8,6 +8,7 @@ import { ApoderadoModule } from '../Apoderado/apoderado.module';
 import { Estudiante } from 'src/models/Estudiante.entity';
 import { ApoderadoSuplente } from 'src/models/ApoderadoSuplente.entity';
 import { ApoderadoSuplenteEstudiante } from 'src/models/ApoderadoSuplenteEstudiante.entity';
+import { UsuarioModule } from '../User/user.module';
 
 @Module({
   imports: [
@@ -15,6 +16,7 @@ import { ApoderadoSuplenteEstudiante } from 'src/models/ApoderadoSuplenteEstudia
       InscripcionMatricula,ApoderadoSuplente,ApoderadoSuplenteEstudiante
     ]),
     CorreoModule,
+    UsuarioModule,
     ApoderadoModule,
     Estudiante
     

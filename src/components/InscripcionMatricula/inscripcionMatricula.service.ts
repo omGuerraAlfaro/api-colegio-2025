@@ -13,6 +13,7 @@ import { ApoderadoEstudiante } from 'src/models/ApoderadoEstudiante.entity';
 import { EstudianteCurso } from 'src/models/CursoEstudiante.entity';
 import { ApoderadoSuplente } from 'src/models/ApoderadoSuplente.entity';
 import { ApoderadoSuplenteEstudiante } from 'src/models/ApoderadoSuplenteEstudiante.entity';
+import { UsuarioService } from '../User/user.service';
 
 @Injectable()
 export class InscripcionMatriculaService {
@@ -34,6 +35,7 @@ export class InscripcionMatriculaService {
     @InjectRepository(EstudianteCurso)
     private readonly estudianteCursoRepository: Repository<EstudianteCurso>,
     private readonly correoService: CorreoService,
+    private readonly userService: UsuarioService,
 
   ) { }
 
@@ -207,13 +209,13 @@ export class InscripcionMatriculaService {
       const savedApoderado = await this.apoderadoRepository.save(apoderado);
       const apoderadoSuplente = this.apoderadoSuplenteRepository.create(inscripcionMatricula);
       const savedApoderadoSuplente = await this.apoderadoSuplenteRepository.save(apoderadoSuplente);
-  
+
       const savedEstudiantes = [];
       for (const estudianteData of inscripcionMatricula.estudiantes) {
         const estudiante = this.estudianteRepository.create(estudianteData);
         const savedEstudiante = await this.estudianteRepository.save(estudiante);
         savedEstudiantes.push(savedEstudiante);
-  
+
         const apoderadoEstudiante = new ApoderadoEstudiante();
         apoderadoEstudiante.apoderado_id = savedApoderado.id;
         apoderadoEstudiante.estudiante_id = savedEstudiante.id;
@@ -223,14 +225,151 @@ export class InscripcionMatriculaService {
         apoderadoSuplenteEstudiante.apoderado_suplente_id = savedApoderadoSuplente.id;
         apoderadoSuplenteEstudiante.estudiante_id = savedEstudiante.id;
         await this.apoderadoSuplenteEstudianteRepository.save(apoderadoSuplenteEstudiante);
-  
+
         const estudianteCurso = new EstudianteCurso();
         estudianteCurso.curso_id = estudianteData.cursoId;
         estudianteCurso.estudiante_id = savedEstudiante.id;
         await this.estudianteCursoRepository.save(estudianteCurso);
       }
-  
+
+      const savedUser = await this.userService.createUserForApoderadoByRut(apoderado.rut);
+
+      const correoHtml = `
+        <html>
+          <head>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f0f0f0;
+              }
+              .container {
+                background-color: #fff;
+                max-width: 600px;
+                margin: 20px auto;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                border: 1px solid #ccc;
+              }
+              .header {
+                text-align: center;
+              }
+              .header h1 {
+                color: #333;
+                font-size: 20px;
+                margin: 0;
+              }
+              .logo {
+                width: 120px;
+                display: block;
+                margin: 20px auto 10px;
+              }
+              p {
+                color: #333;
+                font-size: 14px;
+                line-height: 1.6;
+              }
+              .highlight-box {
+                background-color: #e0e0e0;
+                padding: 15px;
+                border-radius: 5px;
+                text-align: center;
+                margin: 20px 0;
+              }
+              .highlight-box .label {
+                font-size: 16px;
+                color: #333;
+                font-weight: bold;
+              }
+              .highlight-box .value {
+                font-size: 18px;
+                font-weight: bold;
+                color: #000;
+              }
+              .footer {
+                text-align: center;
+                margin-top: 20px;
+                font-size: 12px;
+                color: #666;
+              }
+              .download-links {
+                margin: 20px 0;
+                text-align: center;
+              }
+              .download-links a {
+                display: inline-block;
+                margin: 0 10px;
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: #fff;
+                text-decoration: none;
+                border-radius: 5px;
+                transition: background-color 0.3s;
+              }
+              .download-links a:hover {
+                background-color: #0056b3;
+              }
+              .normal-text {
+                font-size: 14px;
+                color: #333;
+                line-height: 1.6;
+                margin-top: 20px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Confirmación de Matricula y Creación de Usuario</h1>
+              </div>
+              <p>Estimado(a) apoderado(a),</p>
+              <p>Nos complace confirmar la matrícula de ${inscripcionMatricula.estudiantes.length > 1 ? 'los siguientes estudiantes' : 'el siguiente estudiante'} en nuestro colegio para el año 2025:</p>
+              <ul>
+                ${savedEstudiantes.map(estudiante => `<li>${estudiante.primer_nombre_alumno} ${estudiante.primer_apellido_alumno}</li>`).join('')}
+              </ul>
+              <p>Estos son los datos de ingreso para nuestra app:</p>
+              <div class="highlight-box">
+                <p class="label">Usuario:</p>
+                <p class="value">${savedUser.map(user => user.username).join(', ')}</p>
+                <p class="label">Contraseña inicial:</p>
+                <p class="value">andeschile2025</p>
+                <p>Puede cambiar su contraseña directamente desde la aplicación Móvil Colegio Andes Chile App.</p>
+              </div>
+              <p>Pueden descargar la app en los siguientes enlaces para ambas plataformas:</p>
+              <div class="download-links normal-text">
+                <a href="https://play.google.com/store/apps/details?id=colegio.andes.chile.app&hl=es_CR&pli=1" target="_blank">Descargar para Android</a>
+                <a href="https://apps.apple.com/cl/app/colegio-andes-chile/id6497167780" target="_blank">Descargar para iOS</a>
+              </div>
+              <p>Durante el año 2025, la app tendrá muchas sorpresas y actualizaciones. ¡Únete y conéctate con nuestra comunidad online!</p>
+              <p>¡Bienvenidos a nuestra comunidad CACH!</p>
+              <div class="footer normal-text">
+                <img class="logo" src="https://www.colegioandeschile.cl/img/LOGOCOLEGIO.png" alt="Andes Chile Colegio">
+                <p>Colegio Andes Chile - Educando con Amor ❤️</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+
+
+      const mailOptionsAdm = {
+        from: 'contacto@colegioandeschile.cl',
+        to: savedApoderado.correo_apoderado,
+        subject: 'Confirmación Inscripción Matricula',
+        html: correoHtml,
+      };
+
+      try {
+        await this.correoService.enviarCorreo(mailOptionsAdm);
+        console.log('Correo enviado con éxito');
+      } catch (error) {
+        console.error('Error al enviar el correo:', error);
+      }
+
       return {
+        usuario: savedUser,
         apoderado: savedApoderado,
         apoderadoSuplente: savedApoderadoSuplente,
         estudiantes: savedEstudiantes

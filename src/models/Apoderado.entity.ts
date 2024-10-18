@@ -32,7 +32,7 @@ export class Apoderado {
     @Column({ nullable: true })
     fecha_nacimiento: Date;
 
-    @Column({ type: 'varchar', length: 10 })
+    @Column({ type: 'varchar', length: 10, unique: true })
     rut: string;
 
     @Column({ type: 'char', length: 1 })

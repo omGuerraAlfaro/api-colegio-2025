@@ -107,6 +107,38 @@ export class UsuarioService {
     return createdUsers;
   }
 
+  async createUserForApoderadoByRut(rut: string): Promise<Usuarios[]> {
+    try {
+      const apoderado = await this.apoderadoRepository.findOne({ where: { rut } });
+      const userCreated: Usuarios[] = [];
+
+      const username = apoderado.rut +'-'+apoderado.dv;
+      const plainPassword = 'andeschile2025';
+      const hashedPassword = await hash(plainPassword, 5);
+
+
+      const usuario = new Usuarios();
+      usuario.username = username;
+      usuario.password = hashedPassword;
+      usuario.correo_electronico = apoderado.correo_apoderado;
+      usuario.apoderado_id = apoderado.id;
+      usuario.rut = apoderado.rut;
+
+
+      const savedUser = await this.usuarioRepository.save(usuario);
+      userCreated.push(savedUser);
+      
+      return userCreated;
+    } catch (error) {
+      this.logger.error(`Error creating createUserForApoderadoByRut: ${error.message}`, error.stack);
+      throw new InternalServerErrorException({
+        message: 'Error creating in createUserForApoderadoByRut.',
+        details: error.message,
+        stack: error.stack,
+      });
+    }
+  }
+
 
   async createUsersForAllProfesores(): Promise<Usuarios[]> {
     try {
