@@ -213,6 +213,7 @@ export class InscripcionMatriculaService {
       const savedEstudiantes = [];
       for (const estudianteData of inscripcionMatricula.estudiantes) {
         const estudiante = this.estudianteRepository.create(estudianteData);
+        estudiante.fecha_matricula = new Date();
         const savedEstudiante = await this.estudianteRepository.save(estudiante);
         savedEstudiantes.push(savedEstudiante);
 
