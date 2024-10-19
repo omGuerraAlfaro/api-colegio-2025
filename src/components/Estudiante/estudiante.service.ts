@@ -13,17 +13,46 @@ export class EstudianteService {
     private cursoRepository: Repository<Curso>,
   ) { }
 
- 
+
   async findAll() {
-    return await this.estudianteRepository.find({ relations: ["infoPae"] });
+    const estudiantes = await this.estudianteRepository.createQueryBuilder("estudiante")
+      .leftJoinAndSelect("estudiante.cursoConnection", "cursoConnection")
+      .leftJoinAndSelect("cursoConnection.curso", "curso")
+      .getMany();
+
+    // Mapear el resultado para incluir solo el curso y toda la data del estudiante
+    return estudiantes.map(estudiante => ({
+      id: estudiante.id,
+      primer_nombre_alumno: estudiante.primer_nombre_alumno,
+      segundo_nombre_alumno: estudiante.segundo_nombre_alumno,
+      primer_apellido_alumno: estudiante.primer_apellido_alumno,
+      segundo_apellido_alumno: estudiante.segundo_apellido_alumno,
+      fecha_nacimiento_alumno: estudiante.fecha_nacimiento_alumno,
+      fecha_matricula: estudiante.fecha_matricula,
+      rut: estudiante.rut+'-'+estudiante.dv,
+      genero_alumno: estudiante.genero_alumno,
+      alergia_alimento_alumno: estudiante.alergia_alimento_alumno,
+      alergia_medicamento_alumno: estudiante.alergia_medicamento_alumno,
+      vive_con: estudiante.vive_con,
+      enfermedad_cronica_alumno: estudiante.enfermedad_cronica_alumno,
+      prevision_alumno: estudiante.prevision_alumno,
+      nacionalidad: estudiante.nacionalidad,
+      es_pae: estudiante.es_pae,
+      consultorio_clinica_alumno: estudiante.consultorio_clinica_alumno,
+      autorizacion_fotografias: estudiante.autorizacion_fotografias,
+      apto_educacion_fisica: estudiante.apto_educacion_fisica,
+      observaciones_alumno: estudiante.observaciones_alumno,
+      curso: estudiante.cursoConnection.map(cc => cc.curso)
+    }));
   }
+
 
   async findByRut(rut: string) {
     const estudiante = await this.estudianteRepository.findOne({
       where: { rut: rut },
       relations: ['cursoConnection', 'cursoConnection.curso'],
     });
-  
+
     if (estudiante) {
       // Rename cursoConnection to curso
       const { cursoConnection, ...rest } = estudiante;
@@ -31,7 +60,7 @@ export class EstudianteService {
         ...rest,
         curso: cursoConnection.map(conn => conn.curso),
       };
-    }  
+    }
     return null;
   }
 
@@ -41,7 +70,7 @@ export class EstudianteService {
 
     return { masculinoCount: maleCount, femeninoCount: femaleCount };
   }
-  
+
 
 }
 
