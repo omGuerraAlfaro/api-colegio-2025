@@ -12,7 +12,8 @@ import { BoletaModule } from "./Boleta/boleta.module";
 import { AnotacionModule } from "./Anotacion//anotacion.module";
 import { AsignaturaModule } from "./Asignatura/asignatura.module";
 import { InscripcionMatriculaModule } from "./InscripcionMatricula/inscripcionMatricula.module";
+import { PdfModule } from "./Pdf/pdf.module";
 
 export { ApoderadoModule, EstudianteModule, ProfesorModule,
      PaymentModule, CursoModule, UsuarioModule, AdministradorModule, AuthModule, NoticiasModule,
-     CorreoModule, BoletaModule, AnotacionModule, AsignaturaModule, InscripcionMatriculaModule };
+     CorreoModule, BoletaModule, AnotacionModule, AsignaturaModule, InscripcionMatriculaModule, PdfModule };
