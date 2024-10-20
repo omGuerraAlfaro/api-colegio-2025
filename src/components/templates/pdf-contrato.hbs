@@ -179,44 +179,58 @@
         </tr>
         <tr>
           <td style='width: 30%;'><b>Nombre Completo</b></td>
-          <td style='width: 70%;'></td>
+          {{#each estudiantes}}
+              <td style='width: 70%;'>{{primer_nombre_alumno}} {{segundo_nombre_alumno}} {{primer_apellido_alumno}} {{segundo_apellido_alumno}}</td>
+          {{/each}}
         </tr>
         <tr>
           <td><b>Rut</b></td>
-          <td></td>
+          {{#each estudiantes}}
+              <td>{{rut}}-{{dv}}</td>
+          {{/each}}
         </tr>
         <tr>
           <td><b>Fecha de Nacimiento</b></td>
-          <td></td>
+          {{#each estudiantes}}
+              <td>{{fecha_nacimiento_alumno}}</td>
+          {{/each}}
         </tr>
         <tr>
           <td><b>Género</b></td>
-          <td></td>
+          {{#each estudiantes}}
+              <td>{{genero_alumno}}</td>
+          {{/each}}
         </tr>
         <tr>
           <td><b>Nacionalidad</b></td>
-          <td></td>
+          {{#each estudiantes}}
+              <td>{{nacionalidad_alumno}}</td>
+          {{/each}}
         </tr>
         <tr>
           <td><b>Edad al 31 de Marzo</b></td>
-          <td></td>
+          {{#each estudiantes}}
+              <td>{{edad_marzo}}</td>
+          {{/each}}
         </tr>
         <tr>
           <td><b>Dirección</b></td>
-          <td></td>
+              <td>{{direccion}}</td>
         </tr>
         <tr>
           <td><b>Comuna</b></td>
-          <td></td>
+              <td>{{comuna}}</td>
         </tr>
         <tr>
           <td><b>Contacto de Emergencia</b></td>
-          <td></td>
+            <td>{{telefono_apoderado}}</td>
         </tr>
-        <tr>
+        {{!-- <tr>
           <td><b>Teléfono de Contacto</b></td>
-          <td></td>
-        </tr>
+          {{#each estudiantes}}
+              <td>{{rut}}-{{dv}}</td>
+          {{/each}}
+        </tr> --}}
       </table>
 
       <table class='tabla'>
@@ -225,15 +239,21 @@
         </tr>
         <tr>
           <td style='width: 30%;'><b>Enfermedad Crónica</b></td>
-          <td style='width: 70%;'></td>
+          {{#each estudiantes}}
+              <td style='width: 70%;'>{{enfermedad_cronica_alumno}}</td>
+          {{/each}}
         </tr>
         <tr>
           <td><b>Alergia a Alimentos</b></td>
-          <td></td>
+          {{#each estudiantes}}
+              <td>{{alergia_alimento_alumno}}</td>
+          {{/each}}
         </tr>
         <tr>
           <td><b>Alergia a Medicamentos</b></td>
-          <td></td>
+          {{#each estudiantes}}
+              <td>{{alergia_medicamento_alumno}}</td>
+          {{/each}}
         </tr>
       </table>
 
@@ -243,35 +263,35 @@
         </tr>
         <tr>
           <td style='width: 30%;'><b>Nombre Completo</b></td>
-          <td style='width: 70%;'></td>
+              <td style='width: 70%;'>{{primer_nombre_apoderado}} {{segundo_nombre_apoderado}} {{primer_apellido_apoderado}} {{segundo_apellido_apoderado}}</td>
         </tr>
         <tr>
           <td><b>Rut</b></td>
-          <td></td>
+          <td>{{rut}}-{{dv}}</td>
         </tr>
         <tr>
           <td><b>Parentesco</b></td>
-          <td></td>
+          <td>{{parentesco_apoderado}}</td>
         </tr>
         <tr>
           <td><b>Estado Civil</b></td>
-          <td></td>
+          <td>{{estado_civil}}</td>
         </tr>
         <tr>
           <td><b>Profesión u Oficio</b></td>
-          <td></td>
+          <td>{{profesion_oficio}}</td>
         </tr>
         <tr>
           <td><b>Dirección</b></td>
-          <td></td>
+          <td>{{direccion}}</td>
         </tr>
         <tr>
           <td><b>Comuna</b></td>
-          <td></td>
+          <td>{{comuna}}</td>
         </tr>
         <tr>
           <td><b>Teléfono de Contacto</b></td>
-          <td></td>
+          <td>{{telefono_apoderado}}</td>
         </tr>
       </table>
 
@@ -283,99 +303,107 @@
         </tr>
         <tr>
           <td style='width: 30%;'><b>Nombre Completo</b></td>
-          <td style='width: 70%;'></td>
+              <td style='width: 70%;'>{{primer_nombre_apoderado_suplente}} {{segundo_nombre_apoderado_suplente}} {{primer_apellido_apoderado_suplente}} {{segundo_apellido_apoderado_suplente}}</td>
         </tr>
         <tr>
           <td><b>Rut</b></td>
-          <td></td>
+          <td>{{rut_apoderado_suplente}}-{{dv_apoderado_suplente}}</td>
         </tr>
         <tr>
           <td><b>Parentesco</b></td>
-          <td></td>
+          <td>{{parentesco_apoderado_suplente}}</td>
         </tr>
         <tr>
           <td><b>Estado Civil</b></td>
-          <td></td>
+          <td>{{estado_civil_suplente}}</td>
         </tr>
         <tr>
           <td><b>Profesión u Oficio</b></td>
-          <td></td>
+          <td>{{profesion_oficio_suplente}}</td>
         </tr>
         <tr>
           <td><b>Dirección</b></td>
-          <td></td>
+          <td>{{direccion_suplente}}</td>
         </tr>
         <tr>
           <td><b>Comuna</b></td>
-          <td></td>
+          <td>{{comuna_suplente}}</td>
         </tr>
         <tr>
           <td><b>Teléfono de Contacto</b></td>
-          <td></td>
+          <td>{{telefono_apoderado_suplente}}</td>
         </tr>
       </table>
 
-<hr>
-<br>
-      <table class='tabla' style="width: 50%;">
-        <tr>
-          <th colspan='2'>DOCUMENTOS PRESENTADOS</th>
-        </tr>
-        <tr>
-          <td style='width: 80%;'><b>Certificados de Nacimiento</b></td>
-          <td style='width: 20%;'></td>
-        </tr>
-        <tr>
-          <td><b>Certificado de Notas</b></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td><b>Informe Personalidad</b></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td><b>Comprobante de Domicilio</b></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td><b>Fotocopia Cedula Identidad Apoderado</b></td>
-          <td></td>
-        </tr>
-      </table>
-
+      <hr>
+      <br>
       <table class='tabla' style="margin-top: 20px;">
         <tr>
           <th colspan='3'>AUTORIZACIONES</th>
         </tr>
         <tr>
           <th colspan='1' style="text-align: start;">1.</th>
-          <th colspan='1'>Si</th>
+          <th colspan='1'>Sí</th>
           <th colspan='1'>No</th>
         </tr>
         <tr>
           <td style='width: 80%;'><b>Manifiesto mi voluntad de solicitar la eximición de mi pupilo de la asignatura de Religión</b></td>
-          <td style='width: 10%;'></td>
-          <td style='width: 10%;'></td>
+          <td style='width: 10%;' class="text-center">
+            {{#each estudiantes}}
+              {{#if eximir_religion}}
+                X
+              {{/if}}
+            {{/each}}
+          </td>
+          <td style='width: 10%;' class="text-center">
+            {{#each estudiantes}}
+              {{#unless eximir_religion}}
+                X
+              {{/unless}}
+            {{/each}}
+          </td>
         </tr>
+        
         <tr>
           <th colspan='1' style="text-align: start;">2.</th>
-          <th colspan='1'>Si</th>
+          <th colspan='1'>Sí</th>
           <th colspan='1'>No</th>
         </tr>
         <tr>
           <td style='width: 80%;'><b>Autorizo a que fotografíen o graben a mi hijo(a) en actividades del colegio</b></td>
-          <td style='width: 10%;'></td>
-          <td style='width: 10%;'></td>
+          <td style='width: 10%;' class="text-center">
+            {{#each estudiantes}}
+              {{#if autorizacion_fotografias}}
+                X
+              {{/if}}
+            {{/each}}
+          </td>
+          <td style='width: 10%;' class="text-center">
+            {{#each estudiantes}}
+              {{#unless autorizacion_fotografias}}
+                X
+              {{/unless}}
+            {{/each}}
+          </td>
         </tr>
+        
         <tr>
           <th colspan='1' style="text-align: start;">3.</th>
-          <th colspan='1'>Si</th>
+          <th colspan='1'>Sí</th>
           <th colspan='1'>No</th>
         </tr>
         <tr>
           <td style='width: 80%;'><b>El alumno es apto para realizar educación física.</b></td>
-          <td style='width: 10%;'></td>
-          <td style='width: 10%;'></td>
+          <td style='width: 10%;' class="text-center">
+            {{#if apto_educacion_fisica}}
+              X
+            {{/if}}
+          </td>
+          <td style='width: 10%;' class="text-center">
+            {{#unless apto_educacion_fisica}}
+              X
+            {{/unless}}
+          </td>
         </tr>
       </table>
 
@@ -396,53 +424,59 @@
       <table class='tabla'>
         <tr>
           <td style='width: 30%;'><b>Nombre Completo</b></td>
-          <td style='width: 70%;'></td>
+          <td style='width: 70%;'>{{primer_nombre_apoderado}} {{segundo_nombre_apoderado}} {{primer_apellido_apoderado}} {{segundo_apellido_apoderado}}</td>
         </tr>
         <tr>
           <td><b>Rut</b></td>
-          <td></td>
+          <td>{{rut}}-{{dv}}</td>
         </tr>
         <tr>
           <td><b>Parentesco</b></td>
-          <td></td>
+          <td>{{parentesco_apoderado}}</td>
         </tr>
         <tr>
           <td><b>Estado Civil</b></td>
-          <td></td>
+          <td>{{estado_civil}}</td>
         </tr>
         <tr>
           <td><b>Profesión u Oficio</b></td>
-          <td></td>
+          <td>{{profesion_oficio}}</td>
         </tr>
         <tr>
           <td><b>Dirección</b></td>
-          <td></td>
+          <td>{{direccion}}</td>
         </tr>
         <tr>
           <td><b>Comuna</b></td>
-          <td></td>
+          <td>{{comuna}}</td>
         </tr>
         <tr>
           <td><b>Teléfono de Contacto</b></td>
-          <td></td>
+          <td>{{telefono_apoderado}}</td>
         </tr>
       </table>
       <p class="justificar">en adelante <b>“el requirente de los servicios”</b>, <b>“el requirente”</b> o <b>“el apoderado”</b>, y por la otra, la <b>Sociedad Educacional Colegio Andes Chile</b>, RUT 77.625.500-9, debidamente representada, por don Alfredo Agustín Gallegos Ávila, RUT 10.352.842-9, ambos con domicilio en calle Manuel Rodríguez Nº 1064, Comuna de Los Andes, en adelante <b>“el Prestador de los servicios”</b> o <b>“el prestador”</b>, se ha convenido el siguiente contrato de prestaciones de Servicios:</p>
       <p class="justificar"><b>PRIMERO:</b> El prestador tiene la calidad de sostenedor, único titular y director del establecimiento educacional denominado Colegio particular Andes- Chile, en los niveles de educación Pre – Básica y Básica, con domicilio en calle Manuel Rodríguez Nº 1064, comuna y Provincia de Los Andes, establecimiento reconocido por el Ministerio de Educación del Estado de Chile, de conformidad a la legislación vigente.</p>
-      <p class="justificar"><b>SEGUNDO:</b> Por el presente instrumento, el requirente o apoderado, don(ña): <span style="color: red;">¿???</span> ya individualizada, requiere los servicios educacionales que brinda el prestador, mediante “Colegio Andes Chile”, requerimiento que por este acto es aceptado expresamente por don Alfredo Agustín Gallegos Ávila, en virtud de la representación que inviste, y se obliga a proveer los siguientes servicios. </p>
+      <p class="justificar"><b>SEGUNDO:</b> Por el presente instrumento, el requirente o apoderado, don(ña): <b>{{primer_nombre_apoderado}} {{segundo_nombre_apoderado}} {{primer_apellido_apoderado}} {{segundo_apellido_apoderado}}</b> ya individualizada, requiere los servicios educacionales que brinda el prestador, mediante “Colegio Andes Chile”, requerimiento que por este acto es aceptado expresamente por don Alfredo Agustín Gallegos Ávila, en virtud de la representación que inviste, y se obliga a proveer los siguientes servicios. </p>
       <p class="justificar"><b>TERCERO:</b> Los Servicios contratados se prestarán en relación con la matrícula e incorporación al “Colegio Andes Chile” del alumno (a): </p>
       <table class='tabla'>
         <tr>
           <td style='width: 30%;'><b>Nombre Completo</b></td>
-          <td style='width: 70%;'></td>
+          {{#each estudiantes}}
+              <td style='width: 70%;'>{{primer_nombre_alumno}} {{segundo_nombre_alumno}} {{primer_apellido_alumno}} {{segundo_apellido_alumno}}</td>
+          {{/each}}
         </tr>
         <tr>
           <td><b>Rut</b></td>
-          <td></td>
+          {{#each estudiantes}}
+              <td>{{rut}}-{{dv}}</td>
+          {{/each}}
         </tr>
         <tr>
           <td><b>Curso</b></td>
-          <td></td>
+          {{#each estudiantes}}
+              <td>{{cursoId}}</td>
+          {{/each}}
         </tr>
       </table>
       <p class="justificar"><b>En el año o período lectivo correspondiente desde marzo a diciembre del año lectivo correspondiente, y de conformidad con los programas o planes de estudios aprobados por el Ministerio de Educación del Estado de Chile, ya sea mediante talleres, clases presenciales, semipresenciales o cualquier método o régimen a distancia, según corresponda.</b></p>
@@ -507,27 +541,27 @@
       <table class='tabla'>
         <tr>
           <td style='width: 30%;'><b>Yo</b></td>
-          <td style='width: 70%;'></td>
+          <td style='width: 70%;'>{{primer_nombre_apoderado}} {{segundo_nombre_apoderado}} {{primer_apellido_apoderado}} {{segundo_apellido_apoderado}}</td>
         </tr>
         <tr>
           <td><b>Cédula Nacional de Identidad y Rut N°</b></td>
-          <td></td>
+          <td>{{rut}}-{{dv}}</td>
         </tr>
         <tr>
           <td><b>Profesión u Oficio</b></td>
-          <td></td>
+          <td>{{profesion_oficio}}</td>
         </tr>
         <tr>
           <td><b>Dirección</b></td>
-          <td></td>
+          <td>{{direccion}}</td>
         </tr>
         <tr>
           <td><b>Comuna</b></td>
-          <td></td>
+          <td>{{comuna}}</td>
         </tr>
         <tr>
           <td><b>Teléfono de Contacto</b></td>
-          <td></td>
+          <td>{{telefono_apoderado}}</td>
         </tr>
       </table>
       <p class="justificar" style="margin-top: 10px;"><b>Debo</b> y pagaré incondicionalmente a la orden de Sociedad Educacional Colegio Andes Chile, Rut 77.625.500-9 o a quien sus derechos representen, la suma de $2.250.000, en moneda chilena, que adeudo en las siguientes condiciones que acepto y cumpliré:</p>
@@ -560,19 +594,19 @@
       <table class='tabla'>
         <tr>
           <td style='width: 30%;'><b>Nombre y Apellidos del Deudor</b></td>
-          <td style='width: 70%;'></td>
+          <td style='width: 70%;'>{{primer_nombre_apoderado}} {{segundo_nombre_apoderado}} {{primer_apellido_apoderado}} {{segundo_apellido_apoderado}}</td>
         </tr>
         <tr>
           <td><b>Cédula Nacional de Identidad y Rut N°</b></td>
-          <td></td>
+          <td>{{rut}}-{{dv}}</td>
         </tr>
         <tr>
           <td><b>Dirección</b></td>
-          <td></td>
+          <td>{{direccion}}</td>
         </tr>
         <tr>
           <td><b>Comuna</b></td>
-          <td></td>
+          <td>{{comuna}}</td>
         </tr>
       </table>
       <p class="justificar" style="margin-top: 10px;">Pagó el impuesto por la cantidad de ……………..(……………..) en ………….. con fecha ………….., según declaración y pago de impuesto Timbres y Estampillas D.L.3.475 Formulario N°…..Folio ………………Los Andes.</p>
@@ -591,7 +625,9 @@
             <th>Curso:</th>
           </tr>
           <tr>
-            <td class='text-center'>5°to Básico</td>
+            {{#each estudiantes}}
+              <td class='text-center'>{{cursoId}}</td>
+          {{/each}}
           </tr>
         </table>
         <table class='tabla2'>
@@ -607,19 +643,21 @@
       <table class='tabla'>
         <tr>
           <td style='width: 30%;'><b>Nombre Alumno</b></td>
-          <td style='width: 70%;'></td>
+          {{#each estudiantes}}
+              <td style='width: 70%;'>{{primer_nombre_alumno}} {{segundo_nombre_alumno}} {{primer_apellido_alumno}} {{segundo_apellido_alumno}}</td>
+          {{/each}}
         </tr>
         <tr>
           <td><b>Nombre Apoderado</b></td>
-          <td></td>
+          <td>{{primer_nombre_apoderado}} {{segundo_nombre_apoderado}} {{primer_apellido_apoderado}} {{segundo_apellido_apoderado}}</td>
         </tr>
         <tr>
           <td><b>Rut Apoderado</b></td>
-          <td></td>
+          <td>{{rut}}-{{dv}}</td>
         </tr>
         <tr>
           <td><b>Teléfono</b></td>
-          <td></td>
+          <td>{{telefono_apoderado}}</td>
         </tr>
       </table>
 
@@ -649,5 +687,6 @@
     document.getElementById('current-date').textContent = formattedDate;
     document.getElementById('current-date2').textContent = formattedDate;
     document.getElementById('current-date3').textContent = formattedDate;
+
   </script>
 </html>
