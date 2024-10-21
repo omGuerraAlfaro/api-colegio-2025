@@ -1,4 +1,4 @@
-import { Controller, Get, Res, Query, InternalServerErrorException, Body } from '@nestjs/common';
+import { Controller, Get, Res, Query, InternalServerErrorException, Body, Post } from '@nestjs/common';
 import { PdfService } from './pdf.service';
 import { Response } from 'express';
 import { MatriculaDto } from 'src/dto/matricula.dto';
@@ -7,7 +7,7 @@ import { MatriculaDto } from 'src/dto/matricula.dto';
 export class PdfController {
   constructor(private readonly pdfService: PdfService) {}
 
-  @Get('generate')
+  @Post('generate')
   async generatePdf(@Res() res: Response, @Body() datosMatricula: MatriculaDto) {
     try {
       // Llama al servicio para generar el PDF

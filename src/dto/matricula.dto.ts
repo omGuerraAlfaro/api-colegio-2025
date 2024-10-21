@@ -324,7 +324,7 @@ export class MatriculaDto {
   @IsNotEmpty()
   valor_matricula: number;
 
-  @IsNumber()
+  @IsString()
   @IsOptional()
-  valor_mensualidad?: number;
+  valor_mensualidad?: string;
 }
