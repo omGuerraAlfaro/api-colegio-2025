@@ -44,7 +44,7 @@ class EstudianteDto {
 
   @IsString()
   @IsNotEmpty()
-  nacionalidad_alumno: string;
+  nacionalidad: string;
 
   @IsString()
   @IsOptional()
@@ -324,7 +324,7 @@ export class MatriculaDto {
   @IsNotEmpty()
   valor_matricula: number;
 
-  @IsString()
-  @IsOptional()
-  valor_mensualidad?: string;
+  @IsNumber()
+  @IsNotEmpty()
+  valor_mensualidad?: number;
 }

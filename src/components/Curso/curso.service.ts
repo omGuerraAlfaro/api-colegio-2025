@@ -138,6 +138,22 @@ export class CursoService {
       };
     });
   }
+
+  async findCursoByRutEstudiante(rut: string) {
+    const curso = await this.cursoRepository
+      .createQueryBuilder("curso")
+      .leftJoin("curso.cursoConnection", "cursoEstudiante")
+      .leftJoin("cursoEstudiante.estudiante", "estudiante")
+      .where("estudiante.rut = :rut", { rut })
+      .getOne();
+  
+    if (!curso) {
+      throw new Error(`No course found for student with RUT: ${rut}`);
+    }
+  
+    return curso;
+  }
+  
   
   
 

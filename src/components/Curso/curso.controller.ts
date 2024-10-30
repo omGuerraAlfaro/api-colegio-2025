@@ -39,14 +39,14 @@ export class CursoController {
   async getCursoId(@Param('id') id: number) {
     return await this.cursoService.findOneWithCurse(id);
   }
-
+  
   @Get(':id/apoderados-estudiantes')
   async getCursoWithAE(@Param('id') id: number) {
     try {
       const result = await this.cursoService.findCursoWithApoderadoAndEstudiante(id);
       if (!result) {
         console.log('No se encontraron estudiantes para el curso con id: ' + id);
-
+        
       }
       return result;
     } catch (error) {
@@ -55,4 +55,9 @@ export class CursoController {
     }
   }
 
+  @Get('curso-estudiante/:rut')
+  async findCursoByRutEstudiante(@Param('rut') rut: string) {
+    return await this.cursoService.findCursoByRutEstudiante(rut);
+  }
+  
 }

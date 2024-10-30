@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { ApoderadoAloneDTO, ApoderadoDTO } from 'src/dto/apoderado.dto';
 import { Apoderado } from 'src/models/Apoderado.entity';
 import { ApoderadoEstudiante } from 'src/models/ApoderadoEstudiante.entity';
+import { ApoderadoSuplente } from 'src/models/ApoderadoSuplente.entity';
 import { EstudianteCurso } from 'src/models/CursoEstudiante.entity';
 import { Estudiante } from 'src/models/Estudiante.entity';
 import { Repository } from 'typeorm';
@@ -12,6 +13,8 @@ export class ApoderadoService {
   constructor(
     @InjectRepository(Apoderado)
     private readonly apoderadoRepository: Repository<Apoderado>,
+    @InjectRepository(ApoderadoSuplente)
+    private readonly apoderadoSuplenteRepository: Repository<ApoderadoSuplente>,
     @InjectRepository(Estudiante)
     private readonly estudianteRepository: Repository<Estudiante>,
     @InjectRepository(ApoderadoEstudiante)
@@ -60,7 +63,7 @@ export class ApoderadoService {
       throw new InternalServerErrorException('Error al buscar el apoderado');
     }
   }
-  
+
   async findAll() {
     return await this.apoderadoRepository.find();
   }
@@ -172,5 +175,17 @@ export class ApoderadoService {
       throw new InternalServerErrorException('Error al actualizar el apoderado');
     }
   }
+
+  async findApoderadoSuplenteByRutEstudiante(rut: string): Promise<ApoderadoSuplente | null> {
+    const result = await this.apoderadoSuplenteRepository
+      .createQueryBuilder("apoderadoSuplente")
+      .innerJoinAndSelect("apoderadoSuplente.estudiantesConnection", "apoderadoSuplenteEstudiante")
+      .innerJoinAndSelect("apoderadoSuplenteEstudiante.estudiante", "estudiante")
+      .where("estudiante.rut = :rut", { rut })
+      .getOne();
+
+    return result || null; // Return the found Apoderado Suplente or null
+  }
+
 }
 

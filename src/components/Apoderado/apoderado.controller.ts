@@ -64,6 +64,11 @@ export class ApoderadoController {
     return await this.apoderadoService.findAddressWithApoderadoId(id);
   }
 
+  @Get('apoderado-suplente/:rut')
+  async findApoderadoSuplenteByRutEstudiante(@Param('rut') rut: string) {
+    return await this.apoderadoService.findApoderadoSuplenteByRutEstudiante(rut);
+  }
+
   @Get('rut/:rut')
   async getApoderadoByRut(@Param('rut') rut: string) {
     try {

@@ -65,7 +65,7 @@
       .signature-block {
       display: flex;
       justify-content: space-between;
-      margin-top: 50px;
+      margin-top: 200px;
       position: relative; /* Para posicionar el logo sobre la línea */
       }
 
@@ -159,9 +159,10 @@
           </tr>
           {{#each estudiantes}}
             <tr>
-              <td class='text-center'>{{cursoId}}</td>
+                <td class='text-center'>{{getCursoName cursoId}}</td>
             </tr>
           {{/each}}
+
         </table>
         <table class='tabla2'>
           <tr>
@@ -198,13 +199,13 @@
         <tr>
           <td><b>Género</b></td>
           {{#each estudiantes}}
-              <td>{{genero_alumno}}</td>
+              <td>{{getGeneroName genero_alumno}}</td>
           {{/each}}
         </tr>
         <tr>
           <td><b>Nacionalidad</b></td>
           {{#each estudiantes}}
-              <td>{{nacionalidad_alumno}}</td>
+              <td>{{nacionalidad}}</td>
           {{/each}}
         </tr>
         <tr>
@@ -295,9 +296,7 @@
         </tr>
       </table>
 
-      <div class="page-break" > </div> 
-      <br>
-      <table class='tabla' style="margin-top: 60px;">
+      <table class='tabla'>
         <tr>
           <th colspan='2'>IDENTIFICACIÓN DEL APODERADO SUPLENTE</th>
         </tr>
@@ -335,10 +334,13 @@
         </tr>
       </table>
 
-      <hr>
+      <div class="page-break" > </div> 
       <br>
+{{!-- 
+      <hr>
+      <br> --}}
 
-      <table class='tabla' style="width: 50%;">
+      <table class='tabla' style="width: 50%; margin-top: 60px;">
         <tr>
           <th colspan='2'>DOCUMENTOS PRESENTADOS</th>
         </tr>
@@ -434,7 +436,7 @@
         </tr>
       </table>
 
-      <div class="text-center" style="padding-top: 20px;">
+      <div class="text-center" style="padding-top: 20px; margin-top: 200px;">
         <h4>__________________________________</h4>
         <h4>Firma Apoderado:</h4>
       </div>
@@ -502,20 +504,20 @@
         <tr>
           <td><b>Curso</b></td>
           {{#each estudiantes}}
-              <td>{{cursoId}}</td>
+              <td class='text-center'>{{getCursoName cursoId}}</td>
           {{/each}}
         </tr>
       </table>
       <p class="justificar"><b>En el año o período lectivo correspondiente desde marzo a diciembre del año lectivo correspondiente, y de conformidad con los programas o planes de estudios aprobados por el Ministerio de Educación del Estado de Chile, ya sea mediante talleres, clases presenciales, semipresenciales o cualquier método o régimen a distancia, según corresponda.</b></p>
 
+      <p class="justificar" style="margin-top: 20px;"><b>CUARTO:</b> Valores del contrato. El arancel anual estará compuesto por los siguientes conceptos y sumas:</p>
+      <p class="justificar" style="margin-left: 50px"><b>A. Derecho de escolaridad:</b> La administración del Colegio Andes Chile ha establecido una colegiatura anual de $ {{calcularValorAnual valor_mensualidad}}.- para el período escolar 2025, pagaderos en 1 cuota ó máximo 10 cuotas mensuales e iguales, equivalente a $ {{formatearValor valor_mensualidad}} cada una, desde marzo a diciembre de 2025.-</p>
+      <p class="justificar" style="margin-left: 50px"><b>B.</b> La administración del colegio andes chile ha establecido los pagos de mensualidades para los días 01 de cada mes o primer día hábil bancario inmediatamente siguiente.</p>
+
       <div class="page-break" > </div> 
       <br>
 
-      <p class="justificar" style="margin-top: 60px;"><b>CUARTO:</b> Valores del contrato. El arancel anual estará compuesto por los siguientes conceptos y sumas:</p>
-      <p class="justificar" style="margin-left: 50px"><b>A. Derecho de escolaridad:</b> La administración del Colegio Andes Chile ha establecido una colegiatura anual de $ 2.250.000.- para el período escolar 2025, pagaderos en 1 cuota ó máximo 10 cuotas mensuales e iguales, equivalente a $ {{valor_mensualidad}} cada una, desde marzo a diciembre de 2025.-</p>
-      <p class="justificar" style="margin-left: 50px"><b>B.</b> La administración del colegio andes chile ha establecido los pagos de mensualidades para los días 01 de cada mes o primer día hábil bancario inmediatamente siguiente.</p>
-
-      <p class="justificar" style="margin-top: 20px;"><b>QUINTO:</b> Son obligaciones contractuales del prestador o institución educadora:</p>
+      <p class="justificar" style="margin-top: 60px;"><b>QUINTO:</b> Son obligaciones contractuales del prestador o institución educadora:</p>
       <p class="justificar" style="margin-left: 50px"><b>A.</b> Incorporar al Alumno en el desarrollo de los contenidos programáticos, del plan de estudios aprobados por el Ministerio de Educación del Estado de Chile para el respectivo grado o curso, ya sea mediante talleres, clases presenciales, semipresenciales o cualquier método o régimen a distancia.</p>
       <p class="justificar" style="margin-left: 50px"><b>B.</b> Difundir el reglamento de convivencia escolar del colegio o una síntesis de éste y tomar las medidas respectivas para su cabal cumplimiento. Para tal efecto existirá permanentemente una copia del mismo a disposición de los padres y apoderados en la dirección general del establecimiento y en la página web del colegio, www.colegioandeschile.cl</p>
       <p class="justificar" style="margin-left: 50px"><b>C.</b> Aplicar y ejecutar planes de contingencia, de emergencia y adoptar las medidas de seguridad y control de accidentes.</p>
@@ -527,15 +529,17 @@
       <p class="justificar" style="margin-left: 50px"><b>A.</b> Participar en las actividades cívicas y extra programáticas que el establecimiento determine en calidad de apoderado del alumno con matrícula vigente, tales como, bingos, día de la chilenidad, gala de pre básica, etc., entre otras.</p>
       <p class="justificar" style="margin-left: 50px"><b>B.</b> Conocer y aplicar el reglamento de convivencia escolar del establecimiento, los principios valóricos que sirven de directrices de la educación impartida en el colegio y las normas disciplinarias sobre conducta, rendimiento y presentación personal del alumno.</p>
       <p class="justificar" style="margin-left: 50px"><b>C.</b> Asistir a reuniones o actividades generales del Centro General de Padres y Apoderados y de Sub-Centro, cada vez que se les notifique. Al efecto el apoderado titular se obliga a concurrir a las citaciones personales que les sea remitidas por secretaria academica, convivencia escolar, docentes o dirección súperior a lo menos el 80% y un 20% para el apoderado suplente, de las asambleas o reuniones. Se obliga igualmente a concurrir a las citaciones personales que le sean remitidas por el inspector general o docente superior.</p>
-      <div class="page-break" > </div> 
-      <br>
-      <p class="justificar" style="margin-top: 60px; margin-left: 50px"><b>D.</b> Prestar colaboración en las labores educativas que programe y desarrolle el colegio en beneficio del alumno.</p>
+      
+      <p class="justificar" style="margin-top: 20px; margin-left: 50px"><b>D.</b> Prestar colaboración en las labores educativas que programe y desarrolle el colegio en beneficio del alumno.</p>
       <p class="justificar" style="margin-left: 50px"><b>E.</b> Colaborar con el colegio a través de las actividades que programe el centro general de padres y apoderados o directiva de su curso.</p>
       <p class="justificar" style="margin-left: 50px"><b>F.</b> Dar a conocer y requerir del alumno el cumplimiento de las obligaciones escolares y de las normas disciplinarias y reglamentarias del establecimiento.</p>
       <p class="justificar" style="margin-left: 50px"><b>G.</b> Pagar en forma oportuna las cuotas de escolaridad que fije el establecimiento para el nivel y grado que corresponda al alumno.</p>
       <p class="justificar" style="margin-left: 50px"><b>H.</b> Solucionar posibles problemas, conflictos disciplinarios o formativos a través de las instancias que el colegio disponga y en ningún caso enfrentar a otro alumno o apoderado por iniciativa propia.</p>
       
-      <p class="justificar" style="margin-top: 10px;"><b>SEPTIMO:</b> Son obligaciones del alumno matriculado, las cuales acepta por intermedio del requirente de los servicios:</p>
+      <div class="page-break" > </div> 
+      <br>
+
+      <p class="justificar" style="margin-top: 60px;"><b>SEPTIMO:</b> Son obligaciones del alumno matriculado, las cuales acepta por intermedio del requirente de los servicios:</p>
       <p class="justificar" style="margin-left: 50px"><b>A.</b> Asistir regularmente a clases, sean éstas presenciales, semipresenciales o mediante cualquier método o régimen a distancia, como también a los talleres y demás actividades dispuestas y planificadas por el establecimiento.</p>
       <p class="justificar" style="margin-left: 50px"><b>B.</b> Estudiar, internalizar y aprobar los contenidos programáticos tratados en las diferentes asignaturas, según las exigencias explicadas en el reglamento de evaluación vigente. Al efecto, el establecimiento dará a conocer al alumno, dentro del período lectivo vigente, los rendimientos mínimos exigidos, para la renovación de matrículas en el período siguiente:</p>
       <p class="justificar" style="margin-left: 50px"><b>C.</b> Conocer y aplicar las normas del reglamento de evaluación vigente y las normas del reglamento de convivencia escolar de funcionamiento, en los artículos de sus competencias.</p>
@@ -591,25 +595,25 @@
           <td>{{telefono_apoderado}}</td>
         </tr>
       </table>
-      <p class="justificar" style="margin-top: 10px;"><b>Debo</b> y pagaré incondicionalmente a la orden de Sociedad Educacional Colegio Andes Chile, Rut 77.625.500-9 o a quien sus derechos representen, la suma de $2.250.000, en moneda chilena, que adeudo en las siguientes condiciones que acepto y cumpliré:</p>
-      <p class="justificar" style="margin-top: 10px;"><b>PRIMERO:</b> Forma de pago de capital: El capital se pagará en 1 o 10 cuotas máximas mensuales, sucesivas e iguales de $ 225.000.- (dos ciento veinticinco mil pesos) c/u en el período comprendido desde el 01 de marzo de 2025, por concepto de arancel correspondiente al programa de estudio denominado año escolar a dictarse a partir de MARZO a DICIEMBRE, mediante clases presenciales, semipresenciales o a distancia, venciendo la primera de ellas el 01 de marzo de 2025 y la última, el 01 de diciembre de 2025.</p>
+      <p class="justificar" style="margin-top: 10px;"><b>Debo</b> y pagaré incondicionalmente a la orden de Sociedad Educacional Colegio Andes Chile, Rut 77.625.500-9 o a quien sus derechos representen, la suma de ${{calcularValorAnual valor_mensualidad}} , en moneda chilena, que adeudo en las siguientes condiciones que acepto y cumpliré:</p>
+      <p class="justificar" style="margin-top: 10px;"><b>PRIMERO:</b> Forma de pago de capital: El capital se pagará en 1 o 10 cuotas máximas mensuales, sucesivas e iguales de $ {{formatearValor valor_mensualidad}} .- (dos ciento veinticinco mil pesos) c/u en el período comprendido desde el 01 de marzo de 2025, por concepto de arancel correspondiente al programa de estudio denominado año escolar a dictarse a partir de MARZO a DICIEMBRE, mediante clases presenciales, semipresenciales o a distancia, venciendo la primera de ellas el 01 de marzo de 2025 y la última, el 01 de diciembre de 2025.</p>
       <p class="justificar" style="margin-top: 10px;"><b>SEGUNDO:</b> Intereses por retardo y aceleración: En caso de mora o simple retardo en una de cualquiera de las cuotas pactadas, se devengará el máximo interés convencional para operaciones no reajustables vigente a la fecha de la inscripción o a las épocas de la mora o retardo a elección del acreedor, esto es, en caso de mora o simple retardo en el pago de una de las cuotas o del capital, este pagaré devengará, por todo el lapso que dure la mora o retardo, el interés máximo convencional que la ley permita estipular para operaciones de crédito de dinero en moneda nacional no reajustables, según el plazo de la presente obligación vigente durante la mora, pero sólo si estos fueren superiores al interés máximo convencional vigente a esta fecha. En el evento contrario, se aplicará esta última tasa. Iguales intereses se devengarán en caso de aceleración;</p>
       <p class="justificar" style="margin-top: 10px;"><b>TERCERO:</b> Cláusula de aceleración. En caso de mora o simple retardo de una o cualquiera de las cuotas antes indicadas, faculta a la Sociedad Educacional Colegio Andes Chile. para hacer exigible el total de lo adeudado, considerándose toda la obligación como de plazo vencido y devengándose en ese caso como interés moratorio el interés máximo convencional para operaciones no reajustables vigente a la fecha de la inscripción o a las épocas de la mora o retardo a elección del acreedor;</p>
       <p class="justificar" style="margin-top: 10px;"><b>CUARTO:</b> Días inhábiles, prórroga de pago: Cualquiera fecha para el pago de capital y/o de intereses que corresponda a día inhábil bancario se prorrogará hasta el día hábil bancario inmediatamente siguiente, debiendo el respectivo pago incluir, además, los intereses que correspondan a los días comprendidos en esa prórroga;</p>
       <p class="justificar" style="margin-top: 10px;"><b>QUINTO:</b> Indivisibilidad: Todas las obligaciones derivadas de este pagaré se considerarán indivisibles para el suscriptor, sus herederos y/o sucesores, para todos los efectos legales y en especial aquellos contemplados en los Artículos 1526 N°4 y 1528 del Código Civil;</p>
       <p class="justificar" style="margin-top: 10px;"><b>SEXTO:</b> Protesto: Sin obligación de protesto. Libero al acreedor de la obligación de protesto, pero si él optare por la realización de dicha diligencia, podrá hacerla, a su libre elección, en forma bancaria, notarial o por el funcionario público que corresponda. En todo caso, en el evento de protesto me obligo a pagar los gastos e impuestos que se devenguen;</p>
+      <p class="justificar" style="margin-top: 10px;"><b>SÉPTIMO:</b> Autorizo a Sociedad Educacional Colegio Andes Chile.RUT, 77.625.500-9  para que en caso de simple retardo, mora o incumplimiento de las obligaciones contraídas en este pagaré, mis datos y los demás derivados de este pagaré, puedan ser tratados y/o comunicados a terceros sin restricciones, en el registro o banco de datos SICOM (Sistema de Morosidades y Protestos DICOM) Esta autorización es permanente, pudiendo ser revocada sin efecto retroactivo y con fecha no anterior al último documento de pago emitido a mi nombre.</p>
       
       <div class="page-break" > </div> 
       <br>
-      
-      <p class="justificar" style="margin-top: 60px;"><b>SÉPTIMO:</b> Autorizo a Sociedad Educacional Colegio Andes Chile.RUT, 77.625.500-9  para que en caso de simple retardo, mora o incumplimiento de las obligaciones contraídas en este pagaré, mis datos y los demás derivados de este pagaré, puedan ser tratados y/o comunicados a terceros sin restricciones, en el registro o banco de datos SICOM (Sistema de Morosidades y Protestos DICOM) Esta autorización es permanente, pudiendo ser revocada sin efecto retroactivo y con fecha no anterior al último documento de pago emitido a mi nombre.</p>
-      <p class="justificar" style="margin-top: 10px;"><b>OCTAVO:</b> El suscriptor viene a otorgar mandato especial pero tan amplio como en derecho se requiere a la Sociedad Educacional Colegio Andes Chile, a fin de que éste, en caso de presentarse la situación de mora expresada precedentemente, proceda a informar dicho incumplimiento a un banco de datos para su tratamiento y transmisión de conformidad a la ley Nº 19.628;</p>
+
+      <p class="justificar" style="margin-top: 60px;"><b>OCTAVO:</b> El suscriptor viene a otorgar mandato especial pero tan amplio como en derecho se requiere a la Sociedad Educacional Colegio Andes Chile, a fin de que éste, en caso de presentarse la situación de mora expresada precedentemente, proceda a informar dicho incumplimiento a un banco de datos para su tratamiento y transmisión de conformidad a la ley Nº 19.628;</p>
       <p class="justificar" style="margin-top: 10px;"><b>NOVENO:</b> Los derechos que para la Sociedad Educacional Colegio Andes Chile emanan del presente Pagaré., podrán ser transferidos o cedidos por éste a cualquier persona natural o jurídica, en cuyo caso gozará de todos los derechos, privilegios y garantías del cedente, subsistiendo íntegramente los derechos y obligaciones del suscriptor;</p>
       <p class="justificar" style="margin-top: 10px;"><b>DÉCIMO:</b> Impuestos, Derechos y Gastos: Cualquier impuesto, derecho, gasto e incremento en los costos que para el beneficiario de este pagaré se ocasionen o devenguen con motivo de su suscripción, modificaciones, prórrogas, renovaciones, pagos, protesto u otras circunstancias relativas a aquel, será de cargo exclusivo del suscriptor.</p>
       <p class="justificar" style="margin-top: 10px;"><b>DÉCIMO PRIMERO:</b> Garantías: Sociedad Educacional Colegio Andes Chile, y quien sus derechos represente, queda desde luego autorizada para modificar, sustituir, alzar o renunciar, en todo o parte, las garantías que actualmente estén constituidas o que en el futuro se constituyan para caucionar las obligaciones a que se refiere el presente pagaré, ninguna de las cuales se entenderá transferida a quien adquiera este pagaré a menos que la Sociedad Educacional Colegio Andes Chile lo declare expresamente; </p>
       <p class="justificar" style="margin-top: 10px;"><b>DÉCIMO SEGUNDO:</b> Domicilio y Competencia: Para todos los efectos legales derivados del presente pagaré, el deudor o suscriptor constituye domicilio especial en la comuna señalada en el encabezamiento de este pagaré y se someterá a la competencia de sus tribunales de justicia, domicilio que también será lugar hábil para las diligencias de protesto en caso de practicarse.</p>
 
-      <div class="text-center" style="padding-top: 25px;">
+      <div class="text-center" style="padding-top: 25px; margin-top: 200px;">
         <h4>______________________________________________</h4>
         <h4>Firma del Suscriptor o Deudor y Huella Dactilar</h4>
       </div>
@@ -653,7 +657,7 @@
           </tr>
           <tr>
             {{#each estudiantes}}
-              <td class='text-center'>{{cursoId}}</td>
+              <td class='text-center'>{{getCursoName cursoId}}</td>
           {{/each}}
           </tr>
         </table>
@@ -688,7 +692,7 @@
         </tr>
       </table>
 
-      <div class="text-center" style="padding-top: 25px;">
+      <div class="text-center" style="padding-top: 25px; margin-top: 200px;">
         <h4>______________________________________________</h4>
         <h4>Firma Apoderado</h4>
       </div>

@@ -6,13 +6,17 @@ import { ApoderadoController } from './apoderado.controller';
 import { Estudiante } from 'src/models/Estudiante.entity';
 import { ApoderadoEstudiante } from 'src/models/ApoderadoEstudiante.entity';
 import { EstudianteCurso } from 'src/models/CursoEstudiante.entity';
+import { ApoderadoSuplente } from 'src/models/ApoderadoSuplente.entity';
+import { ApoderadoSuplenteEstudiante } from 'src/models/ApoderadoSuplenteEstudiante.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Apoderado,
+      ApoderadoSuplente,
       Estudiante,
       ApoderadoEstudiante,
+      ApoderadoSuplenteEstudiante,
       EstudianteCurso
     ]),
   ],
