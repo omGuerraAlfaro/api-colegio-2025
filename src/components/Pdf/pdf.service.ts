@@ -71,7 +71,7 @@ export class PdfService {
 
       // Lanzar Puppeteer para generar el PDF
       const browser = await puppeteer.launch({
-        // executablePath: '/opt/render/.cache/puppeteer/chrome/linux-*/chrome',
+        executablePath: '/opt/render/.cache/puppeteer/chrome/linux-130.0.6723.58/chrome-linux64/chrome',
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'], // Asegurar que Puppeteer puede ejecutarse en entornos de servidor
       });
