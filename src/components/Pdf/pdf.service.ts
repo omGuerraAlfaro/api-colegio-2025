@@ -71,41 +71,40 @@ export class PdfService {
       const executablePath = '/opt/render/.cache/puppeteer/chrome/linux-130.0.6723.58/chrome-linux64/chrome';
 
       // Lanzar Puppeteer para generar el PDF
-      try {
-        const browser = await puppeteer.launch({
-          executablePath,
-          args: ['--no-sandbox', '--disable-setuid-sandbox'],
-        });
-        const page = await browser.newPage();
-        await page.setContent(html);
-        // Generación de PDF aquí...
-        // Generar el PDF y convertir a Buffer
-        const pdfBuffer = Buffer.from(await page.pdf({
-          // format: 'A3',
-          width: '21.5cm',
-          height: '33cm',
-          printBackground: true,
-          margin: {
-            top: '80px',
-            bottom: '80px',
-            left: '20mm',
-            right: '20mm'
-          },
-          displayHeaderFooter: true,
-          headerTemplate: `<p></p>`,
-          footerTemplate: `
-            <div style="font-size:10px; width:100%; text-align:center;">
-              Página <span class="pageNumber"></span> de <span class="totalPages"></span>
-            </div>
-          `,
-        }));
-        await browser.close();
-        return pdfBuffer;
-      } catch (error) {
-        console.error('Error launching Puppeteer:', error);
-      }
-      
+      const browser = await puppeteer.launch({
+        executablePath,
+        headless: true,
+        args: ['--no-sandbox', '--disable-setuid-sandbox'], 
+        dumpio: true, 
+      });
+      const page = await browser.newPage();
+      await page.setContent(html);
 
+      // Generar el PDF y convertir a Buffer
+      const pdfBuffer = Buffer.from(await page.pdf({
+        // format: 'A3',
+        width: '21.5cm',
+        height: '33cm',
+        printBackground: true,
+        margin: {
+          top: '80px',
+          bottom: '80px',
+          left: '20mm',
+          right: '20mm'
+        },
+        displayHeaderFooter: true,
+        headerTemplate: `<p></p>`,
+        footerTemplate: `
+          <div style="font-size:10px; width:100%; text-align:center;">
+            Página <span class="pageNumber"></span> de <span class="totalPages"></span>
+          </div>
+        `,
+      }));
+
+
+
+      await browser.close();
+      return pdfBuffer;
     } catch (error) {
       console.error('Error generating PDF:', error.message, error.stack);
       throw new InternalServerErrorException('Failed to generate PDF.');
