@@ -119,7 +119,8 @@ export class BoletaService {
     const total = mes === 'matricula' ? crearBoletaDto.valor_matricula : crearBoletaDto.valor_mensualidad;
 
     if (mes === 'matricula') {
-      const fechaVencimiento = new Date(new Date().getFullYear(), 0, 1);
+      // Establece el año en 2025 para la fecha de vencimiento de matrícula
+      const fechaVencimiento = new Date(2025, 0, 1);
       return this.boletaRepository.create({
         apoderado_id: apoderadoId,
         estudiante_id: estudianteId,
@@ -132,7 +133,8 @@ export class BoletaService {
       });
     } else if (mes !== 'febrero') {
       const monthIndex = this.getMonthIndex(mes);
-      const fechaVencimiento = new Date(new Date().getFullYear(), monthIndex, 1);
+      // Establece el año en 2025 para la fecha de vencimiento de las mensualidades
+      const fechaVencimiento = new Date(2025, monthIndex, 1);
 
       return this.boletaRepository.create({
         apoderado_id: apoderadoId,
@@ -147,7 +149,8 @@ export class BoletaService {
     }
 
     return undefined;
-  }
+}
+
 
   private getMonthIndex(mes: string): number {
     const meses = ['matricula', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
