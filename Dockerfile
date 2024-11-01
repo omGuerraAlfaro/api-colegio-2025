@@ -46,7 +46,7 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV CHROME_PATH=/usr/bin/chromium
 
 # Expone el puerto en el que tu aplicación escucha (ajusta según sea necesario)
-EXPOSE 3000
+EXPOSE 3200
 
 # Comando para iniciar la aplicación
-CMD ["npm", "run", "start:prod"]
+CMD ["node", "dist/src/main.js"]
