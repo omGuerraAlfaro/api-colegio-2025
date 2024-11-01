@@ -1,4 +1,4 @@
-# Usa una imagen base de Node.js 18
+# Usa una imagen base de Node.js
 FROM node:18
 
 # Crea un directorio de trabajo en el contenedor
@@ -7,8 +7,8 @@ WORKDIR /usr/src/app
 # Copia el archivo de paquete y el archivo de bloqueo (package.json y package-lock.json)
 COPY package*.json ./
 
-# Instala las dependencias de la aplicación
-RUN npm install --production
+# Instala todas las dependencias de la aplicación (incluidas devDependencies)
+RUN npm install
 
 # Copia el resto del código de la aplicación al contenedor
 COPY . .
@@ -38,15 +38,15 @@ RUN apt-get update && apt-get install -y \
   libxshmfence1 \
   libgtk-3-0 \
   chromium \
-  --no-install-recommends && \
-  rm -rf /var/lib/apt/lists/*
+  --no-install-recommends \
+  && rm -rf /var/lib/apt/lists/*
 
 # Establece el PATH para que Puppeteer encuentre Chromium
 ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV CHROME_PATH=/usr/bin/chromium
 
 # Expone el puerto en el que tu aplicación escucha (ajusta según sea necesario)
-EXPOSE 3200
+EXPOSE 3000
 
 # Comando para iniciar la aplicación
 CMD ["npm", "run", "start:prod"]
