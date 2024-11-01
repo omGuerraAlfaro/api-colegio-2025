@@ -709,15 +709,18 @@
   <script>
     // Obtener la fecha actual
     const today = new Date();
-    const formattedDate = today.toLocaleDateString('es-ES', {
+
+    const formattedDate = new Intl.DateTimeFormat('es-CL', {
       day: '2-digit',
       month: '2-digit',
       year: 'numeric'
-    });
+    }).format(today);
+
     document.getElementById('current-date0').textContent = formattedDate;
     document.getElementById('current-date').textContent = formattedDate;
     document.getElementById('current-date2').textContent = formattedDate;
     document.getElementById('current-date3').textContent = formattedDate;
+
 
   </script>
 </html>
