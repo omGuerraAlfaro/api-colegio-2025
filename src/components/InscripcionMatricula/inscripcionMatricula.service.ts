@@ -208,8 +208,6 @@ export class InscripcionMatriculaService {
       const apoderado = this.apoderadoRepository.create(inscripcionMatricula);
       const savedApoderado = await this.apoderadoRepository.save(apoderado);
       const apoderadoSuplente = this.apoderadoSuplenteRepository.create(inscripcionMatricula);
-      apoderadoSuplente.rut_apoderado_suplente = inscripcionMatricula.rut_apoderado_suplente.split('-')[0]
-      apoderadoSuplente.dv_apoderado_suplente = inscripcionMatricula.rut_apoderado_suplente.split('-')[1]
       const savedApoderadoSuplente = await this.apoderadoSuplenteRepository.save(apoderadoSuplente);
 
       const savedEstudiantes = [];
