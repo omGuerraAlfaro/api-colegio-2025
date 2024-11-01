@@ -163,10 +163,10 @@ export class PaymentService {
                 </tr>
                 ${Array.from(apoderados.values()).map(apoderado => `
                     <tr>
-                        <td>${apoderado.primer_nombre} ${apoderado.segundo_nombre} ${apoderado.primer_apellido} ${apoderado.segundo_apellido}</td>
+                        <td>${apoderado.primer_nombre_apoderado} ${apoderado.segundo_nombre_apoderado} ${apoderado.primer_apellido_apoderado} ${apoderado.segundo_apellido_apoderado}</td>
                         <td>${apoderado.rut}-${apoderado.dv}</td>
                         <td>${apoderado.telefono}</td>
-                        <td>${apoderado.correo_electronico}</td>
+                        <td>${apoderado.correo_apoderado}</td>
                     </tr>
                 `).join('')}
             </table>
@@ -189,7 +189,7 @@ export class PaymentService {
                             <td>${boleta.detalle}</td>
                             <td>$ ${Math.round(parseFloat(boleta.total))}</td>
                             <td>${boleta.rut_estudiante}</td>
-                            <td>${estudiante ? `${estudiante.primer_nombre} ${estudiante.segundo_nombre} ${estudiante.primer_apellido} ${estudiante.segundo_apellido}` : ''}</td>
+                            <td>${estudiante ? `${estudiante.primer_nombre_alumno} ${estudiante.segundo_nombre_alumno} ${estudiante.primer_apellido_alumno} ${estudiante.segundo_apellido_alumno}` : ''}</td>
                         </tr>
                     `;
             }).join('')}
