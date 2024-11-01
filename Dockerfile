@@ -13,6 +13,9 @@ RUN npm install
 # Copia el resto del código de la aplicación al contenedor
 COPY . .
 
+# Compila el proyecto
+RUN npm run build
+
 # Instala las dependencias necesarias para Puppeteer y Chromium
 RUN apt-get update && apt-get install -y \
   wget \
@@ -43,7 +46,7 @@ ENV PUPPETEER_SKIP_DOWNLOAD=true
 ENV CHROME_PATH=/usr/bin/chromium
 
 # Expone el puerto en el que tu aplicación escucha (ajusta según sea necesario)
-EXPOSE 3200
+EXPOSE 3000
 
 # Comando para iniciar la aplicación
 CMD ["npm", "run", "start:prod"]
