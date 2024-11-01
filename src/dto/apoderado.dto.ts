@@ -132,23 +132,23 @@ export class ApoderadoDTO {
 export class ApoderadoAloneDTO {
     @ApiProperty()
     @IsOptional()
-    segundo_nombre?: string | null;
+    segundo_nombre_apoderado?: string | null;
 
     @ApiProperty()
     @IsOptional()
-    segundo_apellido?: string | null;
+    segundo_apellido_apoderado?: string | null;
 
     @ApiProperty()
-    @IsNotEmpty()
+    @IsOptional()
     fecha_nacimiento: Date;
 
     @ApiProperty()
     @IsOptional()
-    telefono?: string | null;
+    telefono_apoderado?: string | null;
 
     @ApiProperty()
     @IsEmail()
-    correo_electronico: string;
+    correo_apoderado: string;
 
     @ApiProperty()
     @IsOptional()
@@ -160,7 +160,7 @@ export class ApoderadoAloneDTO {
 
     @ApiProperty()
     @IsOptional()
-    actividad?: string | null;
+    profesion_oficio?: string | null;
 
     @ApiProperty()
     @IsOptional()
