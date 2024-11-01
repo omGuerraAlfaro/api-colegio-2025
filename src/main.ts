@@ -3,14 +3,24 @@ import { AppModule } from './app.module';
 import { SwaggerModule, DocumentBuilder } from '@nestjs/swagger';
 import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from 'filters/all-exception.filter';
+import * as basicAuth from 'express-basic-auth';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+
+  app.use(
+    '/api',
+    basicAuth({
+      users: { 'admin': 'qazqwe123' }, 
+      challenge: true,
+    })
+  );
 
   // Pipes y filtros globales
   app.useGlobalPipes(new ValidationPipe({ transform: true }));
   app.useGlobalFilters(new AllExceptionsFilter());
 
+  // Configuración de CORS
   app.enableCors({
     origin: [
       'https://www.colegioandeschile.cl',
@@ -36,6 +46,7 @@ async function bootstrap() {
     credentials: false,
   });
 
+  // Configuración de Swagger
   const config = new DocumentBuilder()
     .setTitle('API COLEGIO')
     .setDescription('ENDPOINTS COLEGIO')
