@@ -72,11 +72,11 @@ export class PdfService {
 
       // Lanzar Puppeteer para generar el PDF
       const browser = await puppeteer.launch({
-        executablePath,
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'], 
-        dumpio: true, 
+        dumpio: true,
       });
+      
       const page = await browser.newPage();
       await page.setContent(html);
 
