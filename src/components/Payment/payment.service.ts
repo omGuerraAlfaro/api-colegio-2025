@@ -37,7 +37,7 @@ export class PaymentService {
         WebpayPlus.configureForProduction(this.commerceCode, this.apiKey);
     }
 
-    
+
 
     async createTransaction(buyOrder: string, sessionId: string, amount: number, returnUrl: string) {
         const tx = new WebpayPlus.Transaction(new Options(this.commerceCode, this.apiKey, Environment.Production));
@@ -114,9 +114,10 @@ export class PaymentService {
             const boletas = [];
             const apoderados = new Map();
             const estudiantes = new Map();
-            let totalPago = 0;
-
+            var correo = '';
+            
             for (const idBoleta of idsBoletas) {
+                let totalPago = 0;
                 await this.boletaService.updateBoletaStatus(idBoleta, 2, buy_order);
                 const boleta = await this.boletaService.findBoletaById(idBoleta);
                 boletas.push(boleta);
@@ -126,6 +127,7 @@ export class PaymentService {
 
                 if (!apoderados.has(boleta.rut_apoderado)) {
                     const apoderado = await this.apoderadoService.findApoderadoByRut(boleta.rut_apoderado);
+                    correo = apoderado.correo_apoderado;
                     apoderados.set(boleta.rut_apoderado, apoderado);
                 }
 
@@ -145,8 +147,8 @@ export class PaymentService {
                 transaccionExistente.estado_transaccion_id = estadoTransaccionId;
                 transaccionExistente.monto = totalPago;
                 transaccionExistente.fecha_actualizacion = new Date();
-                transaccionExistente.metodo_pago = 'Tarjeta';
-                transaccionExistente.descripcion = 'Pago de boletas';
+                transaccionExistente.metodo_pago = 'Venta Tarjeta';
+                transaccionExistente.descripcion = 'Pago Colegiatura';
                 transaccionExistente.codigo_autorizacion = authorization_code;
                 transaccionExistente.codigo_respuesta = response_code;
 
@@ -201,6 +203,22 @@ export class PaymentService {
             </table>
         `;
 
+            const correoHtmlApoderado = `
+            <h4><strong>Confirmación de Transacción WebPay</strong></h4>
+            <p>Estimado Usuario,</p>
+            ${apoderadosHtml}
+            <<p>Se ha realizado el pago de la o las siguentes boletas.</p>
+            ${boletasHtml}
+            <h3>Colegio Andes Chile – Educando con Amor</h3>
+        `;
+
+            const mailOptionsApoderado = {
+                from: 'contacto@colegioandeschile.cl',
+                to: correo,
+                subject: 'Confirmación de Transferencia',
+                html: correoHtmlApoderado,
+            };
+
             const correoHtmlAdm = `
             <h4><strong>Confirmación de Transacción WebPay</strong></h4>
             <p>Estimado Administrador,</p>
@@ -220,6 +238,7 @@ export class PaymentService {
             };
 
             try {
+                await this.correoService.enviarCorreo(mailOptionsApoderado);
                 await this.correoService.enviarCorreo(mailOptionsAdm);
                 console.log('Correo enviado con éxito');
             } catch (error) {
