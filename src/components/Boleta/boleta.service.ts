@@ -1,10 +1,11 @@
 import { Get, Injectable, InternalServerErrorException, NotFoundException, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Boleta } from 'src/models/Boleta.entity';
-import { LessThan, MoreThan, Repository } from 'typeorm';
+import { In, LessThan, MoreThan, Repository } from 'typeorm';
 import { Apoderado } from 'src/models/Apoderado.entity';
 import { ApoderadoService } from '../Apoderado/apoderado.service';
 import { CrearBoletaDto, UpdateBoletaDto, UpdateBoletaDto2 } from 'src/dto/updateBoleta.dto';
+import { Transacciones } from 'src/models/Transacciones.entity';
 
 @Injectable()
 export class BoletaService {
@@ -13,6 +14,8 @@ export class BoletaService {
     private readonly boletaRepository: Repository<Boleta>,
     @InjectRepository(Apoderado)
     private readonly apoderadoRepository: Repository<Apoderado>,
+    @InjectRepository(Transacciones)
+    private transaccionRepository: Repository<Transacciones>,
     private readonly apoderadoService: ApoderadoService,
   ) { }
 
@@ -62,6 +65,34 @@ export class BoletaService {
   async findAllBoletasConApoderado(): Promise<Boleta[]> {
     return this.boletaRepository.find({ relations: ['apoderado'] });
   }
+
+  async findBoletasPagadasWithTransaccionData(rut_apoderado: string): Promise<Transacciones[]> {
+    // Fetch boletas with estado_id of 2 or 5 for the given rut_apoderado
+    const boletas = await this.boletaRepository.find({
+      where: {
+        rut_apoderado,
+        estado_id: In([2, 5]),  // Use In operator to specify multiple estado_id
+      },
+    });
+
+    // If no boletas found, return an empty array
+    if (boletas.length === 0) {
+      return [];
+    }
+
+    // Extract boleta IDs for querying transactions
+    const boletaIds = boletas.map(boleta => boleta.id);  // Assuming 'id' is the primary key of boleta
+
+    // Fetch transactions associated with the found boletas
+    const transacciones = await this.transaccionRepository.find({
+      where: {
+        boleta_id: In(boletaIds),  // Use In operator for boleta IDs
+      },
+    });
+
+    return transacciones;  // Return the transactions data
+  }
+
 
   async reenumerateBoletas(): Promise<void> {
     const boletas = await this.boletaRepository.find({ order: { id: 'ASC' } });
@@ -149,7 +180,7 @@ export class BoletaService {
     }
 
     return undefined;
-}
+  }
 
 
   private getMonthIndex(mes: string): number {

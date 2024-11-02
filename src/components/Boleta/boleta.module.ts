@@ -13,7 +13,7 @@ import { ApoderadoModule } from '../Apoderado/apoderado.module';
   imports: [
     ApoderadoModule,
     TypeOrmModule.forFeature([
-      Boleta, Apoderado
+      Boleta, Apoderado, Transacciones
     ]),
   ],
   exports: [TypeOrmModule, BoletaService],

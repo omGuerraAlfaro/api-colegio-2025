@@ -53,6 +53,11 @@ export class BoletaController {
         return await this.boletaService.findBoletasByRutApoderadoOnly(rut);
     }
 
+    @Get('apoderado-historial-pago/:rut')
+    async findBoletasPagadasWithTransaccionData(@Param('rut') rut: string) {
+        return await this.boletaService.findBoletasPagadasWithTransaccionData(rut);
+    }
+
     @Post('crear-boletas-apoderado/:rut')
     createBoletasEstudiante(
         @Param('rut') rut: string,
