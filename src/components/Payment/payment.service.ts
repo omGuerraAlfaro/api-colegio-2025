@@ -116,8 +116,8 @@ export class PaymentService {
             const estudiantes = new Map();
             var correo = '';
             
+            let totalPago = 0;
             for (const idBoleta of idsBoletas) {
-                let totalPago = 0;
                 await this.boletaService.updateBoletaStatus(idBoleta, 2, buy_order);
                 const boleta = await this.boletaService.findBoletaById(idBoleta);
                 boletas.push(boleta);
@@ -145,7 +145,7 @@ export class PaymentService {
 
                 // Actualizar los campos necesarios en la transacción existente
                 transaccionExistente.estado_transaccion_id = estadoTransaccionId;
-                transaccionExistente.monto = totalPago;
+                transaccionExistente.monto = total;
                 transaccionExistente.fecha_actualizacion = new Date();
                 transaccionExistente.metodo_pago = 'Venta Tarjeta';
                 transaccionExistente.descripcion = 'Pago Colegiatura';
