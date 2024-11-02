@@ -1,7 +1,7 @@
 import { Get, Injectable, InternalServerErrorException, NotFoundException, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Boleta } from 'src/models/Boleta.entity';
-import { In, LessThan, MoreThan, Repository } from 'typeorm';
+import { In, IsNull, LessThan, MoreThan, Not, Repository } from 'typeorm';
 import { Apoderado } from 'src/models/Apoderado.entity';
 import { ApoderadoService } from '../Apoderado/apoderado.service';
 import { CrearBoletaDto, UpdateBoletaDto, UpdateBoletaDto2 } from 'src/dto/updateBoleta.dto';
@@ -66,32 +66,39 @@ export class BoletaService {
     return this.boletaRepository.find({ relations: ['apoderado'] });
   }
 
-  async findBoletasPagadasWithTransaccionData(rut_apoderado: string): Promise<Transacciones[]> {
-    // Fetch boletas with estado_id of 2 or 5 for the given rut_apoderado
+  async findBoletasPagadasWithTransaccionData(rut_apoderado: string): Promise<any[]> {
     const boletas = await this.boletaRepository.find({
       where: {
         rut_apoderado,
-        estado_id: In([2, 5]),  // Use In operator to specify multiple estado_id
+        estado_id: In([2, 5]),
       },
     });
 
-    // If no boletas found, return an empty array
     if (boletas.length === 0) {
       return [];
     }
 
-    // Extract boleta IDs for querying transactions
-    const boletaIds = boletas.map(boleta => boleta.id);  // Assuming 'id' is the primary key of boleta
+    const result: any[] = [];
 
-    // Fetch transactions associated with the found boletas
-    const transacciones = await this.transaccionRepository.find({
-      where: {
-        boleta_id: In(boletaIds),  // Use In operator for boleta IDs
-      },
-    });
+    for (const boleta of boletas) {
+      const transacciones = await this.transaccionRepository.find({
+        where: {
+          boleta_id: boleta.id,
+          codigo_respuesta: Not(IsNull()),
+        },
+      });
 
-    return transacciones;  // Return the transactions data
+      if (transacciones && transacciones.length > 0) {
+        result.push({
+          boleta,
+          transacciones,
+        });
+      }
+    }
+
+    return result;
   }
+
 
 
   async reenumerateBoletas(): Promise<void> {
