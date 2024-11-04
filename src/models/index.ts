@@ -25,10 +25,11 @@ import { Asignatura } from './Asignatura.entity';
 import { ApoderadoSuplente } from './ApoderadoSuplente.entity';
 import { ApoderadoSuplenteEstudiante } from './ApoderadoSuplenteEstudiante.entity';
 import { InscripcionMatricula } from './InscripcionMatricula.entity';
+import { SubAdministrador } from './SubAdministrador.entity';
 
 
 export const entities = [Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudiante, ApoderadoEstudiante, ApoderadoDireccion,
-                        Estudiante, Profesor, Curso, EstudianteCurso, Anotacion, AnotacionesEstudiante, Usuarios, Administrador,
+                        Estudiante, Profesor, Curso, EstudianteCurso, Anotacion, AnotacionesEstudiante, Usuarios, Administrador, SubAdministrador,
                         Boleta, EstadoBoleta, Transacciones, EstadoTransaccion, TransactionEntity,
                         Direccion, Ciudad, Region, NoticiasColegio, NoticiasImages, Correo, Asignatura, InscripcionMatricula
                         ];

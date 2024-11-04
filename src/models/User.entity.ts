@@ -47,6 +47,9 @@ export class Usuarios {
     @Column({ name: 'administrador_id', nullable: true })
     administrador_id: number;
 
+    @Column({ name: 'subAdministrador_id', nullable: true })
+    subAdministrador_id: number;
+
     @ManyToOne(() => Administrador, administrador => administrador.usuario)
     @JoinColumn({ name: 'administrador_id' })
     administrador: Administrador;

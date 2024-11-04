@@ -6,6 +6,7 @@ import { Usuarios } from 'src/models/User.entity';
 import { Repository } from 'typeorm';
 import { Administrador } from 'src/models/Administrador.entity';
 import { hash, compare } from 'bcrypt';
+import { SubAdministrador } from 'src/models/SubAdministrador.entity';
 
 @Injectable()
 export class UsuarioService {
@@ -20,6 +21,8 @@ export class UsuarioService {
     private readonly profesorRepository: Repository<Profesor>,
     @InjectRepository(Administrador)
     private readonly administradorRepository: Repository<Administrador>,
+    @InjectRepository(SubAdministrador)
+    private readonly subAdministradorRepository: Repository<SubAdministrador>,
   ) { }
 
   async findAll(): Promise<Usuarios[]> {
@@ -201,6 +204,45 @@ export class UsuarioService {
         usuario.administrador_id = administrador.id;
         usuario.rut = administrador.rut;
         usuario.genero = administrador.genero;
+
+        const savedUser = await this.usuarioRepository.save(usuario);
+        createdUsers.push(savedUser);
+      }
+
+      return createdUsers;
+
+    } catch (error) {
+      this.logger.error(`Error creating user: ${error.message}`, error.stack);
+      throw new InternalServerErrorException({
+        message: 'Error creating the user.',
+        details: error.message,
+        stack: error.stack,
+      });
+    }
+  }
+
+  async createUsersForAllSubAdministradores(): Promise<Usuarios[]> {
+    try {
+      const subAdministradores = await this.subAdministradorRepository.find();
+      const createdUsers: Usuarios[] = [];
+
+      for (const subAdministrador of subAdministradores) {
+        const username = this.generateUsername(subAdministrador.primer_nombre, subAdministrador.primer_apellido);
+        const plainPassword = subAdministrador.rut;
+        const hashedPassword = await hash(plainPassword, 5);
+
+        const existingUser = await this.usuarioRepository.findOne({ where: { username } });
+        if (existingUser) {
+          continue;
+        }
+
+        const usuario = new Usuarios();
+        usuario.username = username;
+        usuario.password = hashedPassword;
+        usuario.correo_electronico = subAdministrador.correo_electronico;
+        usuario.subAdministrador_id = subAdministrador.id;
+        usuario.rut = subAdministrador.rut;
+        usuario.genero = subAdministrador.genero;
 
         const savedUser = await this.usuarioRepository.save(usuario);
         createdUsers.push(savedUser);

@@ -81,6 +81,22 @@ export class UsuarioController {
     }
   }
 
+  @Post('/create-for-all-sub-administradores')
+  async createUsersForAllSubAdministradores(@Response() res): Promise<void> {
+    try {
+      const createdUsers = await this.usuarioService.createUsersForAllSubAdministradores();
+      res.status(201).json({
+        message: `${createdUsers.length} usuarios creados exitosamente.`,
+        data: createdUsers
+      });
+    } catch (error) {
+      res.status(500).json({
+        message: 'Hubo un error al crear los usuarios.',
+        error: error.message
+      });
+    }
+  }
+
   @Patch('change/:id')
   async changePassword(
     @Param('id') id: number,
