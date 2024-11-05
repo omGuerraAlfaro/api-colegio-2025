@@ -29,7 +29,14 @@ export class AdministradorController {
 
   @Get(':rut')
   async getAdministrador(@Param('rut') rut: string) {
-    const administrador = await this.administradorService.findOne(rut);
+    const administrador = await this.administradorService.findOneAdm(rut);
+    if (!administrador) throw new BadRequestException('Administrador no encontrado');
+    return administrador;
+  }
+
+  @Get('sub/:rut')
+  async getSubAdministrador(@Param('rut') rut: string) {
+    const administrador = await this.administradorService.findOneSubAdm(rut);
     if (!administrador) throw new BadRequestException('Administrador no encontrado');
     return administrador;
   }

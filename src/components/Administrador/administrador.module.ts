@@ -3,11 +3,12 @@ import { AdministradorService } from './administrador.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AdministradorController } from './administrador.controller';
 import { Administrador } from 'src/models/Administrador.entity';
+import { SubAdministrador } from 'src/models/SubAdministrador.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      Administrador,
+      Administrador, SubAdministrador
     ]),
   ],
   controllers: [AdministradorController],
