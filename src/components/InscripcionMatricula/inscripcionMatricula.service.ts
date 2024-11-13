@@ -206,13 +206,16 @@ export class InscripcionMatriculaService {
     try {
 
       const apoderado = this.apoderadoRepository.create(inscripcionMatricula);
+      apoderado.rut =  apoderado.rut.replace(/\./g, '');
       const savedApoderado = await this.apoderadoRepository.save(apoderado);
       const apoderadoSuplente = this.apoderadoSuplenteRepository.create(inscripcionMatricula);
+      apoderadoSuplente.rut_apoderado_suplente = apoderadoSuplente.rut_apoderado_suplente.replace(/\./g, '');
       const savedApoderadoSuplente = await this.apoderadoSuplenteRepository.save(apoderadoSuplente);
 
       const savedEstudiantes = [];
       for (const estudianteData of inscripcionMatricula.estudiantes) {
         const estudiante = this.estudianteRepository.create(estudianteData);
+        estudiante.rut = estudiante.rut.replace(/\./g, '');
         estudiante.fecha_matricula = new Date();
         const savedEstudiante = await this.estudianteRepository.save(estudiante);
         savedEstudiantes.push(savedEstudiante);
