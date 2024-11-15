@@ -20,6 +20,12 @@ export class PdfService {
         throw new Error('Template file does not exist.');
       }
 
+      handlebars.registerHelper('formatRut', function (rut) {
+        const rutStr = rut.toString();
+        return rutStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      });
+
+
       handlebars.registerHelper('getCursoName', function (cursoId) {
         const id = parseInt(cursoId, 10);
         switch (id) {
@@ -75,7 +81,7 @@ export class PdfService {
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
-      
+
       const page = await browser.newPage();
       await page.setContent(html);
 
