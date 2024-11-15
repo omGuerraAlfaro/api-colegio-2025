@@ -99,7 +99,6 @@ export class InscripcionDto {
 
   @IsString()
   @IsNotEmpty()
-  
   primer_nombre_apoderado: string;
 
   @IsString()
@@ -162,7 +161,6 @@ export class InscripcionDto {
 
   @IsString()
   @IsNotEmpty()
-  
   primer_apellido_apoderado_suplente: string;
 
   @IsString()
@@ -182,7 +180,7 @@ export class InscripcionDto {
   telefono_apoderado_suplente: string;
 
   @IsEmail()
-  @IsNotEmpty()
+  @IsOptional()
   correo_apoderado_suplente: string;
 
   @IsString()
@@ -214,7 +212,6 @@ export class MatriculaDto {
 
   @IsString()
   @IsNotEmpty()
-  
   primer_nombre_apoderado: string;
 
   @IsString()
@@ -223,12 +220,10 @@ export class MatriculaDto {
 
   @IsString()
   @IsNotEmpty()
-  
   primer_apellido_apoderado: string;
 
   @IsString()
   @IsNotEmpty()
-  
   segundo_apellido_apoderado: string;
 
   @IsString()
