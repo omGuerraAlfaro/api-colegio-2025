@@ -290,7 +290,7 @@ export class MatriculaDto {
   @Matches(/^[0-9]{9}$/, { message: 'Telefono debe tener 9 dígitos' })
   telefono_apoderado_suplente: string;
 
-  @IsEmail()
+  @IsString()
   @IsOptional()
   correo_apoderado_suplente?: string;
 
