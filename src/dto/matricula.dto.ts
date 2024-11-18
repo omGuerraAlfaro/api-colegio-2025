@@ -291,8 +291,8 @@ export class MatriculaDto {
   telefono_apoderado_suplente: string;
 
   @IsEmail()
-  @IsNotEmpty()
-  correo_apoderado_suplente: string;
+  @IsOptional()
+  correo_apoderado_suplente?: string;
 
   @IsString()
   @IsNotEmpty()
