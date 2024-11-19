@@ -63,8 +63,12 @@ export class BoletaService {
   }
 
   async findAllBoletasConApoderado(): Promise<Boleta[]> {
-    return this.boletaRepository.find({ relations: ['apoderado'] });
+    return this.boletaRepository.createQueryBuilder('boleta')
+      .leftJoinAndSelect('boleta.apoderado', 'apoderado')
+      .where('boleta.estado_boleta = :estado', { estado: 1 })
+      .getMany();
   }
+  
 
   async findBoletasPagadasWithTransaccionData(rut_apoderado: string): Promise<any[]> {
     const boletas = await this.boletaRepository.find({
