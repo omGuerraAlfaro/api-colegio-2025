@@ -101,57 +101,57 @@ export class BoletaService {
 
 
 
-  async reenumerateBoletas(): Promise<void> {
-    const boletas = await this.boletaRepository.find({ order: { id: 'ASC' } });
+  // async reenumerateBoletas(): Promise<void> {
+  //   const boletas = await this.boletaRepository.find({ order: { id: 'ASC' } });
 
-    let newId = 1;
-    for (const boleta of boletas) {
-      await this.boletaRepository.update(boleta.id, { id: newId });
-      newId++;
-    }
+  //   let newId = 1;
+  //   for (const boleta of boletas) {
+  //     await this.boletaRepository.update(boleta.id, { id: newId });
+  //     newId++;
+  //   }
 
-    await this.boletaRepository.query(`ALTER TABLE boletas AUTO_INCREMENT = ${newId}`);
-  }
+  //   await this.boletaRepository.query(`ALTER TABLE boletas AUTO_INCREMENT = ${newId}`);
+  // }
 
-  async createAnnualBoletasForApoderadoByRut(rut: string, crearBoletaDto: CrearBoletaDto) {
-    try {
-      // Validar los valores de matrícula y mensualidad
-      if (crearBoletaDto.valor_matricula <= 0 || crearBoletaDto.valor_mensualidad <= 0) {
-        throw new Error('Los valores de matrícula y mensualidad deben ser mayores que cero.');
-      }
+  // async createAnnualBoletasForApoderadoByRut(rut: string, crearBoletaDto: CrearBoletaDto) {
+  //   try {
+  //     // Validar los valores de matrícula y mensualidad
+  //     if (crearBoletaDto.valor_matricula <= 0 || crearBoletaDto.valor_mensualidad <= 0) {
+  //       throw new Error('Los valores de matrícula y mensualidad deben ser mayores que cero.');
+  //     }
 
-      // Obtén los estudiantes asociados al apoderado
-      const apoderado = await this.apoderadoService.findStudentsWithApoderadoId(rut);
-      if (!apoderado.estudiantes || apoderado.estudiantes.length === 0) {
-        throw new Error('No se encontraron estudiantes para el apoderado con el RUT proporcionado.');
-      }
+  //     // Obtén los estudiantes asociados al apoderado
+  //     const apoderado = await this.apoderadoService.findStudentsWithApoderadoId(rut);
+  //     if (!apoderado.estudiantes || apoderado.estudiantes.length === 0) {
+  //       throw new Error('No se encontraron estudiantes para el apoderado con el RUT proporcionado.');
+  //     }
 
-      // Define the months excluding February
-      const meses = ['matricula', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  //     // Define the months excluding February
+  //     const meses = ['matricula', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
-      const boletas = apoderado.estudiantes.flatMap(estudiante =>
-        meses.map(mes => {
-          // If the month is February, skip creating a boleta
-          if (mes === 'febrero' && !crearBoletaDto.valor_mensualidad) {
-            return; // Skip creating the boleta for February
-          }
-          return this.createBoleta(apoderado.id, apoderado.rut, estudiante.id, estudiante.rut, mes, crearBoletaDto);
-        })
-      );
+  //     const boletas = apoderado.estudiantes.flatMap(estudiante =>
+  //       meses.map(mes => {
+  //         // If the month is February, skip creating a boleta
+  //         if (mes === 'febrero' && !crearBoletaDto.valor_mensualidad) {
+  //           return; // Skip creating the boleta for February
+  //         }
+  //         return this.createBoleta(apoderado.id, apoderado.rut, estudiante.id, estudiante.rut, mes, crearBoletaDto);
+  //       })
+  //     );
 
-      // Filter out any undefined values (e.g., if a boleta was not created)
-      const validBoletas = boletas.filter(boleta => boleta !== undefined);
+  //     // Filter out any undefined values (e.g., if a boleta was not created)
+  //     const validBoletas = boletas.filter(boleta => boleta !== undefined);
 
-      // Guarda todas las boletas en una sola operación
-      const savedBoletas = await this.boletaRepository.save(validBoletas);
+  //     // Guarda todas las boletas en una sola operación
+  //     const savedBoletas = await this.boletaRepository.save(validBoletas);
 
-      // Retorna las boletas creadas
-      return savedBoletas;
-    } catch (error) {
-      console.error("Se ha producido un error:", error);
-      throw error;
-    }
-  }
+  //     // Retorna las boletas creadas
+  //     return savedBoletas;
+  //   } catch (error) {
+  //     console.error("Se ha producido un error:", error);
+  //     throw error;
+  //   }
+  // }
 
   private createBoleta(apoderadoId: number, apoderadoRut: string, estudianteId: number, estudianteRut: string, mes: string, crearBoletaDto: CrearBoletaDto) {
     const total = mes === 'matricula' ? crearBoletaDto.valor_matricula : crearBoletaDto.valor_mensualidad;
@@ -198,71 +198,71 @@ export class BoletaService {
 
 
 
-  async createAnnualBoletasForMultipleApoderados() {
-    try {
-      // Tu código asíncrono aquí
-      // Obtén un arreglo de todos los RUTs de apoderados
-      const arrayRuts = await this.apoderadoService.findAllRut();
+  // async createAnnualBoletasForMultipleApoderados() {
+  //   try {
+  //     // Tu código asíncrono aquí
+  //     // Obtén un arreglo de todos los RUTs de apoderados
+  //     const arrayRuts = await this.apoderadoService.findAllRut();
 
-      const meses = ['matricula', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-      const boletas = [];
-      const mesesPae = ['marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
-      const boletasPae = [];
+  //     const meses = ['matricula', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  //     const boletas = [];
+  //     const mesesPae = ['marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+  //     const boletasPae = [];
 
-      for (const rut of arrayRuts) {
-        const apoderado = await this.apoderadoService.findStudentsWithApoderadoId(rut.rut);
+  //     for (const rut of arrayRuts) {
+  //       const apoderado = await this.apoderadoService.findStudentsWithApoderadoId(rut.rut);
 
-        if (!apoderado.estudiantes || apoderado.estudiantes.length === 0) {
-          continue; // Si no hay estudiantes, continúa con el siguiente RUT
-        }
+  //       if (!apoderado.estudiantes || apoderado.estudiantes.length === 0) {
+  //         continue; // Si no hay estudiantes, continúa con el siguiente RUT
+  //       }
 
-        const rutApoderado = apoderado.rut;
+  //       const rutApoderado = apoderado.rut;
 
-        for (const estudiante of apoderado.estudiantes) {
-          const rutEstudiante = estudiante.rut;
+  //       for (const estudiante of apoderado.estudiantes) {
+  //         const rutEstudiante = estudiante.rut;
 
-          for (const mes of meses) {
-            const fechaActual = new Date();
-            let anio = fechaActual.getFullYear();
-            let mesIndex = meses.indexOf(mes);
-            let valorMatricula = 220000;
-            let subTotal = 0;
-            let total = 0;
+  //         for (const mes of meses) {
+  //           const fechaActual = new Date();
+  //           let anio = fechaActual.getFullYear();
+  //           let mesIndex = meses.indexOf(mes);
+  //           let valorMatricula = 220000;
+  //           let subTotal = 0;
+  //           let total = 0;
 
-            if (mes === 'matricula') {
-              mesIndex = 0;
-              total = valorMatricula;
-              subTotal = total
-            } else {
-              mesIndex += 1;
-              total = 1000; //cambiar
-              subTotal = total
-            }
+  //           if (mes === 'matricula') {
+  //             mesIndex = 0;
+  //             total = valorMatricula;
+  //             subTotal = total
+  //           } else {
+  //             mesIndex += 1;
+  //             total = 1000; //cambiar
+  //             subTotal = total
+  //           }
 
-            const fechaVencimiento = new Date(anio, mesIndex, 1);
+  //           const fechaVencimiento = new Date(anio, mesIndex, 1);
 
-            const boleta = this.boletaRepository.create({
-              apoderado: apoderado,
-              rut_estudiante: rutEstudiante,
-              rut_apoderado: rutApoderado,
-              estado_id: 1, // 1 es 'Pendiente'
-              detalle: `Boleta de ${mes}`,
-              total: total,
-              fecha_vencimiento: fechaVencimiento,
-            });
+  //           const boleta = this.boletaRepository.create({
+  //             apoderado: apoderado,
+  //             rut_estudiante: rutEstudiante,
+  //             rut_apoderado: rutApoderado,
+  //             estado_id: 1, // 1 es 'Pendiente'
+  //             detalle: `Boleta de ${mes}`,
+  //             total: total,
+  //             fecha_vencimiento: fechaVencimiento,
+  //           });
 
-            // Guarda la boleta en la base de datos
-            const savedBoleta = await this.boletaRepository.save(boleta);
-            boletas.push(savedBoleta);
+  //           // Guarda la boleta en la base de datos
+  //           const savedBoleta = await this.boletaRepository.save(boleta);
+  //           boletas.push(savedBoleta);
 
-          }
-        }
-        return { boletas, boletasPae };
-      }
-    } catch (error) {
-      console.error("Se ha producido un error:", error);
-    }
-  }
+  //         }
+  //       }
+  //       return { boletas, boletasPae };
+  //     }
+  //   } catch (error) {
+  //     console.error("Se ha producido un error:", error);
+  //   }
+  // }
 
   async repactarBoleta(boletaId: number, meses: number): Promise<Boleta[]> {
     if (meses < 1 || meses > 2) {
@@ -349,6 +349,7 @@ export class BoletaService {
       const boletas = await this.boletaRepository.createQueryBuilder('boleta')
         .where('boleta.estado_id = :estadoId', { estadoId: 1 })
         .andWhere('boleta.fecha_vencimiento < :currentDate', { currentDate })
+        .andWhere('boleta.estado_boleta = :estadoBoleta', { estadoBoleta: 1 })
         .getMany();
       return { boletas };
     } catch (error) {
@@ -364,7 +365,7 @@ export class BoletaService {
         .select('SUM(boleta.total)', 'total_pendiente_vencido')
         .where('boleta.estado_id = :estadoId', { estadoId: 1 })
         .andWhere('boleta.fecha_vencimiento BETWEEN :startDate AND :currentDate', { startDate, currentDate })
-        //.andWhere('boleta.fecha_vencimiento < :currentDate', { currentDate })
+        .andWhere('boleta.estado_boleta = :estadoBoleta', { estadoBoleta: 1 })
         .getRawOne();
       return result.total_pendiente_vencido ? { total_pendiente_vencido: result.total_pendiente_vencido } : { total_pendiente_vencido: 0 };
     } catch (error) {
@@ -385,6 +386,7 @@ export class BoletaService {
           boleta
         WHERE 
           boleta.estado_id = 1
+          AND boleta.estado_boleta = 1
           AND boleta.fecha_vencimiento BETWEEN ? AND ?
         GROUP BY 
           DATE_FORMAT(boleta.fecha_vencimiento, '%Y-%m')
@@ -415,6 +417,7 @@ export class BoletaService {
           boleta
         WHERE 
           boleta.estado_id = 2
+          AND boleta.estado_boleta = 1
           AND boleta.fecha_vencimiento BETWEEN ? AND ?
         GROUP BY 
           DATE_FORMAT(boleta.fecha_vencimiento, '%Y-%m')
@@ -440,6 +443,7 @@ export class BoletaService {
       const result = await this.boletaRepository.createQueryBuilder('boleta')
         .select('SUM(boleta.total)', 'total_pagado')
         .where('boleta.estado_id = :estadoId', { estadoId: 2 })
+        .andWhere('boleta.estado_boleta = :estadoBoleta', { estadoBoleta: 1 })
         .andWhere('boleta.fecha_vencimiento BETWEEN :startDate AND :currentDate', { startDate, currentDate })
         .getRawOne();
 
@@ -458,6 +462,7 @@ export class BoletaService {
         .leftJoinAndSelect('boleta.apoderado', 'apoderado')
         .where('boleta.estado_id = :estadoId', { estadoId })
         .andWhere('boleta.fecha_vencimiento < :currentDate', { currentDate })
+        .andWhere('boleta.estado_boleta = :estadoBoleta', { estadoBoleta: 1 })
         .getMany();
 
       // Agrupar boletas por RUT de apoderado

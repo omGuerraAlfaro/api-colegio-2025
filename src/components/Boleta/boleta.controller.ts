@@ -33,10 +33,10 @@ export class BoletaController {
         return await this.boletaService.findAllBoletasConApoderado();
     }
 
-    @Post('reenumerate')
-    async reenumerateBoletas(): Promise<void> {
-        await this.boletaService.reenumerateBoletas();
-    }
+    // @Post('reenumerate')
+    // async reenumerateBoletas(): Promise<void> {
+    //     await this.boletaService.reenumerateBoletas();
+    // }
 
     @Get('estudiante/:rut')
     async getBoletasByRutEstudiante(@Param('rut') rut: string): Promise<Boleta[]> {
@@ -58,18 +58,18 @@ export class BoletaController {
         return await this.boletaService.findBoletasPagadasWithTransaccionData(rut);
     }
 
-    @Post('crear-boletas-apoderado/:rut')
-    createBoletasEstudiante(
-        @Param('rut') rut: string,
-        @Body() crearBoletaDto: CrearBoletaDto
-    ) {
-        return this.boletaService.createAnnualBoletasForApoderadoByRut(rut, crearBoletaDto);
-    }
+    // @Post('crear-boletas-apoderado/:rut')
+    // createBoletasEstudiante(
+    //     @Param('rut') rut: string,
+    //     @Body() crearBoletaDto: CrearBoletaDto
+    // ) {
+    //     return this.boletaService.createAnnualBoletasForApoderadoByRut(rut, crearBoletaDto);
+    // }
 
-    @Post('generar-boletas')
-    async getBoletasEstudiantes() {
-        return await this.boletaService.createAnnualBoletasForMultipleApoderados();
-    }
+    // @Post('generar-boletas')
+    // async getBoletasEstudiantes() {
+    //     return await this.boletaService.createAnnualBoletasForMultipleApoderados();
+    // }
 
     @Post('repactar/:id/:meses')
     async repactarBoleta(

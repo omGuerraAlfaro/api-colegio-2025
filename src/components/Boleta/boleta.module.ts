@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { BoletaController } from './boleta.controlle';
+import { BoletaController } from './boleta.controller';
 import { BoletaService } from './boleta.service';
 
 import { Transacciones } from 'src/models/Transacciones.entity';
