@@ -58,13 +58,13 @@ export class BoletaController {
         return await this.boletaService.findBoletasPagadasWithTransaccionData(rut);
     }
 
-    // @Post('crear-boletas-apoderado/:rut')
-    // createBoletasEstudiante(
-    //     @Param('rut') rut: string,
-    //     @Body() crearBoletaDto: CrearBoletaDto
-    // ) {
-    //     return this.boletaService.createAnnualBoletasForApoderadoByRut(rut, crearBoletaDto);
-    // }
+    @Post('crear-boletas-apoderado/:rut')
+    createBoletasEstudiante(
+        @Param('rut') rut: string,
+        @Body() crearBoletaDto: CrearBoletaDto
+    ) {
+        return this.boletaService.createAnnualBoletasForApoderadoByRut(rut, crearBoletaDto);
+    }
 
     // @Post('generar-boletas')
     // async getBoletasEstudiantes() {

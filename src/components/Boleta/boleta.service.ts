@@ -117,45 +117,45 @@ export class BoletaService {
   //   await this.boletaRepository.query(`ALTER TABLE boletas AUTO_INCREMENT = ${newId}`);
   // }
 
-  // async createAnnualBoletasForApoderadoByRut(rut: string, crearBoletaDto: CrearBoletaDto) {
-  //   try {
-  //     // Validar los valores de matrícula y mensualidad
-  //     if (crearBoletaDto.valor_matricula <= 0 || crearBoletaDto.valor_mensualidad <= 0) {
-  //       throw new Error('Los valores de matrícula y mensualidad deben ser mayores que cero.');
-  //     }
+  async createAnnualBoletasForApoderadoByRut(rut: string, crearBoletaDto: CrearBoletaDto) {
+    try {
+      // Validar los valores de matrícula y mensualidad
+      if (crearBoletaDto.valor_matricula <= 0 || crearBoletaDto.valor_mensualidad <= 0) {
+        throw new Error('Los valores de matrícula y mensualidad deben ser mayores que cero.');
+      }
 
-  //     // Obtén los estudiantes asociados al apoderado
-  //     const apoderado = await this.apoderadoService.findStudentsWithApoderadoId(rut);
-  //     if (!apoderado.estudiantes || apoderado.estudiantes.length === 0) {
-  //       throw new Error('No se encontraron estudiantes para el apoderado con el RUT proporcionado.');
-  //     }
+      // Obtén los estudiantes asociados al apoderado
+      const apoderado = await this.apoderadoService.findStudentsWithApoderadoId(rut);
+      if (!apoderado.estudiantes || apoderado.estudiantes.length === 0) {
+        throw new Error('No se encontraron estudiantes para el apoderado con el RUT proporcionado.');
+      }
 
-  //     // Define the months excluding February
-  //     const meses = ['matricula', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+      // Define the months excluding February
+      const meses = ['matricula', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
 
-  //     const boletas = apoderado.estudiantes.flatMap(estudiante =>
-  //       meses.map(mes => {
-  //         // If the month is February, skip creating a boleta
-  //         if (mes === 'febrero' && !crearBoletaDto.valor_mensualidad) {
-  //           return; // Skip creating the boleta for February
-  //         }
-  //         return this.createBoleta(apoderado.id, apoderado.rut, estudiante.id, estudiante.rut, mes, crearBoletaDto);
-  //       })
-  //     );
+      const boletas = apoderado.estudiantes.flatMap(estudiante =>
+        meses.map(mes => {
+          // If the month is February, skip creating a boleta
+          if (mes === 'febrero' && !crearBoletaDto.valor_mensualidad) {
+            return; // Skip creating the boleta for February
+          }
+          return this.createBoleta(apoderado.id, apoderado.rut, estudiante.id, estudiante.rut, mes, crearBoletaDto);
+        })
+      );
 
-  //     // Filter out any undefined values (e.g., if a boleta was not created)
-  //     const validBoletas = boletas.filter(boleta => boleta !== undefined);
+      // Filter out any undefined values (e.g., if a boleta was not created)
+      const validBoletas = boletas.filter(boleta => boleta !== undefined);
 
-  //     // Guarda todas las boletas en una sola operación
-  //     const savedBoletas = await this.boletaRepository.save(validBoletas);
+      // Guarda todas las boletas en una sola operación
+      const savedBoletas = await this.boletaRepository.save(validBoletas);
 
-  //     // Retorna las boletas creadas
-  //     return savedBoletas;
-  //   } catch (error) {
-  //     console.error("Se ha producido un error:", error);
-  //     throw error;
-  //   }
-  // }
+      // Retorna las boletas creadas
+      return savedBoletas;
+    } catch (error) {
+      console.error("Se ha producido un error:", error);
+      throw error;
+    }
+  }
 
   private createBoleta(apoderadoId: number, apoderadoRut: string, estudianteId: number, estudianteRut: string, mes: string, crearBoletaDto: CrearBoletaDto) {
     const total = mes === 'matricula' ? crearBoletaDto.valor_matricula : crearBoletaDto.valor_mensualidad;
