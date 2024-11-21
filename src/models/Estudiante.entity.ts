@@ -76,6 +76,9 @@ export class Estudiante {
     @Column({ type: 'varchar', length: 100, nullable: true })
     observaciones_alumno: string;
 
+    @Column({ type: 'boolean', default: true })
+    estado_estudiante: boolean;
+    
     @OneToMany(() => AnotacionesEstudiante, anotacioneEstudiante => anotacioneEstudiante.estudiante)
     anotacionesConnection: AnotacionesEstudiante[];
 
