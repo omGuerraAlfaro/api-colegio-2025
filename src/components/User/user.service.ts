@@ -84,27 +84,35 @@ export class UsuarioService {
   async createUsersForAllApoderados(): Promise<Usuarios[]> {
     const apoderados = await this.apoderadoRepository.find();
     const createdUsers: Usuarios[] = [];
+    try {
+      for (const apoderado of apoderados) {
+        const username = apoderado.rut + '-' + apoderado.dv;
+        const plainPassword = 'andeschile2025';
+        const hashedPassword = await hash(plainPassword, 5);
 
-    for (const apoderado of apoderados) {
-      const username = this.generateUsername(apoderado.primer_nombre_apoderado, apoderado.primer_apellido_apoderado);
-      const plainPassword = apoderado.rut;
-      const hashedPassword = await hash(plainPassword, 5);
+        const existingUser = await this.usuarioRepository.findOne({ where: { username } });
+        if (existingUser) {
+          continue;
+        }
 
-      const existingUser = await this.usuarioRepository.findOne({ where: { username } });
-      if (existingUser) {
-        continue;
+        const usuario = new Usuarios();
+        usuario.username = username;
+        usuario.password = hashedPassword;
+        usuario.correo_electronico = apoderado.correo_apoderado;
+        usuario.apoderado_id = apoderado.id;
+        usuario.rut = apoderado.rut;
+
+
+        const savedUser = await this.usuarioRepository.save(usuario);
+        createdUsers.push(savedUser);
       }
-
-      const usuario = new Usuarios();
-      usuario.username = username;
-      usuario.password = hashedPassword;
-      usuario.correo_electronico = apoderado.correo_apoderado;
-      usuario.apoderado_id = apoderado.id;
-      usuario.rut = apoderado.rut;
-
-
-      const savedUser = await this.usuarioRepository.save(usuario);
-      createdUsers.push(savedUser);
+    } catch (error) {
+      this.logger.error(`Error creating createUsersForAllApoderados: ${error.message}`, error.stack);
+      throw new InternalServerErrorException({
+        message: 'Error creating in createUsersForAllApoderados.',
+        details: error.message,
+        stack: error.stack,
+      });
     }
 
     return createdUsers;
@@ -115,7 +123,7 @@ export class UsuarioService {
       const apoderado = await this.apoderadoRepository.findOne({ where: { rut } });
       const userCreated: Usuarios[] = [];
 
-      const username = apoderado.rut +'-'+apoderado.dv;
+      const username = apoderado.rut + '-' + apoderado.dv;
       const plainPassword = 'andeschile2025';
       const hashedPassword = await hash(plainPassword, 5);
 
@@ -130,7 +138,7 @@ export class UsuarioService {
 
       const savedUser = await this.usuarioRepository.save(usuario);
       userCreated.push(savedUser);
-      
+
       return userCreated;
     } catch (error) {
       this.logger.error(`Error creating createUserForApoderadoByRut: ${error.message}`, error.stack);
