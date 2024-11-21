@@ -2,10 +2,6 @@ import { TransactionEntity } from './transaction.entity';
 import { Apoderado } from './Apoderado.entity';
 import { Estudiante } from './Estudiante.entity';
 import { ApoderadoEstudiante } from './ApoderadoEstudiante.entity';
-import { ApoderadoDireccion } from './ApoderadoDireccion.entity';
-import { Direccion } from './Direccion.entity';
-import { Ciudad } from './Ciudad.entity';
-import { Region } from './Region.entity';
 import { Profesor } from './Profesor.entity';
 import { Curso } from './Curso.entity';
 import { EstudianteCurso } from './CursoEstudiante.entity';
@@ -26,11 +22,16 @@ import { ApoderadoSuplente } from './ApoderadoSuplente.entity';
 import { ApoderadoSuplenteEstudiante } from './ApoderadoSuplenteEstudiante.entity';
 import { InscripcionMatricula } from './InscripcionMatricula.entity';
 import { SubAdministrador } from './SubAdministrador.entity';
+import { Asistencia } from './Asistencia.entity';
+import { CalendarioEscolar } from './CalendarioEscolar.entity';
+import { Nota } from './Notas.entity';
 
 
-export const entities = [Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudiante, ApoderadoEstudiante, ApoderadoDireccion,
+export const entities = [Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudiante, ApoderadoEstudiante,
                         Estudiante, Profesor, Curso, EstudianteCurso, Anotacion, AnotacionesEstudiante, Usuarios, Administrador, SubAdministrador,
                         Boleta, EstadoBoleta, Transacciones, EstadoTransaccion, TransactionEntity,
-                        Direccion, Ciudad, Region, NoticiasColegio, NoticiasImages, Correo, Asignatura, InscripcionMatricula
-                        ];
+                        NoticiasColegio, NoticiasImages,
+                        Correo,
+                        Asignatura, InscripcionMatricula, Nota,
+                        Asistencia, CalendarioEscolar];
 

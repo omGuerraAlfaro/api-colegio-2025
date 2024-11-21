@@ -94,29 +94,29 @@ export class ApoderadoService {
     return null;
   }
 
-  async findAddressWithApoderadoId(apoderadoId: number) {
-    const result = await this.apoderadoRepository
-      .createQueryBuilder("apoderado")
-      .leftJoinAndSelect("apoderado.estudiantesConnection", "apoderadoEstudiante")
-      .leftJoinAndSelect("apoderadoEstudiante.estudiante", "estudiante")
-      .leftJoinAndSelect("apoderado.direccionConnection", "apoderadoDireccion")
-      .leftJoinAndSelect("apoderadoDireccion.direccion", "direccion")
-      .leftJoinAndSelect("direccion.ciudad", "ciudad")
-      .leftJoinAndSelect("ciudad.region", "region")
-      .where("apoderado.id = :apoderadoId", { apoderadoId })
-      .getOne();
+  // async findAddressWithApoderadoId(apoderadoId: number) {
+  //   const result = await this.apoderadoRepository
+  //     .createQueryBuilder("apoderado")
+  //     .leftJoinAndSelect("apoderado.estudiantesConnection", "apoderadoEstudiante")
+  //     .leftJoinAndSelect("apoderadoEstudiante.estudiante", "estudiante")
+  //     .leftJoinAndSelect("apoderado.direccionConnection", "apoderadoDireccion")
+  //     .leftJoinAndSelect("apoderadoDireccion.direccion", "direccion")
+  //     .leftJoinAndSelect("direccion.ciudad", "ciudad")
+  //     .leftJoinAndSelect("ciudad.region", "region")
+  //     .where("apoderado.id = :apoderadoId", { apoderadoId })
+  //     .getOne();
 
-    if (result) {
-      const { estudiantesConnection, direccionConnection, ...otherData } = result;
+  //   if (result) {
+  //     const { estudiantesConnection, direccionConnection, ...otherData } = result;
 
-      return {
-        ...otherData,
-        estudiantes: estudiantesConnection.map(conn => conn.estudiante),
-        direccion: direccionConnection.map(conn => conn.direccion)
-      };
-    }
-    return null;
-  }
+  //     return {
+  //       ...otherData,
+  //       estudiantes: estudiantesConnection.map(conn => conn.estudiante),
+  //       direccion: direccionConnection.map(conn => conn.direccion)
+  //     };
+  //   }
+  //   return null;
+  // }
 
 
   /* ************************************************************ */

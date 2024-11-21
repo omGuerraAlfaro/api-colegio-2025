@@ -7,8 +7,6 @@ import {
 } from 'typeorm';
 import { ApoderadoEstudiante } from './ApoderadoEstudiante.entity';
 import { Estudiante } from './Estudiante.entity';
-import { ApoderadoDireccion } from './ApoderadoDireccion.entity';
-import { Direccion } from './Direccion.entity';
 import { Usuarios } from './User.entity';
 import { Boleta } from './Boleta.entity';
 import { ApoderadoSuplenteEstudiante } from './ApoderadoSuplenteEstudiante.entity';
@@ -71,9 +69,6 @@ export class ApoderadoSuplente {
 
     @OneToMany(() => ApoderadoSuplenteEstudiante, apoderadoEstudiante => apoderadoEstudiante.apoderado)
     estudiantesConnection: ApoderadoSuplenteEstudiante[];
-
-    @OneToMany(() => ApoderadoDireccion, apoderadoDireccion => apoderadoDireccion.direccion)
-    direccionConnection: ApoderadoDireccion[];
 
     estudiantes?: Estudiante[];
 }
