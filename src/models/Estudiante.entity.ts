@@ -10,6 +10,8 @@ import {
 import { ApoderadoEstudiante } from './ApoderadoEstudiante.entity';
 import { EstudianteCurso } from './CursoEstudiante.entity';
 import { AnotacionesEstudiante } from './AnotacionesEstudiantes.entity';
+import { Asistencia } from './Asistencia.entity';
+import { Nota } from './Notas.entity';
 
 @Entity()
 export class Estudiante {
@@ -79,6 +81,7 @@ export class Estudiante {
     @Column({ type: 'boolean', default: true })
     estado_estudiante: boolean;
     
+
     @OneToMany(() => AnotacionesEstudiante, anotacioneEstudiante => anotacioneEstudiante.estudiante)
     anotacionesConnection: AnotacionesEstudiante[];
 
@@ -87,4 +90,11 @@ export class Estudiante {
 
     @OneToMany(() => EstudianteCurso, cursoEstudiante => cursoEstudiante.estudiante)
     cursoConnection: EstudianteCurso[];
+
+    @OneToMany(() => Asistencia, (asistencia) => asistencia.estudiante)
+    asistencias: Asistencia[];
+
+    @OneToMany(() => Nota, (nota) => nota.estudiante)
+    notas: Nota[];
+
 }
