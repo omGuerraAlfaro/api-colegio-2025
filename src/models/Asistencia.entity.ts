@@ -8,6 +8,7 @@ import {
 import { CalendarioEscolar } from './CalendarioEscolar.entity';
 import { Estudiante } from './Estudiante.entity';
 import { Curso } from './Curso.entity';
+import { Semestre } from './Semestre.entity';
 
 @Entity('asistencia')
 export class Asistencia {
@@ -25,6 +26,10 @@ export class Asistencia {
     @ManyToOne(() => CalendarioEscolar, (calendario) => calendario.asistencias)
     @JoinColumn({ name: 'id_dia' })
     calendario: CalendarioEscolar;
+
+    @ManyToOne(() => Semestre, (semestre) => semestre.asistencias)
+    @JoinColumn({ name: 'id_semestre' })
+    semestre: Semestre;
 
     @Column({ type: 'varchar', length: 20 })
     estado: string; // Presente, Ausente, Tardanza, etc.

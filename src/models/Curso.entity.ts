@@ -11,6 +11,7 @@ import { EstudianteCurso } from './CursoEstudiante.entity';
 import { Estudiante } from './Estudiante.entity';
 import { Asistencia } from './Asistencia.entity';
 import { Nota } from './Notas.entity';
+import { Evaluacion } from './Evaluacion.entity';
 @Entity()
 export class Curso {
 
@@ -38,6 +39,9 @@ export class Curso {
 
     @OneToMany(() => Nota, (nota) => nota.curso)
     notas: Nota[];
+
+    @OneToMany(() => Evaluacion, (evaluacion) => evaluacion.curso)
+    evaluaciones: Evaluacion[];
 
 
     addStudent(student: Estudiante) {

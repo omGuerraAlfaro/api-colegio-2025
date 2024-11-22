@@ -25,13 +25,15 @@ import { SubAdministrador } from './SubAdministrador.entity';
 import { Asistencia } from './Asistencia.entity';
 import { CalendarioEscolar } from './CalendarioEscolar.entity';
 import { Nota } from './Notas.entity';
+import { Evaluacion } from './Evaluacion.entity';
+import { Semestre } from './Semestre.entity';
 
 
 export const entities = [Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudiante, ApoderadoEstudiante,
                         Estudiante, Profesor, Curso, EstudianteCurso, Anotacion, AnotacionesEstudiante, Usuarios, Administrador, SubAdministrador,
                         Boleta, EstadoBoleta, Transacciones, EstadoTransaccion, TransactionEntity,
                         NoticiasColegio, NoticiasImages,
-                        Correo,
-                        Asignatura, InscripcionMatricula, Nota,
+                        Correo, InscripcionMatricula,
+                        Asignatura, Evaluacion, Nota, Semestre,
                         Asistencia, CalendarioEscolar];
 

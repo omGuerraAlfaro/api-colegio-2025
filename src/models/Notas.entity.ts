@@ -1,13 +1,9 @@
-import {
-    Entity,
-    PrimaryGeneratedColumn,
-    Column,
-    ManyToOne,
-    JoinColumn
-} from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
 import { Estudiante } from './Estudiante.entity';
 import { Curso } from './Curso.entity';
 import { Asignatura } from './Asignatura.entity';
+import { Evaluacion } from './Evaluacion.entity';
+import { Semestre } from './Semestre.entity';
 
 @Entity('notas')
 export class Nota {
@@ -26,7 +22,15 @@ export class Nota {
     @JoinColumn({ name: 'id_asignatura' })
     asignatura: Asignatura;
 
-    @Column({ type: 'decimal', precision: 5, scale: 2 })
+    @ManyToOne(() => Evaluacion, (evaluacion) => evaluacion.notas, { nullable: true })
+    @JoinColumn({ name: 'id_evaluacion' })
+    evaluacion: Evaluacion;
+
+    @ManyToOne(() => Semestre, (semestre) => semestre.notas)
+    @JoinColumn({ name: 'id_semestre' })
+    semestre: Semestre;
+
+    @Column({ type: 'decimal', precision: 5, scale: 1 })
     nota: number;
 
     @Column({ type: 'date' })
