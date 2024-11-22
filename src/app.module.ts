@@ -29,7 +29,7 @@ import { ApoderadoModule, EstudianteModule, ProfesorModule, CursoModule, Usuario
       port: 3306,
       username: 'colegioa_omarignacio',
       password: '068gJOWTJ@@k',
-      database: 'colegioa_colegio3',
+      database: 'colegio2025',
       entities,
       synchronize: true
     }),
