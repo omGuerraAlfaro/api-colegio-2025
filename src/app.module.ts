@@ -28,7 +28,7 @@ import { ApoderadoModule, EstudianteModule, ProfesorModule, CursoModule, Usuario
       host: '44.207.168.60',
       port: 3306,
       username: 'colegioa_omarignacio',
-      password: '068gJOWTJ@@k',
+      password: 'tZk+2t]rxUG3',
       database: 'colegio2025',
       entities,
       synchronize: true
