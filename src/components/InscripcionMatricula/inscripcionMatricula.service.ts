@@ -206,15 +206,28 @@ export class InscripcionMatriculaService {
     try {
 
       const apoderado = this.apoderadoRepository.create(inscripcionMatricula);
+      apoderado.primer_nombre_apoderado = apoderado.primer_nombre_apoderado.toUpperCase();
+      apoderado.segundo_nombre_apoderado = apoderado.segundo_nombre_apoderado ? apoderado.segundo_nombre_apoderado.toUpperCase() : apoderado.segundo_nombre_apoderado;       
+      apoderado.primer_apellido_apoderado = apoderado.primer_apellido_apoderado.toUpperCase();
+      apoderado.segundo_apellido_apoderado = apoderado.segundo_apellido_apoderado.toUpperCase();
       apoderado.rut =  apoderado.rut.replace(/\./g, '');
       const savedApoderado = await this.apoderadoRepository.save(apoderado);
+      
       const apoderadoSuplente = this.apoderadoSuplenteRepository.create(inscripcionMatricula);
+      apoderadoSuplente.primer_nombre_apoderado_suplente = apoderadoSuplente.primer_nombre_apoderado_suplente.toUpperCase();
+      apoderadoSuplente.segundo_nombre_apoderado_suplente = apoderadoSuplente.segundo_nombre_apoderado_suplente ? apoderadoSuplente.segundo_nombre_apoderado_suplente.toUpperCase() : apoderadoSuplente.segundo_nombre_apoderado_suplente;  
+      apoderadoSuplente.primer_apellido_apoderado_suplente = apoderadoSuplente.primer_apellido_apoderado_suplente.toUpperCase();
+      apoderadoSuplente.segundo_apellido_apoderado_suplente = apoderadoSuplente.segundo_apellido_apoderado_suplente.toUpperCase();
       apoderadoSuplente.rut_apoderado_suplente = apoderadoSuplente.rut_apoderado_suplente.replace(/\./g, '');
       const savedApoderadoSuplente = await this.apoderadoSuplenteRepository.save(apoderadoSuplente);
 
       const savedEstudiantes = [];
       for (const estudianteData of inscripcionMatricula.estudiantes) {
         const estudiante = this.estudianteRepository.create(estudianteData);
+        estudiante.primer_nombre_alumno = estudiante.primer_nombre_alumno.toUpperCase();
+        estudiante.segundo_nombre_alumno = estudiante.segundo_nombre_alumno ? estudiante.segundo_nombre_alumno.toUpperCase() : estudiante.segundo_nombre_alumno;      
+        estudiante.primer_apellido_alumno = estudiante.primer_apellido_alumno.toUpperCase();
+        estudiante.segundo_apellido_alumno = estudiante.segundo_apellido_alumno.toUpperCase();
         estudiante.rut = estudiante.rut.replace(/\./g, '');
         estudiante.fecha_matricula = new Date();
         const savedEstudiante = await this.estudianteRepository.save(estudiante);
