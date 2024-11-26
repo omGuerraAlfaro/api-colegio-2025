@@ -210,6 +210,7 @@ export class InscripcionMatriculaService {
       apoderado.segundo_nombre_apoderado = apoderado.segundo_nombre_apoderado ? apoderado.segundo_nombre_apoderado.toUpperCase() : apoderado.segundo_nombre_apoderado;       
       apoderado.primer_apellido_apoderado = apoderado.primer_apellido_apoderado.toUpperCase();
       apoderado.segundo_apellido_apoderado = apoderado.segundo_apellido_apoderado.toUpperCase();
+      apoderado.direccion = apoderado.direccion.toUpperCase();
       apoderado.rut =  apoderado.rut.replace(/\./g, '');
       const savedApoderado = await this.apoderadoRepository.save(apoderado);
       
@@ -219,6 +220,7 @@ export class InscripcionMatriculaService {
       apoderadoSuplente.primer_apellido_apoderado_suplente = apoderadoSuplente.primer_apellido_apoderado_suplente.toUpperCase();
       apoderadoSuplente.segundo_apellido_apoderado_suplente = apoderadoSuplente.segundo_apellido_apoderado_suplente.toUpperCase();
       apoderadoSuplente.rut_apoderado_suplente = apoderadoSuplente.rut_apoderado_suplente.replace(/\./g, '');
+      apoderadoSuplente.direccion_suplente = apoderadoSuplente.direccion_suplente.toUpperCase();
       const savedApoderadoSuplente = await this.apoderadoSuplenteRepository.save(apoderadoSuplente);
 
       const savedEstudiantes = [];
