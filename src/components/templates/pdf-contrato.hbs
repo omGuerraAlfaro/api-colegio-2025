@@ -424,14 +424,18 @@
         <tr>
           <td style='width: 80%;'><b>El alumno es apto para realizar educación física.</b></td>
           <td style='width: 10%;' class="text-center">
-            {{#if apto_educacion_fisica}}
-              X
-            {{/if}}
+            {{#each estudiantes}}
+              {{#if apto_educacion_fisica}}
+                X
+              {{/if}}
+            {{/each}}
           </td>
           <td style='width: 10%;' class="text-center">
-            {{#unless apto_educacion_fisica}}
-              X
-            {{/unless}}
+            {{#each estudiantes}}
+              {{#unless apto_educacion_fisica}}
+                X
+              {{/unless}}
+            {{/each}}
           </td>
         </tr>
       </table>
