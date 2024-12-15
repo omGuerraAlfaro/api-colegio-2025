@@ -5,10 +5,10 @@ import {
     ManyToOne,
     JoinColumn
 } from 'typeorm';
-import { CalendarioEscolar } from './CalendarioEscolar.entity';
 import { Estudiante } from './Estudiante.entity';
 import { Curso } from './Curso.entity';
 import { Semestre } from './Semestre.entity';
+import { CalendarioAsistencia } from './CalendarioAsistencia';
 
 @Entity('asistencia')
 export class Asistencia {
@@ -23,9 +23,9 @@ export class Asistencia {
     @JoinColumn({ name: 'id_curso' })
     curso: Curso;
 
-    @ManyToOne(() => CalendarioEscolar, (calendario) => calendario.asistencias)
+    @ManyToOne(() => CalendarioAsistencia, (calendario) => calendario.asistencias)
     @JoinColumn({ name: 'id_dia' })
-    calendario: CalendarioEscolar;
+    calendario: CalendarioAsistencia;
 
     @ManyToOne(() => Semestre, (semestre) => semestre.asistencias)
     @JoinColumn({ name: 'id_semestre' })

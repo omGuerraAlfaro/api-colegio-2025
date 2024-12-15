@@ -27,6 +27,7 @@ import { CalendarioEscolar } from './CalendarioEscolar.entity';
 import { Nota } from './Notas.entity';
 import { Evaluacion } from './Evaluacion.entity';
 import { Semestre } from './Semestre.entity';
+import { CalendarioAsistencia } from './CalendarioAsistencia';
 
 
 export const entities = [Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudiante, ApoderadoEstudiante,
@@ -35,5 +36,5 @@ export const entities = [Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudian
                         NoticiasColegio, NoticiasImages,
                         Correo, InscripcionMatricula,
                         Asignatura, Evaluacion, Nota, Semestre,
-                        Asistencia, CalendarioEscolar];
+                        Asistencia, CalendarioEscolar, CalendarioAsistencia];
 

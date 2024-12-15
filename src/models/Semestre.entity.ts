@@ -9,7 +9,7 @@ export class Semestre {
     id_semestre: number;
 
     @Column({ type: 'varchar', length: 50 })
-    nombre: string; // Ejemplo: "1er Semestre 2024"
+    nombre: string;
 
     @Column({ type: 'date' })
     fecha_inicio: Date;

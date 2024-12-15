@@ -24,12 +24,6 @@ export class Evaluacion {
     @Column({ type: 'varchar', length: 50 })
     tipo_evaluacion: string;
 
-    @Column({ type: 'decimal', precision: 5, scale: 2 })
-    peso: number;
-
-    @Column({ type: 'date' })
-    fecha: Date;
-
     @OneToMany(() => Nota, (nota) => nota.evaluacion)
     notas: Nota[];
 }

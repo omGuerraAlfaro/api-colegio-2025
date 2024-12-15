@@ -4,7 +4,6 @@ import {
     Column,
     OneToMany
 } from 'typeorm';
-import { Asistencia } from './Asistencia.entity';
 
 @Entity('calendario_escolar')
 export class CalendarioEscolar {
@@ -15,11 +14,8 @@ export class CalendarioEscolar {
     fecha: Date;
 
     @Column({ type: 'varchar', length: 20 })
-    tipo: string; // Clase, Feriado, Evento, etc.
+    tipo: string;
 
     @Column({ type: 'text', nullable: true })
     descripcion?: string;
-
-    @OneToMany(() => Asistencia, (asistencia) => asistencia.calendario)
-    asistencias: Asistencia[];
 }

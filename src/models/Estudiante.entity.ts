@@ -80,7 +80,6 @@ export class Estudiante {
 
     @Column({ type: 'boolean', default: true })
     estado_estudiante: boolean;
-    
 
     @OneToMany(() => AnotacionesEstudiante, anotacioneEstudiante => anotacioneEstudiante.estudiante)
     anotacionesConnection: AnotacionesEstudiante[];
