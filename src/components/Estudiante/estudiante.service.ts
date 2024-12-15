@@ -42,6 +42,7 @@ export class EstudianteService {
       autorizacion_fotografias: estudiante.autorizacion_fotografias,
       apto_educacion_fisica: estudiante.apto_educacion_fisica,
       observaciones_alumno: estudiante.observaciones_alumno,
+      estado_estudiante: estudiante.estado_estudiante,
       curso: estudiante.cursoConnection.map(cc => cc.curso)
     }));
   }
