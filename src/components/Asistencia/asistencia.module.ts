@@ -3,11 +3,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { AsistenciaService } from './asistencia.service';
 import { AsistenciaController } from './asistencia.controller';
 import { Asistencia } from 'src/models/Asistencia.entity';
+import { CalendarioAsistencia } from 'src/models/CalendarioAsistencia';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      Asistencia
+      Asistencia, CalendarioAsistencia
     ]),
   ],
   controllers: [AsistenciaController],

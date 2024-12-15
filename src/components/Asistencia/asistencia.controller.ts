@@ -3,6 +3,11 @@ import { AsistenciaService } from './asistencia.service';
 
 @Controller('asistencia')
 export class AsistenciaController {
-    constructor(private readonly asignaturaService: AsistenciaService) {}
+    constructor(private readonly asignaturaService: AsistenciaService) { }
+
+    @Get('calendario')
+    async getAllFechasCalendarioAsistencia() {
+        return await this.asignaturaService.getAllFechasCalendarioAsistencia();
+    }
 
 }
