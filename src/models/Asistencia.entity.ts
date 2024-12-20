@@ -31,6 +31,6 @@ export class Asistencia {
     @JoinColumn({ name: 'id_semestre' })
     semestre: Semestre;
 
-    @Column({ type: 'varchar', length: 20 })
-    estado: string; // Presente, Ausente, Tardanza, etc.
+    @Column({ type: 'boolean', default: false })
+    estado: boolean;
 }
