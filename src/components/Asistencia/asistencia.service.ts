@@ -21,7 +21,7 @@ export class AsistenciaService {
 
     async getAsistenciaByCursoAndSemestre(cursoId: number, semestreId: number): Promise<any[]> {
         try {
-            return await this.asistenciaRepository
+            const resultados = await this.asistenciaRepository
                 .createQueryBuilder('asistencia')
                 .innerJoinAndSelect('asistencia.estudiante', 'estudiante')
                 .innerJoinAndSelect('asistencia.curso', 'curso')
@@ -29,23 +29,23 @@ export class AsistenciaService {
                 .innerJoinAndSelect('asistencia.calendario', 'calendario')
                 .where('curso.id = :cursoId', { cursoId })
                 .andWhere('semestre.id_semestre = :semestreId', { semestreId })
+                .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
                 .select([
-                    'curso.id',
-                    'semestre.id_semestre',
-                    'estudiante.id',
-                    'estudiante.primer_nombre_alumno',
-                    'calendario.fecha',
-                    'asistencia.estado',
+                    'estudiante.id AS estudianteId',
+                    `CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS nombreCompleto`,
+                    'JSON_ARRAYAGG(JSON_OBJECT("fecha", calendario.fecha, "estado", asistencia.estado)) AS asistencias',
                 ])
-                .orderBy('calendario.fecha', 'ASC')
+                .groupBy('estudiante.id')
+                .orderBy('estudiante.primer_nombre_alumno', 'ASC')
                 .getRawMany();
+    
+            return resultados;
         } catch (error) {
             console.error('Error fetching asistencia data:', error);
     
-            // Throw a custom error or handle it as needed
+            // Lanza un error con un mensaje claro
             throw new Error('Unable to fetch asistencia data. Please check the input parameters and try again.');
         }
-    }
-    
+    }    
     
 }
