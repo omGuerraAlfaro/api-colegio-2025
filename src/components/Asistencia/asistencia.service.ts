@@ -20,24 +20,32 @@ export class AsistenciaService {
     }
 
     async getAsistenciaByCursoAndSemestre(cursoId: number, semestreId: number): Promise<any[]> {
-        return await this.asistenciaRepository
-            .createQueryBuilder('asistencia')
-            .innerJoinAndSelect('asistencia.estudiante', 'estudiante')
-            .innerJoinAndSelect('asistencia.curso', 'curso')
-            .innerJoinAndSelect('asistencia.semestre', 'semestre')
-            .innerJoinAndSelect('asistencia.calendario', 'calendario')
-            .where('curso.id_curso = :cursoId', { cursoId })
-            .andWhere('semestre.id_semestre = :semestreId', { semestreId })
-            .select([
-                'curso.id_curso',
-                'semestre.id_semestre',
-                'estudiante.id_estudiante',
-                'estudiante.nombre',
-                'calendario.fecha',
-                'asistencia.estado',
-            ])
-            .orderBy('calendario.fecha', 'ASC')
-            .getRawMany();
+        try {
+            return await this.asistenciaRepository
+                .createQueryBuilder('asistencia')
+                .innerJoinAndSelect('asistencia.estudiante', 'estudiante')
+                .innerJoinAndSelect('asistencia.curso', 'curso')
+                .innerJoinAndSelect('asistencia.semestre', 'semestre')
+                .innerJoinAndSelect('asistencia.calendario', 'calendario')
+                .where('curso.id = :cursoId', { cursoId })
+                .andWhere('semestre.id_semestre = :semestreId', { semestreId })
+                .select([
+                    'curso.id',
+                    'semestre.id_semestre',
+                    'estudiante.id',
+                    'estudiante.primer_nombre_alumno',
+                    'calendario.fecha',
+                    'asistencia.estado',
+                ])
+                .orderBy('calendario.fecha', 'ASC')
+                .getRawMany();
+        } catch (error) {
+            console.error('Error fetching asistencia data:', error);
+    
+            // Throw a custom error or handle it as needed
+            throw new Error('Unable to fetch asistencia data. Please check the input parameters and try again.');
+        }
     }
+    
     
 }
