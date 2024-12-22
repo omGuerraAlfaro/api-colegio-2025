@@ -39,13 +39,17 @@ export class AsistenciaService {
                 .orderBy('estudiante.primer_nombre_alumno', 'ASC')
                 .getRawMany();
     
-            return resultados;
+            // Convertir asistencias (string) a objetos JSON
+            return resultados.map((resultado) => ({
+                estudianteId: resultado.estudianteId,
+                nombreCompleto: resultado.nombreCompleto,
+                asistencias: JSON.parse(resultado.asistencias), // Convertimos a objeto JSON
+            }));
         } catch (error) {
             console.error('Error fetching asistencia data:', error);
-    
-            // Lanza un error con un mensaje claro
             throw new Error('Unable to fetch asistencia data. Please check the input parameters and try again.');
         }
-    }    
+    }
+    
     
 }
