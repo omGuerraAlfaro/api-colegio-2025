@@ -1,8 +1,12 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CreateAsistenciaDto, UpdateAsistenciaDto } from 'src/dto/asistencia.dto';
 import { Asignatura } from 'src/models/Asignatura.entity';
 import { Asistencia } from 'src/models/Asistencia.entity';
 import { CalendarioAsistencia } from 'src/models/CalendarioAsistencia';
+import { Curso } from 'src/models/Curso.entity';
+import { Estudiante } from 'src/models/Estudiante.entity';
+import { Semestre } from 'src/models/Semestre.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -38,7 +42,7 @@ export class AsistenciaService {
                 .groupBy('estudiante.id')
                 .orderBy('estudiante.primer_nombre_alumno', 'ASC')
                 .getRawMany();
-    
+
             // Convertir asistencias (string) a objetos JSON
             return resultados.map((resultado) => ({
                 estudianteId: resultado.estudianteId,
@@ -50,6 +54,55 @@ export class AsistenciaService {
             throw new Error('Unable to fetch asistencia data. Please check the input parameters and try again.');
         }
     }
-    
-    
+
+    async createAsistencia(dto: CreateAsistenciaDto): Promise<Asistencia> {
+        try {
+            const estudiante = new Estudiante();
+            estudiante.id = dto.estudianteId;
+
+            const curso = new Curso();
+            curso.id = dto.cursoId;
+
+            const semestre = new Semestre();
+            semestre.id_semestre = dto.semestreId;
+
+            const calendario = new CalendarioAsistencia();
+            calendario.id_dia = dto.calendarioId;
+
+            const nuevaAsistencia = this.asistenciaRepository.create({
+                estudiante,
+                curso,
+                semestre,
+                calendario,
+                estado: dto.estado,
+            });
+
+            return await this.asistenciaRepository.save(nuevaAsistencia);
+        } catch (error) {
+            console.error('Error creating asistencia:', error);
+            throw new Error('Unable to create asistencia. Please check the input data and try again.');
+        }
+    }
+
+    async updateAsistencia(dto: UpdateAsistenciaDto): Promise<Asistencia> {
+        try {
+            const asistencia = await this.asistenciaRepository.findOne({
+                where: { id_asistencia: dto.asistenciaId },
+            });
+
+            if (!asistencia) {
+                throw new Error(`Asistencia with ID ${dto.asistenciaId} not found.`);
+            }
+
+            asistencia.estado = dto.estado;
+
+            return await this.asistenciaRepository.save(asistencia);
+        } catch (error) {
+            console.error('Error updating asistencia:', error);
+            throw new Error('Unable to update asistencia. Please check the input data and try again.');
+        }
+    }
+
+
+
 }
