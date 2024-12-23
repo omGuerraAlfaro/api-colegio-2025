@@ -1,5 +1,6 @@
-import { Body, Controller, Get, Param, ParseIntPipe, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, ParseIntPipe, Post, Put, Query } from '@nestjs/common';
 import { AsistenciaService } from './asistencia.service';
+import { CreateAsistenciaDto, UpdateAsistenciaDto } from 'src/dto/asistencia.dto';
 
 @Controller('asistencia')
 export class AsistenciaController {
@@ -16,6 +17,46 @@ export class AsistenciaController {
     ) {
         const { cursoId, semestreId } = body;
         return await this.asistenciaService.getAsistenciaByCursoAndSemestre(cursoId, semestreId);
+    }
+
+    // Crear nueva asistencia
+    @Post()
+    async createAsistencia(@Body() createAsistenciaDto: CreateAsistenciaDto) {
+        try {
+            const nuevaAsistencia = await this.asistenciaService.createAsistencia(createAsistenciaDto);
+            return {
+                message: 'Asistencia creada exitosamente',
+                data: nuevaAsistencia,
+            };
+        } catch (error) {
+            return {
+                message: 'Error al crear la asistencia',
+                error: error.message,
+            };
+        }
+    }
+
+    // Actualizar asistencia existente
+    @Put(':id')
+    async updateAsistencia(
+        @Param('id') asistenciaId: number,
+        @Body() updateAsistenciaDto: UpdateAsistenciaDto,
+    ) {
+        try {
+            const asistenciaActualizada = await this.asistenciaService.updateAsistencia({
+                asistenciaId,
+                ...updateAsistenciaDto,
+            });
+            return {
+                message: 'Asistencia actualizada exitosamente',
+                data: asistenciaActualizada,
+            };
+        } catch (error) {
+            return {
+                message: 'Error al actualizar la asistencia',
+                error: error.message,
+            };
+        }
     }
 
 }
