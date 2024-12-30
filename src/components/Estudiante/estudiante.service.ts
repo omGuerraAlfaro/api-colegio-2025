@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Curso } from 'src/models/Curso.entity';
 import { Estudiante } from 'src/models/Estudiante.entity';
+import { UpdateEstudianteDto } from 'src/dto/estudiante.dto';
 
 @Injectable()
 export class EstudianteService {
@@ -70,6 +71,20 @@ export class EstudianteService {
     const femaleCount = await this.estudianteRepository.count({ where: { genero_alumno: 'F' } });
 
     return { masculinoCount: maleCount, femeninoCount: femaleCount };
+  }
+
+  async updateEstudiante(id: number, updateData: UpdateEstudianteDto): Promise<Estudiante | null> {
+    const estudiante = await this.estudianteRepository.findOne({ where: { id } });
+  
+    if (!estudiante) {
+      return null; // Estudiante no encontrado
+    }
+  
+    // Actualizar los campos del estudiante con los datos proporcionados
+    Object.assign(estudiante, updateData);
+  
+    // Guardar los cambios
+    return await this.estudianteRepository.save(estudiante);
   }
 
 

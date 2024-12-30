@@ -10,9 +10,11 @@ import {
   Param,
   Patch,
   Post,
+  Put,
 } from '@nestjs/common';
 import { EstudianteService } from './estudiante.service';
 import { ApiTags } from '@nestjs/swagger';
+import { UpdateEstudianteDto } from 'src/dto/estudiante.dto';
 
 @ApiTags('Estudiantes')
 @Controller('estudiante')
@@ -32,6 +34,20 @@ export class EstudianteController {
   @Get('count-by-genero')
   async getCountByGender() {
     return this.estudianteService.getCountByGender();
+  }
+
+  @Put(':id')
+  async updateEstudiante(
+    @Param('id') id: number,
+    @Body() updateData: UpdateEstudianteDto,
+  ) {
+    const updatedEstudiante = await this.estudianteService.updateEstudiante(id, updateData);
+
+    if (!updatedEstudiante) {
+      return { message: 'Estudiante not found' };
+    }
+
+    return updatedEstudiante;
   }
 }
 
