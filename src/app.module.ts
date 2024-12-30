@@ -51,6 +51,7 @@ import {
       password: 'tZk+2t]rxUG3',
       database: 'colegioa_colegio2025',
       entities,
+      timezone: 'Z',
       synchronize: true
     }),
   ]
