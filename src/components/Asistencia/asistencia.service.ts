@@ -107,7 +107,7 @@ export class AsistenciaService {
         try {
             // Obtener el rango de fechas del semestre
             const semestre = await this.calendarioAsistenciaRepository.query(
-                `SELECT fecha_inicio, fecha_fin FROM Semestres WHERE id_semestre = ?`, 
+                `SELECT fecha_inicio, fecha_fin FROM semestres WHERE id_semestre = ?`, 
                 [semestreId]
             );
     
