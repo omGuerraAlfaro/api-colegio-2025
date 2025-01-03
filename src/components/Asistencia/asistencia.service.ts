@@ -7,7 +7,7 @@ import { CalendarioAsistencia } from 'src/models/CalendarioAsistencia';
 import { Curso } from 'src/models/Curso.entity';
 import { Estudiante } from 'src/models/Estudiante.entity';
 import { Semestre } from 'src/models/Semestre.entity';
-import { Repository } from 'typeorm';
+import { Between, Repository } from 'typeorm';
 
 @Injectable()
 export class AsistenciaService {
@@ -103,6 +103,63 @@ export class AsistenciaService {
         }
     }
 
+    async createAsistenciasForAllStudents(semestreId: number): Promise<string> {
+        try {
+            // Obtener el rango de fechas del semestre
+            const semestre = await this.calendarioAsistenciaRepository.query(
+                `SELECT fecha_inicio, fecha_fin FROM Semestres WHERE id_semestre = ?`, 
+                [semestreId]
+            );
+    
+            if (!semestre.length) {
+                throw new Error('Semestre no encontrado.');
+            }
+    
+            const { fecha_inicio, fecha_fin } = semestre[0];
+    
+            // Obtener las fechas del calendario dentro del rango del semestre
+            const calendario = await this.calendarioAsistenciaRepository.find({
+                where: { fecha: Between(fecha_inicio, fecha_fin) },
+            });
+    
+            if (!calendario.length) {
+                throw new Error('No se encontraron fechas en el calendario dentro del semestre especificado.');
+            }
+    
+            // Obtener estudiantes y sus cursos relacionados desde la tabla estudiante_curso
+            const estudiantesCursos = await this.asistenciaRepository.query(
+                `SELECT estudiante.id AS estudianteId, estudiante_curso.curso_id AS cursoId
+                 FROM Estudiante estudiante
+                 INNER JOIN estudiante_curso ON estudiante.id = estudiante_curso.estudiante_id
+                 WHERE estudiante.estado_estudiante = true`
+            );
+    
+            if (!estudiantesCursos.length) {
+                throw new Error('No se encontraron estudiantes activos relacionados a cursos.');
+            }
+    
+            // Generar las asistencias
+            const asistencias = estudiantesCursos.flatMap((estudiante) => 
+                calendario.map((fecha) => ({
+                    estudiante: { id: estudiante.estudianteId },
+                    curso: { id: estudiante.cursoId },
+                    semestre: { id_semestre: semestreId },
+                    calendario: { id_dia: fecha.id_dia },
+                    estado: false, // Estado inicial
+                }))
+            );
+    
+            // Guardar las asistencias en la base de datos de forma masiva
+            await this.asistenciaRepository.save(asistencias);
+    
+            return 'Asistencias creadas exitosamente para todos los estudiantes.';
+        } catch (error) {
+            console.error('Error creando asistencias:', error);
+            throw new Error('Error al crear las asistencias. Por favor verifica los datos e intenta nuevamente.');
+        }
+    }
+    
+    
 
 
 }

@@ -59,4 +59,9 @@ export class AsistenciaController {
         }
     }
 
+    @Post('create-all/:semestreId')
+    async createAsistenciasForAll(@Param('semestreId') semestreId: number): Promise<string> {
+        return await this.asistenciaService.createAsistenciasForAllStudents(semestreId);
+    }
+
 }
