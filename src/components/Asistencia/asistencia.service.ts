@@ -129,7 +129,7 @@ export class AsistenciaService {
             // Obtener estudiantes y sus cursos relacionados desde la tabla estudiante_curso
             const estudiantesCursos = await this.asistenciaRepository.query(
                 `SELECT estudiante.id AS estudianteId, estudiante_curso.curso_id AS cursoId
-                 FROM Estudiante estudiante
+                 FROM estudiante estudiante
                  INNER JOIN estudiante_curso ON estudiante.id = estudiante_curso.estudiante_id
                  WHERE estudiante.estado_estudiante = true`
             );
