@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CreateAsistenciaDto, UpdateAsistenciaDto } from 'src/dto/asistencia.dto';
+import { CreateAsistenciaDto, UpdateAsistenciaDto, UpdateAsistenciaDto2 } from 'src/dto/asistencia.dto';
 import { Asignatura } from 'src/models/Asignatura.entity';
 import { Asistencia } from 'src/models/Asistencia.entity';
 import { CalendarioAsistencia } from 'src/models/CalendarioAsistencia';
@@ -103,29 +103,78 @@ export class AsistenciaService {
         }
     }
 
+    async updateAsistencias(dtos: UpdateAsistenciaDto2[]): Promise<Asistencia[]> {
+        const asistenciasActualizadas: Asistencia[] = [];
+
+        for (const dto of dtos) {
+            try {
+                // Supongamos que tu "clave" para buscar la Asistencia es la combinación de:
+                // estudianteId, calendarioId, cursoId, semestreId (o la que tengas definida)
+                // O si tienes un "id_asistencia" único, úsalo para buscar.
+
+                const asistencia = await this.asistenciaRepository.findOne({
+                    where: {
+                        estudiante: { id: dto.estudianteId },
+                        calendario: { id_dia: dto.calendarioId },
+                        curso: { id: dto.cursoId },
+                        semestre: { id_semestre: dto.semestreId },
+                    },
+                });
+
+
+                if (!asistencia) {
+                    // Podrías manejar el error como quieras. Por ejemplo:
+                    // throw new Error(`Asistencia no encontrada para ${JSON.stringify(dto)}`);
+                    // O simplemente continuar.
+                    console.warn(`Asistencia no encontrada para:`, dto);
+                    continue;
+                }
+
+                // Actualiza la asistencia
+                if (dto.estado === 1) {
+                    asistencia.estado = true;
+                } else {
+                    asistencia.estado = false;
+                }
+                // Actualiza otros campos si es necesario
+                // asistencia.algo = dto.algo;
+
+                const asistenciaGuardada = await this.asistenciaRepository.save(asistencia);
+                asistenciasActualizadas.push(asistenciaGuardada);
+            } catch (error) {
+                console.error('Error actualizando asistencia:', error);
+                // Puedes optar por:
+                // - Propagar el error
+                // - O continuar con la siguiente y registrar cuál falló
+            }
+        }
+
+        return asistenciasActualizadas;
+    }
+
     async createAsistenciasForAllStudents(semestreId: number): Promise<string> {
         try {
             // Obtener el rango de fechas del semestre
             const semestre = await this.calendarioAsistenciaRepository.query(
-                `SELECT fecha_inicio, fecha_fin FROM semestres WHERE id_semestre = ?`, 
+                `SELECT fecha_inicio, fecha_fin FROM semestres WHERE id_semestre = ?`,
                 [semestreId]
             );
-    
+
             if (!semestre.length) {
                 throw new Error('Semestre no encontrado.');
             }
-    
+
             const { fecha_inicio, fecha_fin } = semestre[0];
-    
+
             // Obtener las fechas del calendario dentro del rango del semestre
             const calendario = await this.calendarioAsistenciaRepository.find({
                 where: { fecha: Between(fecha_inicio, fecha_fin) },
             });
-    
+
             if (!calendario.length) {
                 throw new Error('No se encontraron fechas en el calendario dentro del semestre especificado.');
             }
-    
+
             // Obtener estudiantes y sus cursos relacionados desde la tabla estudiante_curso
             const estudiantesCursos = await this.asistenciaRepository.query(
                 `SELECT estudiante.id AS estudianteId, estudiante_curso.curso_id AS cursoId
@@ -133,13 +182,13 @@ export class AsistenciaService {
                  INNER JOIN estudiante_curso ON estudiante.id = estudiante_curso.estudiante_id
                  WHERE estudiante.estado_estudiante = true`
             );
-    
+
             if (!estudiantesCursos.length) {
                 throw new Error('No se encontraron estudiantes activos relacionados a cursos.');
             }
-    
+
             // Generar las asistencias
-            const asistencias = estudiantesCursos.flatMap((estudiante) => 
+            const asistencias = estudiantesCursos.flatMap((estudiante) =>
                 calendario.map((fecha) => ({
                     estudiante: { id: estudiante.estudianteId },
                     curso: { id: estudiante.cursoId },
@@ -148,18 +197,18 @@ export class AsistenciaService {
                     estado: false, // Estado inicial
                 }))
             );
-    
+
             // Guardar las asistencias en la base de datos de forma masiva
             await this.asistenciaRepository.save(asistencias);
-    
+
             return 'Asistencias creadas exitosamente para todos los estudiantes.';
         } catch (error) {
             console.error('Error creando asistencias:', error);
             throw new Error('Error al crear las asistencias. Por favor verifica los datos e intenta nuevamente.');
         }
     }
-    
-    
+
+
 
 
 }
