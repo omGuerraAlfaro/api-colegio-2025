@@ -40,7 +40,7 @@ export class AsistenciaService {
                     'JSON_ARRAYAGG(JSON_OBJECT("fecha", calendario.fecha, "estado", asistencia.estado)) AS asistencias',
                 ])
                 .groupBy('estudiante.id')
-                .orderBy('estudiante.primer_nombre_alumno', 'ASC')
+                .orderBy('estudiante.primer_apellido_alumno', 'ASC')
                 .getRawMany();
 
             // Convertir asistencias (string) a objetos JSON
