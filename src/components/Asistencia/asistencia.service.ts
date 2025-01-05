@@ -209,6 +209,85 @@ export class AsistenciaService {
     }
 
 
+    async getAsistenciasResumenPorSemestre(semestreId: number): Promise<any[]> {
+        try {
+            const resultados = await this.asistenciaRepository
+                .createQueryBuilder('asistencia')
+                .innerJoinAndSelect('asistencia.estudiante', 'estudiante')
+                .where('asistencia.semestre.id_semestre = :semestreId', { semestreId })
+                .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
+                .select([
+                    'estudiante.id AS estudianteId',
+                    `CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS nombreCompleto`,
+                    'SUM(CASE WHEN asistencia.estado = true THEN 1 ELSE 0 END) AS asistencias',
+                    'SUM(CASE WHEN asistencia.estado = false THEN 1 ELSE 0 END) AS inasistencias',
+                    'COUNT(asistencia.id_asistencia) AS totalidad',
+                ])
+                .groupBy('estudiante.id')
+                .orderBy('estudiante.primer_apellido_alumno', 'ASC')
+                .getRawMany();
+    
+            return resultados.map((resultado) => ({
+                estudianteId: resultado.estudianteId,
+                nombreCompleto: resultado.nombreCompleto,
+                asistencias: parseInt(resultado.asistencias, 10),
+                inasistencias: parseInt(resultado.inasistencias, 10),
+                totalidad: parseInt(resultado.totalidad, 10),
+                porcentajeAsistencia: parseFloat(
+                    ((parseInt(resultado.asistencias, 10) / parseInt(resultado.totalidad, 10)) * 100).toFixed(2)
+                ),
+                porcentajeInasistencia: parseFloat(
+                    ((parseInt(resultado.inasistencias, 10) / parseInt(resultado.totalidad, 10)) * 100).toFixed(2)
+                ),
+            }));
+        } catch (error) {
+            console.error('Error fetching asistencia resumen data:', error);
+            throw new Error('Unable to fetch asistencia resumen data. Please check the input parameters and try again.');
+        }
+    }
+    
 
+
+    async getAsistenciasResumenPorAlumno(semestreId: number, alumnoId: number): Promise<any> {
+        try {
+            const resultado = await this.asistenciaRepository
+                .createQueryBuilder('asistencia')
+                .innerJoinAndSelect('asistencia.estudiante', 'estudiante')
+                .where('asistencia.semestre.id_semestre = :semestreId', { semestreId })
+                .andWhere('estudiante.id = :alumnoId', { alumnoId })
+                .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
+                .select([
+                    'estudiante.id AS estudianteId',
+                    `CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS nombreCompleto`,
+                    'SUM(CASE WHEN asistencia.estado = true THEN 1 ELSE 0 END) AS asistencias',
+                    'SUM(CASE WHEN asistencia.estado = false THEN 1 ELSE 0 END) AS inasistencias',
+                    'COUNT(asistencia.id_asistencia) AS totalidad',
+                ])
+                .groupBy('estudiante.id')
+                .getRawOne();
+    
+            if (!resultado) {
+                throw new Error('No data found for the given alumno and semestre.');
+            }
+    
+            return {
+                estudianteId: resultado.estudianteId,
+                nombreCompleto: resultado.nombreCompleto,
+                asistencias: parseInt(resultado.asistencias, 10),
+                inasistencias: parseInt(resultado.inasistencias, 10),
+                totalidad: parseInt(resultado.totalidad, 10),
+                porcentajeAsistencia: parseFloat(
+                    ((parseInt(resultado.asistencias, 10) / parseInt(resultado.totalidad, 10)) * 100).toFixed(2)
+                ),
+                porcentajeInasistencia: parseFloat(
+                    ((parseInt(resultado.inasistencias, 10) / parseInt(resultado.totalidad, 10)) * 100).toFixed(2)
+                ),
+            };
+        } catch (error) {
+            console.error('Error fetching asistencia resumen data for alumno:', error);
+            throw new Error('Unable to fetch asistencia resumen data for alumno. Please check the input parameters and try again.');
+        }
+    }
+    
 
 }

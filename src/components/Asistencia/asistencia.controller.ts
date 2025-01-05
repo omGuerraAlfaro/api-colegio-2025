@@ -64,4 +64,12 @@ export class AsistenciaController {
         return await this.asistenciaService.createAsistenciasForAllStudents(semestreId);
     }
 
+    @Get('resumen/alumno/:semestreId/:alumnoId')
+    async getAsistenciasResumenPorAlumno(
+        @Param('semestreId', ParseIntPipe) semestreId: number,
+        @Param('alumnoId', ParseIntPipe) alumnoId: number,
+    ): Promise<any> {
+        return this.asistenciaService.getAsistenciasResumenPorAlumno(semestreId, alumnoId);
+    }
+
 }
