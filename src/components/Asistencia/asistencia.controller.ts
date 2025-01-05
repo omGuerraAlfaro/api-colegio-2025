@@ -72,4 +72,13 @@ export class AsistenciaController {
         return this.asistenciaService.getAsistenciasResumenPorAlumno(semestreId, alumnoId);
     }
 
+    @Get('resumen/alumno/:semestreId/:alumnoId/:fechaHoy')
+    async getAsistenciasResumenPorAlumnoToday(
+        @Param('semestreId', ParseIntPipe) semestreId: number,
+        @Param('alumnoId', ParseIntPipe) alumnoId: number,
+        @Param('fechaHoy') fechaHoy: string, // Fecha límite recibida como parámetro
+    ): Promise<any> {
+        return this.asistenciaService.getAsistenciasResumenPorAlumnoToday(semestreId, alumnoId, fechaHoy);
+    }
+
 }

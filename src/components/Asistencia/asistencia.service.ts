@@ -306,6 +306,68 @@ export class AsistenciaService {
         }
     }
     
+    async getAsistenciasResumenPorAlumnoToday(
+        semestreId: number,
+        alumnoId: number,
+        fechaHoy: string, // Fecha límite como parámetro
+    ): Promise<any> {
+        try {
+            // Obtener el rango de fechas del semestre
+            const semestre = await this.calendarioAsistenciaRepository.query(
+                `SELECT fecha_inicio, fecha_fin FROM semestres WHERE id_semestre = ?`,
+                [semestreId]
+            );
+    
+            if (!semestre.length) {
+                throw new Error('Semestre no encontrado.');
+            }
+    
+            const { fecha_inicio } = semestre[0];
+    
+            const resultado = await this.asistenciaRepository
+                .createQueryBuilder('asistencia')
+                .innerJoinAndSelect('asistencia.estudiante', 'estudiante')
+                .innerJoin('asistencia.calendario', 'calendario')
+                .where('asistencia.semestre.id_semestre = :semestreId', { semestreId })
+                .andWhere('estudiante.id = :alumnoId', { alumnoId })
+                .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
+                .andWhere('calendario.fecha BETWEEN :fechaInicio AND :fechaHoy', {
+                    fechaInicio: fecha_inicio,
+                    fechaHoy: fechaHoy, // Fecha límite pasada como parámetro
+                })
+                .select([
+                    'estudiante.id AS estudianteId',
+                    `CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS nombreCompleto`,
+                    'SUM(CASE WHEN asistencia.estado = true THEN 1 ELSE 0 END) AS asistencias',
+                    'SUM(CASE WHEN asistencia.estado = false THEN 1 ELSE 0 END) AS inasistencias',
+                    'COUNT(asistencia.id_asistencia) AS totalidad',
+                ])
+                .groupBy('estudiante.id')
+                .getRawOne();
+    
+            if (!resultado) {
+                throw new Error('No data found for the given alumno and semestre.');
+            }
+    
+            return {
+                estudianteId: resultado.estudianteId,
+                nombreCompleto: resultado.nombreCompleto,
+                asistencias: parseInt(resultado.asistencias, 10),
+                inasistencias: parseInt(resultado.inasistencias, 10),
+                totalidad: parseInt(resultado.totalidad, 10),
+                porcentajeAsistencia: parseFloat(
+                    ((parseInt(resultado.asistencias, 10) / parseInt(resultado.totalidad, 10)) * 100).toFixed(2)
+                ),
+                porcentajeInasistencia: parseFloat(
+                    ((parseInt(resultado.inasistencias, 10) / parseInt(resultado.totalidad, 10)) * 100).toFixed(2)
+                ),
+            };
+        } catch (error) {
+            console.error('Error fetching asistencia resumen data for alumno:', error);
+            throw new Error('Unable to fetch asistencia resumen data for alumno. Please check the input parameters and try again.');
+        }
+    }
+    
     
 
 }
