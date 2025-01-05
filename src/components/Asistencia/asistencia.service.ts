@@ -250,12 +250,29 @@ export class AsistenciaService {
 
     async getAsistenciasResumenPorAlumno(semestreId: number, alumnoId: number): Promise<any> {
         try {
+            // Obtener el rango de fechas del semestre
+            const semestre = await this.calendarioAsistenciaRepository.query(
+                `SELECT fecha_inicio, fecha_fin FROM semestres WHERE id_semestre = ?`,
+                [semestreId]
+            );
+    
+            if (!semestre.length) {
+                throw new Error('Semestre no encontrado.');
+            }
+    
+            const { fecha_inicio, fecha_fin } = semestre[0];
+    
             const resultado = await this.asistenciaRepository
                 .createQueryBuilder('asistencia')
                 .innerJoinAndSelect('asistencia.estudiante', 'estudiante')
+                .innerJoin('asistencia.calendario', 'calendario')
                 .where('asistencia.semestre.id_semestre = :semestreId', { semestreId })
                 .andWhere('estudiante.id = :alumnoId', { alumnoId })
                 .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
+                .andWhere('calendario.fecha BETWEEN :fechaInicio AND :fechaFin', {
+                    fechaInicio: fecha_inicio,
+                    fechaFin: fecha_fin,
+                })
                 .select([
                     'estudiante.id AS estudianteId',
                     `CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS nombreCompleto`,
@@ -288,6 +305,7 @@ export class AsistenciaService {
             throw new Error('Unable to fetch asistencia resumen data for alumno. Please check the input parameters and try again.');
         }
     }
+    
     
 
 }
