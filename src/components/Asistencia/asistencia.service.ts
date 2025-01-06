@@ -323,7 +323,19 @@ export class AsistenciaService {
                 throw new Error('Semestre no encontrado.');
             }
     
-            const { fecha_inicio } = semestre[0];
+            const { fecha_inicio, fecha_fin } = semestre[0];
+
+            if (new Date(fechaHoy) < new Date(fecha_inicio) || new Date(fechaHoy) > new Date(fecha_fin)) {
+                return {
+                    message: 'La fecha proporcionada no está dentro del rango del semestre.',
+                    estudianteId: alumnoId,
+                    asistencias: 0,
+                    inasistencias: 0,
+                    totalidad: 0,
+                    porcentajeAsistencia: 0,
+                    porcentajeInasistencia: 0,
+                };
+            }
     
             const resultado = await this.asistenciaRepository
                 .createQueryBuilder('asistencia')
