@@ -269,6 +269,7 @@ export class AsistenciaService {
                 .where('asistencia.semestre.id_semestre = :semestreId', { semestreId })
                 .andWhere('estudiante.id = :alumnoId', { alumnoId })
                 .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
+                .andWhere('calendario.es_clase = :esClase', { esClase: true })
                 .andWhere('calendario.fecha BETWEEN :fechaInicio AND :fechaFin', {
                     fechaInicio: fecha_inicio,
                     fechaFin: fecha_fin,
@@ -331,6 +332,7 @@ export class AsistenciaService {
                 .where('asistencia.semestre.id_semestre = :semestreId', { semestreId })
                 .andWhere('estudiante.id = :alumnoId', { alumnoId })
                 .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
+                .andWhere('calendario.es_clase = :esClase', { esClase: true })
                 .andWhere('calendario.fecha BETWEEN :fechaInicio AND :fechaHoy', {
                     fechaInicio: fecha_inicio,
                     fechaHoy: fechaHoy, // Fecha límite pasada como parámetro
