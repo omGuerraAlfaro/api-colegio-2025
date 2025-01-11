@@ -327,7 +327,7 @@ export class AsistenciaService {
 
             if (new Date(fechaHoy) < new Date(fecha_inicio) || new Date(fechaHoy) > new Date(fecha_fin)) {
                 return {
-                    message: 'La fecha proporcionada no está dentro del rango del semestre.',
+                    message: 'La fecha de hoy no está dentro del rango del semestre.',
                     estudianteId: alumnoId,
                     asistencias: 0,
                     inasistencias: 0,
