@@ -20,7 +20,8 @@ import {
   AsistenciaModule,
   CalendarioEscolarModule,
   InscripcionMatriculaModule,
-  PdfModule
+  PdfModule,
+  NotasModule
 } from './components';
 
 @Module({
@@ -43,6 +44,7 @@ import {
     CalendarioEscolarModule,
     InscripcionMatriculaModule,
     PdfModule,
+    NotasModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: '44.207.168.60',

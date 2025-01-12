@@ -15,7 +15,25 @@ import { AsistenciaModule } from "./Asistencia/asistencia.module";
 import { CalendarioEscolarModule } from "./CalendarioEscolar/calendario-escolar.module";
 import { InscripcionMatriculaModule } from "./InscripcionMatricula/inscripcionMatricula.module";
 import { PdfModule } from "./Pdf/pdf.module";
+import { NotasModule } from "./Notas/notas.module";
 
-export { ApoderadoModule, EstudianteModule, ProfesorModule,
-     PaymentModule, CursoModule, UsuarioModule, AdministradorModule, AuthModule, NoticiasModule,
-     CorreoModule, BoletaModule, AnotacionModule, AsignaturaModule, AsistenciaModule, CalendarioEscolarModule, InscripcionMatriculaModule, PdfModule };
+export {
+     ApoderadoModule,
+     EstudianteModule,
+     ProfesorModule,
+     PaymentModule,
+     CursoModule,
+     UsuarioModule,
+     AdministradorModule,
+     AuthModule,
+     NoticiasModule,
+     CorreoModule,
+     BoletaModule,
+     AnotacionModule,
+     AsignaturaModule,
+     AsistenciaModule,
+     CalendarioEscolarModule,
+     InscripcionMatriculaModule,
+     PdfModule,
+     NotasModule
+};
