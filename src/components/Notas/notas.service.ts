@@ -113,11 +113,11 @@ export class NotasService {
             .andWhere('semestre.id_semestre = :semestreId', { semestreId })
             .select([
                 'asignatura.id AS asignaturaId',
-                'asignatura.nombre AS asignaturaNombre',
+                'asignatura.nombre_asignatura AS asignaturaNombre',
                 'AVG(nota.nota) AS promedio',
             ])
             .groupBy('asignatura.id')
-            .orderBy('asignatura.nombre', 'ASC')
+            .orderBy('asignatura.nombre_asignatura', 'ASC')
             .getRawMany();
 
         return resumen.map((r) => ({
