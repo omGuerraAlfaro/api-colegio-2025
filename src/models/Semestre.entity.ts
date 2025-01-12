@@ -1,5 +1,4 @@
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Evaluacion } from './Evaluacion.entity';
 import { Nota } from './Notas.entity';
 import { Asistencia } from './Asistencia.entity';
 
@@ -16,9 +15,6 @@ export class Semestre {
 
     @Column({ type: 'date' })
     fecha_fin: Date;
-
-    @OneToMany(() => Evaluacion, (evaluacion) => evaluacion.semestre)
-    evaluaciones: Evaluacion[];
 
     @OneToMany(() => Nota, (nota) => nota.semestre)
     notas: Nota[];
