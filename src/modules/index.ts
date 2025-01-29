@@ -9,7 +9,7 @@ import { AuthModule } from "./Auth/auth.module";
 import { NoticiasModule } from "./Noticias/noticias.module";
 import { CorreoModule } from "./Correo/correo.module";
 import { BoletaModule } from "./Boleta/boleta.module";
-import { AnotacionModule } from "./Anotacion//anotacion.module";
+import { AnotacionModule } from "./Anotacion/anotacion.module";
 import { AsignaturaModule } from "./Asignatura/asignatura.module";
 import { AsistenciaModule } from "./Asistencia/asistencia.module";
 import { CalendarioEscolarModule } from "./CalendarioEscolar/calendario-escolar.module";

@@ -14,7 +14,7 @@ export class PdfService {
 
     try {
       // Usar `process.cwd()` para asegurarse de que se busque en el directorio de trabajo actual
-      const templatePath = path.join(process.cwd(), 'src', 'components', 'templates', `${templateName}.hbs`);
+      const templatePath = path.join(process.cwd(), 'src', 'modules', 'pdf', 'templates', 'templates', `${templateName}.hbs`);
 
       // Verifica si el archivo de la plantilla existe
       if (!fs.existsSync(templatePath)) {

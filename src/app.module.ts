@@ -22,7 +22,7 @@ import {
   InscripcionMatriculaModule,
   PdfModule,
   NotasModule
-} from './components';
+} from './modules';
 
 @Module({
   imports: [
