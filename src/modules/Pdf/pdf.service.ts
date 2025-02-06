@@ -160,6 +160,17 @@ export class PdfService {
         }
       });
 
+      handlebars.registerHelper('getCursoNameType', function (cursoId) {
+        const id = parseInt(cursoId, 10);
+        if (id <= 2) {
+          return "Educación Parvularia";
+        }
+        else {
+          return "Educación Básica";
+        }
+      }
+      );
+
       handlebars.registerHelper('getGeneroName', function (genero) {
         switch (genero) {
           case 'F': return "Femenino";
