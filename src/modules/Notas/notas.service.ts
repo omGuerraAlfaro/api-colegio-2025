@@ -145,8 +145,13 @@ export class NotasService {
         return notas;
     }
 
-    async getNotasPorCursoAsignatura(cursoId: number, asignaturaId: number, semestreId: number): Promise<any[]> {
-        const notas = await this.notaRepository
+    async getNotasPorCursoAsignatura(
+        cursoId: number,
+        asignaturaId: number,
+        semestreId: number,
+      ): Promise<any[]> {
+        try {
+          const notas = await this.notaRepository
             .createQueryBuilder('nota')
             .innerJoinAndSelect('nota.estudiante', 'estudiante')
             .innerJoin('nota.curso', 'curso')
@@ -154,9 +159,19 @@ export class NotasService {
             .innerJoin('nota.semestre', 'semestre')
             .where('curso.id = :cursoId', { cursoId })
             .andWhere('asignatura.id = :asignaturaId', { asignaturaId })
+            // Si en la entidad Semestre la clave primaria es "id_semestre", usa este campo;
+            // de lo contrario, cámbialo a "semestre.id" si la clave es "id".
             .andWhere('semestre.id_semestre = :semestreId', { semestreId })
             .orderBy('estudiante.primer_apellido', 'ASC')
             .getMany();
-        return notas;
-    }
+      
+          return notas;
+        } catch (error) {
+          console.error('Error en getNotasPorCursoAsignatura:', error);
+          
+          // Puedes manejar el error de la forma que prefieras; en este caso se lanza nuevamente.
+          throw error;
+        }
+      }
+      
 }
