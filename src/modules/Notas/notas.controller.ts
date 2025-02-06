@@ -4,7 +4,7 @@ import { Nota } from 'src/models/Notas.entity';
 
 @Controller('notas')
 export class NotasController {
-    constructor(private readonly notasService: NotasService) {}
+    constructor(private readonly notasService: NotasService) { }
 
     // Obtener todas las notas por estudiante, asignatura y semestre
     @Get('/estudiante/:estudianteId/asignatura/:asignaturaId/semestre/:semestreId')
@@ -75,5 +75,18 @@ export class NotasController {
         @Param('evaluacionId') evaluacionId: number
     ): Promise<any[]> {
         return await this.notasService.getNotasPorEvaluacion(evaluacionId);
+    }
+
+    @Get('/curso/:cursoId/asignatura/:asignaturaId/semestre/:semestreId')
+    async getNotasPorCursoAsignatura(
+        @Param('cursoId') cursoId: number,
+        @Param('asignaturaId') asignaturaId: number,
+        @Param('semestreId') semestreId: number
+    ): Promise<any[]> {
+        return await this.notasService.getNotasPorCursoAsignatura(
+            cursoId,
+            asignaturaId,
+            semestreId
+        );
     }
 }

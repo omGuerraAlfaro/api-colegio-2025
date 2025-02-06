@@ -144,4 +144,19 @@ export class NotasService {
 
         return notas;
     }
+
+    async getNotasPorCursoAsignatura(cursoId: number, asignaturaId: number, semestreId: number): Promise<any[]> {
+        const notas = await this.notaRepository
+            .createQueryBuilder('nota')
+            .innerJoinAndSelect('nota.estudiante', 'estudiante')
+            .innerJoin('nota.curso', 'curso')
+            .innerJoin('nota.asignatura', 'asignatura')
+            .innerJoin('nota.semestre', 'semestre')
+            .where('curso.id = :cursoId', { cursoId })
+            .andWhere('asignatura.id = :asignaturaId', { asignaturaId })
+            .andWhere('semestre.id_semestre = :semestreId', { semestreId })
+            .orderBy('estudiante.primer_apellido', 'ASC')
+            .getMany();
+        return notas;
+    }
 }
