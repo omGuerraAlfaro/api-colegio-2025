@@ -11,7 +11,7 @@ export class NotasService {
         private readonly notaRepository: Repository<Nota>,
         @InjectRepository(Evaluacion)
         private readonly evaluacionRepository: Repository<Evaluacion>,
-    ) {}
+    ) { }
 
     async getNotasPorEstudianteAsignaturaSemestre(
         estudianteId: number,
@@ -149,29 +149,25 @@ export class NotasService {
         cursoId: number,
         asignaturaId: number,
         semestreId: number,
-      ): Promise<any[]> {
+    ): Promise<any[]> {
         try {
-          const notas = await this.notaRepository
-            .createQueryBuilder('nota')
-            .innerJoinAndSelect('nota.estudiante', 'estudiante')
-            .innerJoin('nota.curso', 'curso')
-            .innerJoin('nota.asignatura', 'asignatura')
-            .innerJoin('nota.semestre', 'semestre')
-            .where('curso.id = :cursoId', { cursoId })
-            .andWhere('asignatura.id = :asignaturaId', { asignaturaId })
-            // Si en la entidad Semestre la clave primaria es "id_semestre", usa este campo;
-            // de lo contrario, cámbialo a "semestre.id" si la clave es "id".
-            .andWhere('semestre.id_semestre = :semestreId', { semestreId })
-            .orderBy('estudiante.primer_apellido', 'ASC')
-            .getMany();
-      
-          return notas;
+            const notas = await this.notaRepository
+                .createQueryBuilder('nota')
+                .innerJoinAndSelect('nota.estudiante', 'estudiante')
+                .innerJoin('nota.curso', 'curso')
+                .innerJoin('nota.asignatura', 'asignatura')
+                .innerJoin('nota.semestre', 'semestre')
+                .where('curso.id = :cursoId', { cursoId })
+                .andWhere('asignatura.id = :asignaturaId', { asignaturaId })
+                .andWhere('semestre.id_semestre = :semestreId', { semestreId })
+                .orderBy('estudiante.primer_apellido_alumno', 'ASC')
+                .getMany();
+            return notas;
         } catch (error) {
-          console.error('Error en getNotasPorCursoAsignatura:', error);
-          
-          // Puedes manejar el error de la forma que prefieras; en este caso se lanza nuevamente.
-          throw error;
+            console.error('Error en getNotasPorCursoAsignatura:', error);
+            throw error;
         }
-      }
-      
+    }
+
+
 }
