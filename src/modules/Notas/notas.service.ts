@@ -152,7 +152,7 @@ export class NotasService {
             .innerJoin('nota.curso', 'curso')
             .innerJoin('nota.asignatura', 'asignatura')
             .innerJoin('nota.semestre', 'semestre')
-            .where('curso.id = :cursoId', { cursoId })
+            .where('curso.id_curso = :cursoId', { cursoId })
             .andWhere('asignatura.id = :asignaturaId', { asignaturaId })
             .andWhere('semestre.id_semestre = :semestreId', { semestreId })
             .orderBy('estudiante.primer_apellido', 'ASC')
