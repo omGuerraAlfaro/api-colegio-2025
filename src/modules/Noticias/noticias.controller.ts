@@ -1,6 +1,6 @@
 import { Controller, Post, Body, Get, Param, UseInterceptors, UploadedFile, HttpStatus, HttpException } from '@nestjs/common';
 import { NoticiasService } from './noticias.service';
-import { CreateFullNoticiaDto } from '../../../src/dto/noticia.dto';
+import { CreateFullNoticiaDto } from '../../dto/noticia.dto';
 import { NoticiasColegio } from 'src/models/Noticias.entity';
 import { ApiTags } from '@nestjs/swagger';
 

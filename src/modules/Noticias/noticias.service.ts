@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { NoticiasColegio } from '../../../src/models/Noticias.entity';
-import { NoticiasImages } from '../../../src/models/Noticias.entity';
-import { CreateFullNoticiaDto, } from '../../../src/dto/noticia.dto';
+import { NoticiasColegio } from '../../models/Noticias.entity';
+import { NoticiasImages } from '../../models/Noticias.entity';
+import { CreateFullNoticiaDto, } from '../../dto/noticia.dto';
 
 @Injectable()
 export class NoticiasService {
