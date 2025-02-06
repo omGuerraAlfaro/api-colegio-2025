@@ -1,0 +1,194 @@
+<html lang='es'>
+  <head>
+    <meta charset='UTF-8' />
+    <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+    <title>Ficha de Inscripción Colegio Andes Chile 2025</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+      }
+
+      .body {
+          display: flex;
+          flex-direction: column;
+      }
+
+      .content {
+        flex: 1; 
+        padding: 20px;
+      }
+
+      .text-center {
+        text-align: center;
+      }
+
+      .tabla {
+        border-collapse: collapse;
+        width: 100%;
+        margin-bottom: 10px;
+      }
+
+      .tabla td, .tabla th {
+        border: 1px solid black;
+        padding: 3px;
+        font-size: small;
+      }
+
+      .tabla th {
+        background-color: #f2f2f2;
+      }
+
+      .separacion {
+        overflow: auto;
+        margin-bottom: 20px;
+      }
+
+      .tabla2 {
+        border-collapse: collapse;
+        width: 48%;
+        margin: 1%;
+        float: left;
+      }
+
+      .tabla2 th {
+        background-color: #f2f2f2;
+      }
+
+      .justificar {
+        text-align: justify;
+        font-size: small;
+      }
+      .timbre{
+        width: 10%;
+      }
+
+      .signature-block {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 200px;
+      position: relative; /* Para posicionar el logo sobre la línea */
+      }
+
+      .block {
+        text-align: center;
+        position: relative; /* Para que el logo se posicione en relación a este bloque */
+      }
+
+      .block img {
+        width: 100px;
+        position: absolute;
+        left: 50%;
+        transform: translateX(-10%) translateY(-40%);
+      }
+
+      .block p {
+        margin: 5px 0;
+      }
+
+      .line {
+        border-bottom: 1px solid black;
+        width: 250px; /* Ajusta el ancho de la línea */
+        margin: 0 auto;
+        padding-top: 10px; /* Espacio entre la línea y el contenido superior */
+      }
+
+      @media print {
+       .contenidoCabeza {
+          top: 0;
+          width: 100%;
+          position: fixed;
+        }
+
+        .cabeza {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          font-weight: bolder;
+        }
+
+        .cabeza img {
+            max-width: 5%;
+            margin-right: 50px;
+            height: auto;
+        }
+
+        .content {
+          margin-top: 50px;
+        }
+
+        .pies {
+          position: fixed;
+          bottom: 0;
+          width: 100%;
+          font-size: xx-small;
+          font-weight: bolder;
+          text-align: center;
+        }
+
+        {{!-- table, tr, td, th {
+          page-break-inside: avoid;
+        } --}}
+
+        .page-break {
+          page-break-after: always;
+        }
+      }
+    </style>
+  </head>
+  <body>
+      <div class="contenidoCabeza">
+          <div class='cabeza'>
+            <p>Educando con Amor</p>
+            <img
+              class='logo'
+              src='https://www.colegioandeschile.cl/img/LOGO.png'
+              alt='Andes Chile Colegio'
+            />
+          </div>
+        <hr />
+      </div>
+
+    <div class='content'>
+      <h3 class='text-center'>CERTIFICADO ALUMNO REGULAR</h3>
+      <br />
+
+      <p class="justificar">Los Andes a martes, 04 de febrer de 2025, el señor Alfredo Gallegos Ávil, director del Colegio Particular Andes Chile, certifica que NOMBRE ESTUDIANTE - RUT: xx.xxx.xxx-x registro de matrícula.</p>
+      <p class="justificar">N° XXX Enseñanza Basica Colegio Particular Andes Chile, está matriculado(a) como alumno(a) regular para el año lectivo 2025 y cursará CURSO año de educación básica.</p>
+      <p class="justificar">Nuestro establecimiento educacional está ubicado en la calle Manuel Rodríguez N° 1064 en la ciudad de Los Andes y su RBD es: 14762-1.</p>
+      <p class="justificar">Se otorga el presente certificado a solicitud del apoderado(a) del alumno(a), para fines que estime conveniente. </p>
+
+      <div class="block">
+        <img class="timbre" src="https://www.colegioandeschile.cl/img/timbre.png" alt="Andes Chile Colegio"/>
+        <div class="line"></div>
+        <p>Sociedad Educacional Colegio Andes Chile</p>
+      </div>
+        
+      <div class="page-break" > </div> 
+      <br>
+
+
+    <div class='pies'>
+      <hr />
+      <p>Rodríguez 1064. Los Andes. Tel.: 342402858. Mail:colegioandeschile@gmail.com</p>
+      <p>www.colegioandeschile.cl</p>
+    </div>
+  </body>
+
+  <script>
+    // Obtener la fecha actual
+    const today = new Date();
+
+    const formattedDate = new Intl.DateTimeFormat('es-CL', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    }).format(today);
+
+    document.getElementById('current-date0').textContent = formattedDate;
+    document.getElementById('current-date').textContent = formattedDate;
+    document.getElementById('current-date2').textContent = formattedDate;
+    document.getElementById('current-date3').textContent = formattedDate;
+
+
+  </script>
+</html>

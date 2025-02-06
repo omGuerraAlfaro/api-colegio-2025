@@ -2,6 +2,7 @@ import { Controller, Get, Res, Query, InternalServerErrorException, Body, Post }
 import { PdfService } from './pdf.service';
 import { Response } from 'express';
 import { MatriculaDto } from 'src/dto/matricula.dto';
+import { AlumnoRegularDto } from 'src/dto/alumno-regular.dto';
 
 @Controller('pdf')
 export class PdfController {
@@ -11,7 +12,26 @@ export class PdfController {
   async generatePdf(@Res() res: Response, @Body() datosMatricula: MatriculaDto) {
     try {
       // Llama al servicio para generar el PDF
-      const pdf = await this.pdfService.generatePdf('pdf-contrato', datosMatricula );
+      const pdf = await this.pdfService.generatePdfContratoMatricula('pdf-contrato', datosMatricula );
+
+      // Establece la cabecera y envía el PDF
+      res.set({
+        'Content-Type': 'application/pdf',
+        'Content-Disposition': 'attachment; filename=example.pdf',
+      });
+
+      return res.send(pdf);
+    } catch (error) {
+      console.error('Error in controller:', error);
+      throw new InternalServerErrorException('Failed to generate PDF.');
+    }
+  }
+
+  @Post('generate/alumno-regular')
+  async generatePdfAlumnoRegular(@Res() res: Response, @Body() datosAlumno: AlumnoRegularDto) {
+    try {
+      // Llama al servicio para generar el PDF
+      const pdf = await this.pdfService.generatePdfAlumnoRegular('pdf-alumno-regular', datosAlumno );
 
       // Establece la cabecera y envía el PDF
       res.set({
