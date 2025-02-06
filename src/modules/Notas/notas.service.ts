@@ -149,25 +149,34 @@ export class NotasService {
         cursoId: number,
         asignaturaId: number,
         semestreId: number,
-    ): Promise<any[]> {
+      ): Promise<any[]> {
         try {
-            const notas = await this.notaRepository
-                .createQueryBuilder('nota')
-                .innerJoinAndSelect('nota.estudiante', 'estudiante')
-                .innerJoin('nota.curso', 'curso')
-                .innerJoin('nota.asignatura', 'asignatura')
-                .innerJoin('nota.semestre', 'semestre')
-                .where('curso.id = :cursoId', { cursoId })
-                .andWhere('asignatura.id = :asignaturaId', { asignaturaId })
-                .andWhere('semestre.id_semestre = :semestreId', { semestreId })
-                .orderBy('estudiante.primer_apellido_alumno', 'ASC')
-                .getMany();
-            return notas;
+          const notas = await this.notaRepository
+            .createQueryBuilder('nota')
+            .select([
+              'estudiante.id AS estudianteId',
+              'estudiante.primer_nombre_alumno AS primerNombre',
+              'estudiante.primer_apellido_alumno AS primerApellido',
+              'GROUP_CONCAT(nota.nota ORDER BY nota.fecha ASC SEPARATOR ", ") AS notas',
+            ])
+            .innerJoin('nota.estudiante', 'estudiante')
+            .innerJoin('nota.curso', 'curso')
+            .innerJoin('nota.asignatura', 'asignatura')
+            .innerJoin('nota.semestre', 'semestre')
+            .where('curso.id = :cursoId', { cursoId })
+            .andWhere('asignatura.id = :asignaturaId', { asignaturaId })
+            .andWhere('semestre.id_semestre = :semestreId', { semestreId })
+            .groupBy('estudiante.id')
+            .orderBy('estudiante.primer_apellido_alumno', 'ASC')
+            .getRawMany();
+      
+          return notas;
         } catch (error) {
-            console.error('Error en getNotasPorCursoAsignatura:', error);
-            throw error;
+          console.error('Error en getNotasPorCursoAsignatura:', error);
+          throw error;
         }
-    }
+      }
+      
 
 
 }
