@@ -20,16 +20,16 @@ export class PdfValidadorService {
         return await this.pdfValidadorRepository.find();
     }
 
-    async findOne(id: string): Promise<PdfValidador> {
-        const record = await this.pdfValidadorRepository.findOne({ where: { id } });
+    async findOne(validationCode: string): Promise<PdfValidador> {
+        const record = await this.pdfValidadorRepository.findOne({ where: { validationCode } });
         if (!record) {
-            throw new NotFoundException(`Registro con id ${id} no encontrado`);
+            throw new NotFoundException(`Registro con id ${validationCode} no encontrado`);
         }
         return record;
     }
 
-    async update(id: string, updatePdfValidadorDto: UpdatePdfValidadorDto): Promise<PdfValidador> {
-        const record = await this.findOne(id);
+    async update(validationCode: string, updatePdfValidadorDto: UpdatePdfValidadorDto): Promise<PdfValidador> {
+        const record = await this.findOne(validationCode);
         Object.assign(record, updatePdfValidadorDto);
         return await this.pdfValidadorRepository.save(record);
     }
