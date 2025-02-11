@@ -29,6 +29,8 @@ export class PdfValidadorController {
     async validar(@Query('id') id: string) {
         // Buscar el registro por id
         const record = await this.pdfValidadorService.findOne(id);
+        delete record.validationCode;
+        
         if (!record) {
             throw new NotFoundException(`Registro con id ${id} no encontrado`);
         }
@@ -45,7 +47,7 @@ export class PdfValidadorController {
         };
 
         const updatedRecord = await this.pdfValidadorService.update(id, updateData);
-
+        delete updatedRecord.validationCode;
         return { message: 'Certificado validado exitosamente', data: updatedRecord };
     }
 
