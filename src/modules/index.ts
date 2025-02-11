@@ -16,6 +16,7 @@ import { CalendarioEscolarModule } from "./CalendarioEscolar/calendario-escolar.
 import { InscripcionMatriculaModule } from "./InscripcionMatricula/inscripcionMatricula.module";
 import { PdfModule } from "./Pdf/pdf.module";
 import { NotasModule } from "./Notas/notas.module";
+import { PdfValidadorModule } from "./Pdf-Validador/pdf-validador.module";
 
 export {
      ApoderadoModule,
@@ -35,5 +36,6 @@ export {
      CalendarioEscolarModule,
      InscripcionMatriculaModule,
      PdfModule,
-     NotasModule
+     NotasModule,
+     PdfValidadorModule
 };

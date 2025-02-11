@@ -71,7 +71,8 @@
 
       .block {
         text-align: center;
-        position: relative; /* Para que el logo se posicione en relación a este bloque */
+        position: relative;
+        margin-top: 200px;
       }
 
       .block img {
@@ -133,6 +134,22 @@
           page-break-after: always;
         }
       }
+
+      .qr-container {
+        display: flex;
+        align-items: center;
+        text-align: left;
+        margin-top: 200px;
+      }
+
+      .qr-container img {
+        margin-right: 15px;
+      }
+
+      .qr-text {
+        font-size: small;
+      }
+
     </style>
   </head>
   <body>
@@ -152,19 +169,27 @@
       <h3 class='text-center'>CERTIFICADO ALUMNO REGULAR</h3>
       <br />
 
-      <p class="justificar">Los Andes a <span id="current-date"></span>, el señor Alfredo Gallegos Ávila, director del Colegio Particular Andes Chile, certifica que <b>{{primer_nombre_alumno}} {{segundo_nombre_alumno}} {{primer_apellido_alumno}} {{segundo_apellido_alumno}} - RUT: {{formatRut rut}}-{{dv}} </b> registro de matrícula N° {{numero_matricula}} {{getCursoNameType cursoId}} Colegio Particular Andes Chile.</p>
-      <p class="justificar">Está matriculado(a) como alumno(a) regular para el año lectivo 2025 y cursará {{getCursoNameType cursoId}}</p>
-      <p class="justificar">Nuestro establecimiento educacional está ubicado en la calle Manuel Rodríguez N° 1064 en la ciudad de Los Andes y su RBD es: 14762-1.</p>
-      <p class="justificar">Se otorga el presente certificado a solicitud del apoderado(a) del alumno(a), para fines que estime conveniente. </p>
+      <p class="justificar">Los Andes a <span id="current-date"></span>, el señor Alfredo Gallegos Ávila, director del <b>Colegio Particular Andes Chile</b>, certifica que <b>{{primer_nombre_alumno}} {{segundo_nombre_alumno}} {{primer_apellido_alumno}} {{segundo_apellido_alumno}}, RUT: {{formatRut rut}}-{{dv}} </b> con registro de matrícula <b>N°{{numero_matricula}}.</b></p>
+      <p class="justificar">Está matriculado(a) como alumno(a) regular para el año lectivo <b><span id="current-year"></span></b> en el nivel <b>{{getCursoName curso}} - {{getCursoNameType curso}}.</b></p>
+      <p class="justificar">Nuestro establecimiento educacional se encuentra ubicado en <b>Manuel Rodríguez N° 1064 en la ciudad de Los Andes</b>, y su <b>RBD</b> es: <b>14762-1.</b></p>
+      <p class="justificar">Se extiende el presente certificado a solicitud del apoderado(a) del alumno(a), para fines que estime conveniente. </p>
 
       <div class="block">
         <img class="timbre" src="https://www.colegioandeschile.cl/img/timbre.png" alt="Andes Chile Colegio"/>
         <div class="line"></div>
-        <p>Sociedad Educacional Colegio Andes Chile</p>
+        <p style="font-size: medium;"><b>Alfredo Gallegos Ávila</b></p>
+        <p style="font-size: small;"><b>Director Académico</b></p>
+        <p style="font-size: small;"><b>Colegio Andes Chile</b></p>
       </div>
-        
-      <div class="page-break" > </div> 
-      <br>
+
+      <div class="qr-container">
+        <img src="{{qrCode}}" alt="QR Code de Validación" width="100" height="100"/>
+        <div class="qr-text">
+          <p><b>Para validar este certificado dirigirse a:</b></p>
+          <p><b>www.colegioandeschile.cl/validar-certificado</b></p>
+          <p><b>Ingresar código de validación: {{newValidationId}}</b></p>
+        </div>
+      </div>
 
 
     <div class='pies'>
@@ -184,11 +209,11 @@
       year: 'numeric'
     }).format(today);
 
-    document.getElementById('current-date0').textContent = formattedDate;
     document.getElementById('current-date').textContent = formattedDate;
-    document.getElementById('current-date2').textContent = formattedDate;
-    document.getElementById('current-date3').textContent = formattedDate;
 
+
+    const currentYear = new Date().getFullYear();
+    document.getElementById('current-year').textContent = currentYear;
 
   </script>
 </html>

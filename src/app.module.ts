@@ -21,7 +21,8 @@ import {
   CalendarioEscolarModule,
   InscripcionMatriculaModule,
   PdfModule,
-  NotasModule
+  NotasModule,
+  PdfValidadorModule
 } from './modules';
 
 @Module({
@@ -45,6 +46,7 @@ import {
     InscripcionMatriculaModule,
     PdfModule,
     NotasModule,
+    PdfValidadorModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: '44.207.168.60',
@@ -53,7 +55,6 @@ import {
       password: 'tZk+2t]rxUG3',
       database: 'colegioa_colegio2025',
       entities,
-      timezone: 'Z',
       synchronize: true
     }),
   ]

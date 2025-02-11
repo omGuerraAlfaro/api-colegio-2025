@@ -28,13 +28,14 @@ import { Nota } from './Notas.entity';
 import { Evaluacion } from './Evaluacion.entity';
 import { Semestre } from './Semestre.entity';
 import { CalendarioAsistencia } from './CalendarioAsistencia';
+import { PdfValidador } from './pdf-validador.entity';
 
 
 export const entities = [Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudiante, ApoderadoEstudiante,
                         Estudiante, Profesor, Curso, EstudianteCurso, Anotacion, AnotacionesEstudiante, Usuarios, Administrador, SubAdministrador,
                         Boleta, EstadoBoleta, Transacciones, EstadoTransaccion, TransactionEntity,
                         NoticiasColegio, NoticiasImages,
-                        Correo, InscripcionMatricula,
+                        Correo, InscripcionMatricula, PdfValidador,
                         Asignatura, Evaluacion, Nota, Semestre,
                         Asistencia, CalendarioEscolar, CalendarioAsistencia];
 

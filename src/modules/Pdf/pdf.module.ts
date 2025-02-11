@@ -1,13 +1,11 @@
 import { Module } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { PdfController } from './pdf.controller';
 import { PdfService } from './pdf.service';
-import { NoticiasImages } from 'src/models/Noticias.entity';
+import { PdfValidadorModule } from '../Pdf-Validador/pdf-validador.module';
 
 @Module({
-  imports: [
-  ],
+  imports: [PdfValidadorModule],
   controllers: [PdfController],
   providers: [PdfService],
 })
-export class PdfModule {}
+export class PdfModule { }
