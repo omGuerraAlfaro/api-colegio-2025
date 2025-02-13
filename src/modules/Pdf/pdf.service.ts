@@ -135,33 +135,32 @@ export class PdfService {
     let page: puppeteer.Page | null = null;
 
     try {
-      // Usar process.cwd() para buscar en el directorio de trabajo actual
       const templatePath = path.join(process.cwd(), 'src', 'modules', 'templates', `${templateName}.hbs`);
 
-      // Verifica si el archivo de la plantilla existe
       if (!fs.existsSync(templatePath)) {
         console.error('Template not found:', templatePath);
         throw new Error('Template file does not exist.');
       }
 
-      // 1. Generar un identificador único para la validación del certificado
       const newValidationId = uuidv4();
 
-      // 2. Persistir el registro en la base de datos usando el PdfValidadorService  
-      // Puedes ajustar los campos según tu entidad y la información disponible en data
       await this.pdfValidadorService.create({
         validationCode: newValidationId,
-        certificateType: 'Alumno Regular',
-        certificateNumber: (data as any).numero_matricula || null, // Asegúrate de que 'numero_matricula' esté en tu DTO
-        // isValid se setea por defecto a false en la entidad
+        certificateType: data.tipo_certificado,
+        certificateNumber: (data as any).numero_matricula || null,
+        primerNombreAlumno: data.primer_nombre_alumno,
+        segundoNombreAlumno: data.segundo_nombre_alumno,
+        primerApellidoAlumno: data.primer_apellido_alumno,
+        segundoApellidoAlumno: data.segundo_apellido_alumno,
+        curso: Number(data.curso),
+        rut: data.rut,
+        dv: data.dv,
+        isErp: data.isErp
       });
 
-      // 3. Construir la URL de validación incluyendo el id generado
       const validationUrl = `https://www.colegioandeschile.cl/validar-certificado?id=${newValidationId}`;
-      // 4. Generar el código QR con la URL de validación
       const qrCodeDataUrl = await QRCode.toDataURL(validationUrl);
 
-      // Configurar los helpers de Handlebars
       handlebars.registerHelper('formatRut', function (rut) {
         const rutStr = rut.toString();
         return rutStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
@@ -208,13 +207,10 @@ export class PdfService {
         return valorMensual.toLocaleString('es-CL');
       });
 
-      // Leer y compilar la plantilla de Handlebars
       const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
-      // Se pasa además la imagen del QR (ya con la URL de validación) a la plantilla
       const template = handlebars.compile(htmlTemplate);
       const html = template({ ...data, qrCode: qrCodeDataUrl, newValidationId: newValidationId });
 
-      // Lanzar Puppeteer para generar el PDF
       browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
@@ -223,7 +219,6 @@ export class PdfService {
       page = await browser.newPage();
       await page.setContent(html);
 
-      // Generar el PDF y convertirlo a Buffer
       const pdfBuffer = Buffer.from(
         await page.pdf({
           width: '21.5cm',
@@ -250,7 +245,6 @@ export class PdfService {
       console.error('Error generating PDF:', error.message, error.stack);
       throw new InternalServerErrorException('Failed to generate PDF.');
     } finally {
-      // Asegurar que los recursos de Puppeteer se cierren siempre
       if (page) {
         try {
           await page.close();

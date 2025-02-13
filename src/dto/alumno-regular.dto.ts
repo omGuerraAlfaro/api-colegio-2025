@@ -34,4 +34,12 @@ export class AlumnoRegularDto {
     @IsString()
     @IsNotEmpty()
     curso: string;
+
+    @IsString()
+    @IsNotEmpty()
+    tipo_certificado: string;
+
+    @IsBoolean()
+    @IsNotEmpty()
+    isErp: boolean;
 }
