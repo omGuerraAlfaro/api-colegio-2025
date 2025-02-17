@@ -253,28 +253,18 @@ export class PdfService {
       page = await browser.newPage();
       await page.setContent(html);
 
-      const pdfBuffer = Buffer.from(
-        await page.pdf({
-          width: '21.5cm',
-          height: '33cm',
-          printBackground: true,
-          margin: {
-            top: '80px',
-            bottom: '80px',
-            left: '20mm',
-            right: '20mm',
-          },
-          displayHeaderFooter: true,
-          headerTemplate: `<p></p>`,
-          footerTemplate: `
-            <div style="font-size:10px; width:100%; text-align:center;">
-              Página <span class="pageNumber"></span> de <span class="totalPages"></span>
-            </div>
-          `,
-        })
-      );
-
-      return pdfBuffer;
+      const pdfBuffer = await page.pdf({
+        width: '21.5cm',
+        height: '33cm',
+        printBackground: true,
+        margin: { top: '80px', bottom: '80px', left: '20mm', right: '20mm' },
+        displayHeaderFooter: true,
+        headerTemplate: `<p></p>`,
+        footerTemplate: `<div style="font-size:10px; text-align:center;"> Página <span class="pageNumber"></span> de <span class="totalPages"></span> </div>`
+      });
+      
+      return Buffer.from(pdfBuffer);
+      
     } catch (error) {
       console.error('Error generating PDF:', error.message, error.stack);
       throw new InternalServerErrorException('Failed to generate PDF.');
