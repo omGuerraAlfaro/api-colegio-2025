@@ -40,6 +40,12 @@ export class Profesor {
     @Column({ type: 'varchar', length: 10, nullable: true })
     genero: string;
 
+    @Column({ default: true })
+    estado_profesor: boolean;
+
+    @Column({ type: 'varchar', length: 100, nullable: true })
+    asignatura: string;
+
     @OneToMany(() => Curso, curso => curso.profesorConnection)
     cursoConnection: Curso[];
 
