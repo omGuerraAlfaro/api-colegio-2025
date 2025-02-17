@@ -39,6 +39,7 @@ export class PdfController {
       res.set({
         'Content-Type': 'application/pdf',
         'Content-Disposition': 'attachment; filename=certificado.pdf',
+        'Content-Length': pdf.length
       });
 
       return res.send(pdf);
