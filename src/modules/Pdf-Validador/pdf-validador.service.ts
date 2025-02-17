@@ -33,6 +33,14 @@ export class PdfValidadorService {
         return record;
     }
 
+    async findOneByRutApoderado(rut: string): Promise<PdfValidador[]> {
+        const record = await this.pdfValidadorRepository.find({ where: { rutApoderado: rut, isPagada: true } });
+        if (!record) {
+            throw new NotFoundException(`Registro con id ${rut} no encontrado`);
+        }
+        return record;
+    }
+
     async update(id: string, updatePdfValidadorDto: UpdatePdfValidadorDto): Promise<PdfValidador> {
         const record = await this.findOne(id);
         Object.assign(record, updatePdfValidadorDto);
