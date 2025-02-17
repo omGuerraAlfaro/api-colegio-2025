@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { CreatePdfValidadorDto, UpdatePdfValidadorDto } from 'src/dto/pdf-validador.dto';
 import { PdfValidador } from 'src/models/pdf-validador.entity';
 import { Repository } from 'typeorm';
-import { addDays } from 'date-fns';
+import { addDays, startOfDay } from 'date-fns';
 
 @Injectable()
 export class PdfValidadorService {
@@ -19,11 +19,11 @@ export class PdfValidadorService {
 
     async createArray(createPdfValidadorDto: CreatePdfValidadorDto[]): Promise<PdfValidador[]> {
         const newRecords = this.pdfValidadorRepository.create(createPdfValidadorDto);
-    
+
         newRecords.forEach(record => {
-            record.expirationDate = addDays(new Date(), 30);
+            record.expirationDate = startOfDay(addDays(new Date(), 30));
         });
-    
+
         return await this.pdfValidadorRepository.save(newRecords);
     }
 

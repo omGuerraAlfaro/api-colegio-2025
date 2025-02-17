@@ -9,7 +9,7 @@ import { AlumnoRegularDto } from 'src/dto/alumno-regular.dto';
 import * as QRCode from 'qrcode';
 import { PdfValidadorService } from '../Pdf-Validador/pdf-validador.service';
 import { v4 as uuidv4 } from 'uuid';
-import { addDays, format } from 'date-fns';
+import { addDays, format, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 @Injectable()
@@ -166,7 +166,7 @@ export class PdfService {
           dv: data.dv,
           isErp: data.isErp,
           rutApoderado: data.rutApoderado,
-          expirationDate: addDays(new Date(), 30)
+          expirationDate: startOfDay(addDays(new Date(), 30))
         });
 
         templateData = { ...data };
