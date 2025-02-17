@@ -9,7 +9,8 @@ import { AlumnoRegularDto } from 'src/dto/alumno-regular.dto';
 import * as QRCode from 'qrcode';
 import { PdfValidadorService } from '../Pdf-Validador/pdf-validador.service';
 import { v4 as uuidv4 } from 'uuid';
-import { log } from 'console';
+import { addDays, format } from 'date-fns';
+import { es } from 'date-fns/locale';
 
 @Injectable()
 export class PdfService {
@@ -164,7 +165,8 @@ export class PdfService {
           rut: data.rut,
           dv: data.dv,
           isErp: data.isErp,
-          rutApoderado: data.rutApoderado
+          rutApoderado: data.rutApoderado,
+          expirationDate: addDays(new Date(), 30)
         });
 
         templateData = { ...data };
@@ -225,6 +227,10 @@ export class PdfService {
       handlebars.registerHelper('formatearValor', (valor_mensualidad) => {
         const valorMensual = parseFloat(valor_mensualidad);
         return valorMensual.toLocaleString('es-CL');
+      });
+      handlebars.registerHelper('formatDate', (date) => {
+        if (!date) return 'Fecha inválida';
+        return format(new Date(date), "dd 'de' MMMM 'de' yyyy", { locale: es });
       });
 
       // Leer y compilar el template
