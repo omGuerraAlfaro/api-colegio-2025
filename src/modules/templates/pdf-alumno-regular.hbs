@@ -78,7 +78,7 @@
       .block img {
         width: 100px;
         position: absolute;
-        left: 50%;
+        left: 48%;
         transform: translateX(-10%) translateY(-40%);
       }
 
@@ -169,12 +169,23 @@
       <h3 class='text-center'>CERTIFICADO ALUMNO REGULAR</h3>
       <br />
 
-      <p class="justificar">Los Andes a <span id="current-date"></span>, el señor Alfredo Gallegos Ávila, director del <b>Colegio Particular Andes Chile</b>, certifica que <b>{{primer_nombre_alumno}} {{segundo_nombre_alumno}} {{primer_apellido_alumno}} {{segundo_apellido_alumno}}, RUT: {{formatRut rut}}-{{dv}} </b> con registro de matrícula <b>N°{{numero_matricula}}.</b></p>
+      <p class="justificar">
+        Los Andes a <span id="current-date"></span>, el señor Alfredo Gallegos Ávila, 
+        director del <b>Colegio Particular Andes Chile</b>, certifica que 
+        <b>
+          {{#if primer_nombre_alumno}}{{primer_nombre_alumno}}{{else}}{{primerNombreAlumno}}{{/if}} 
+          {{#if segundo_nombre_alumno}}{{segundo_nombre_alumno}}{{else}}{{segundoNombreAlumno}}{{/if}} 
+          {{#if primer_apellido_alumno}}{{primer_apellido_alumno}}{{else}}{{primerApellidoAlumno}}{{/if}} 
+          {{#if segundo_apellido_alumno}}{{segundo_apellido_alumno}}{{else}}{{segundoApellidoAlumno}}{{/if}}, 
+          RUT: {{#if formatRut}}{{formatRut rut}}{{else}}{{rut}}{{/if}}-{{dv}}</b>, con registro de matrícula 
+        <b>N°{{#if numero_matricula}}{{numero_matricula}}{{else}}{{certificateNumber}}{{/if}}.</b>
+      </p>
       <p class="justificar">Está matriculado(a) como alumno(a) regular para el año lectivo <b><span id="current-year"></span></b> en el nivel <b>{{getCursoName curso}} - {{getCursoNameType curso}}.</b></p>
       <p class="justificar">Nuestro establecimiento educacional se encuentra ubicado en <b>Manuel Rodríguez N° 1064 en la ciudad de Los Andes</b>, y su <b>RBD</b> es: <b>14762-1.</b></p>
       <p class="justificar">Se extiende el presente certificado a solicitud del apoderado(a) del alumno(a), para fines que estime conveniente. </p>
 
       <div class="block">
+        <img class="firma" src="https://www.colegioandeschile.cl/img/firma.png" style="width: 35%; position: absolute; left: 30%; top: -12%" alt="Andes Chile Colegio"/>
         <img class="timbre" src="https://www.colegioandeschile.cl/img/timbre.png" alt="Andes Chile Colegio"/>
         <div class="line"></div>
         <p style="font-size: medium;"><b>Alfredo Gallegos Ávila</b></p>

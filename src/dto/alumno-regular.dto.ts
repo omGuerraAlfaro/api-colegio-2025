@@ -1,45 +1,46 @@
-import { IsBoolean, IsEmail, IsNotEmpty, IsOptional, IsString, Length, Matches, IsDateString, ValidateNested, IsArray, IsNumber } from 'class-validator';
-import { Type } from 'class-transformer';
+import { IsOptional, IsString, IsNumber } from 'class-validator';
 
 export class AlumnoRegularDto {
+  @IsOptional()
+  @IsNumber()
+  numero_matricula?: number;
 
-    @IsNumber()
-    @IsNotEmpty()
-    numero_matricula: number;
+  @IsOptional()
+  @IsString()
+  primer_nombre_alumno?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    primer_nombre_alumno: string;
+  @IsOptional()
+  @IsString()
+  segundo_nombre_alumno?: string;
 
-    @IsString()
-    @IsOptional()
-    segundo_nombre_alumno?: string;
+  @IsOptional()
+  @IsString()
+  primer_apellido_alumno?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    primer_apellido_alumno: string;
+  @IsOptional()
+  @IsString()
+  segundo_apellido_alumno?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    segundo_apellido_alumno: string;
+  @IsOptional()
+  @IsString()
+  rut?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    rut: string;
+  @IsOptional()
+  @IsString()
+  dv?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    dv: string;
+  @IsOptional()
+  @IsString()
+  curso?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    curso: string;
+  @IsOptional()
+  @IsString()
+  tipo_certificado?: string;
 
-    @IsString()
-    @IsNotEmpty()
-    tipo_certificado: string;
+  @IsOptional()
+  isErp?: boolean;
 
-    @IsBoolean()
-    @IsNotEmpty()
-    isErp: boolean;
+  @IsOptional()
+  @IsString()
+  rutApoderado?: string;
 }

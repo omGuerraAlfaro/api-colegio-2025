@@ -11,11 +11,14 @@ import { ApoderadoService } from '../Apoderado/apoderado.service';
 import { json } from 'stream/consumers';
 import { EstudianteService } from '../Estudiante/estudiante.service';
 import { Transacciones } from 'src/models/Transacciones.entity';
+import { PdfValidadorService } from '../Pdf-Validador/pdf-validador.service';
+import { log } from 'console';
 
 @Injectable()
 export class PaymentService {
     private commerceCode: string;
     private apiKey: string;
+    private tx: InstanceType<typeof WebpayPlus.Transaction>;
 
     constructor(
         @InjectRepository(TransactionEntity)
@@ -26,6 +29,7 @@ export class PaymentService {
         private readonly correoService: CorreoService,
         private readonly apoderadoService: ApoderadoService,
         private readonly estudianteService: EstudianteService,
+        private readonly pdfValidadorService: PdfValidadorService
     ) {
         this.commerceCode = process.env.COMMERCE_CODE;
         this.apiKey = process.env.API_KEY;
@@ -35,15 +39,20 @@ export class PaymentService {
         }
 
         WebpayPlus.configureForProduction(this.commerceCode, this.apiKey);
+
+
+        // 📌 Producción:
+        this.tx = new WebpayPlus.Transaction(new Options(this.commerceCode, this.apiKey, Environment.Production));
+
+        // 📌 Integración:
+        // this.tx = new WebpayPlus.Transaction(new Options(IntegrationCommerceCodes.WEBPAY_PLUS, IntegrationApiKeys.WEBPAY, Environment.Integration));
     }
 
 
 
     async createTransaction(buyOrder: string, sessionId: string, amount: number, returnUrl: string) {
-        const tx = new WebpayPlus.Transaction(new Options(this.commerceCode, this.apiKey, Environment.Production));
-        // const tx = new WebpayPlus.Transaction(new Options(IntegrationCommerceCodes.WEBPAY_PLUS, IntegrationApiKeys.WEBPAY, Environment.Integration));
         try {
-            const response = await tx.create(buyOrder, sessionId, amount, returnUrl);
+            const response = await this.tx.create(buyOrder, sessionId, amount, returnUrl);
 
             // Save transaction to database
             await this.transactionRepository.save({
@@ -86,10 +95,8 @@ export class PaymentService {
     }
 
     async confirmTransaction(token: string) {
-        const tx = new WebpayPlus.Transaction(new Options(this.commerceCode, this.apiKey, Environment.Production));
-        // const tx = new WebpayPlus.Transaction(new Options(IntegrationCommerceCodes.WEBPAY_PLUS, IntegrationApiKeys.WEBPAY, Environment.Integration));
         try {
-            const response = await tx.commit(token);
+            const response = await this.tx.commit(token);
             console.log(token);
 
             const { buy_order, amount, session_id, status, accounting_date, transaction_date, authorization_code, payment_type_code, response_code, vci } = response;
@@ -115,7 +122,7 @@ export class PaymentService {
             const apoderados = new Map();
             const estudiantes = new Map();
             var correo = '';
-            
+
             let totalPago = 0;
             for (const idBoleta of idsBoletas) {
                 await this.boletaService.updateBoletaStatus(idBoleta, 2, buy_order);
@@ -399,7 +406,84 @@ export class PaymentService {
         }
     }
 
+    async createTransactionForCertificados(buyOrder: string, sessionId: string, amount: number, returnUrl: string) {
+        try {
+            const response = await this.tx.create(buyOrder, sessionId, amount, returnUrl);
+
+            // Save transaction to database
+            await this.transactionRepository.save({
+                buyOrder: buyOrder,
+                sessionId: sessionId,
+                amount: amount,
+                token: response.token,
+                status: 'pendiente',
+            });
+
+            return response;
+        } catch (error) {
+            throw new InternalServerErrorException(error.message);
+        }
+    }
+
+    async confirmTransactionForCertificados(token: string) {
+        try {
+            const response = await this.tx.commit(token);
+            console.log("Token:", token);
+
+            const { buy_order, amount, session_id, status, accounting_date, transaction_date, authorization_code, payment_type_code, response_code, vci } = response;
+
+            const parts = buy_order.split('-');
+
+            const updateData = {
+                isPagada: true,
+                pagadaAt: new Date(),
+            };
+
+            const updatedRecords = await Promise.all(
+                parts.map(async (uniqueIdPago) => {
+                    const record = await this.pdfValidadorService.updatePay(uniqueIdPago, updateData);
+                    return {
+                        primerNombreAlumno: record.primerNombreAlumno,
+                        segundoNombreAlumno: record.segundoNombreAlumno ?? undefined,
+                        primerApellidoAlumno: record.primerApellidoAlumno,
+                        segundoApellidoAlumno: record.segundoApellidoAlumno,
+                        certificateType: record.certificateType,
+                    };
+                })
+            );            
+
+            let estadoTransaccionId;
+            console.log(vci);
+            
+            switch (vci) {
+                case 'TSY':
+                case 'TSYS':
+                case 'TSYF':
+                    await this.updateTransactionStatus(token, 'aprobado');
+                    estadoTransaccionId = 3; // Terminada
+                    break;
+                default:
+                    estadoTransaccionId = 2; // Rechazada
+                    break;
+            }
+
+            return { response, updatedRecords };
+        } catch (error) {
+            throw new InternalServerErrorException(error.message);
+        }
+    }
+
+
 }
+
+
+// const updateData = {
+//     isPagada: true,
+//     pagadaAt: new Date(),
+// };
+
+// const updatedRecord = await this.pdfValidadorService.update(id, updateData);
+// delete updatedRecord.validationCode;
 
 // const correoHtmlApoderado = `
 //     <h4><strong>Confirmación de Transferencia</strong></h4>

@@ -6,13 +6,13 @@ import { AlumnoRegularDto } from 'src/dto/alumno-regular.dto';
 
 @Controller('pdf')
 export class PdfController {
-  constructor(private readonly pdfService: PdfService) {}
+  constructor(private readonly pdfService: PdfService) { }
 
   @Post('generate')
   async generatePdf(@Res() res: Response, @Body() datosMatricula: MatriculaDto) {
     try {
       // Llama al servicio para generar el PDF
-      const pdf = await this.pdfService.generatePdfContratoMatricula('pdf-contrato', datosMatricula );
+      const pdf = await this.pdfService.generatePdfContratoMatricula('pdf-contrato', datosMatricula);
 
       // Establece la cabecera y envía el PDF
       res.set({
@@ -28,15 +28,17 @@ export class PdfController {
   }
 
   @Post('generate/alumno-regular')
-  async generatePdfAlumnoRegular(@Res() res: Response, @Body() datosAlumno: AlumnoRegularDto) {
+  async generatePdfAlumnoRegular(
+    @Res() res: Response,
+    @Body() datosAlumno: AlumnoRegularDto | null, // Permite que sea null
+    @Query('validationCode') validationCode?: string
+  ) {
     try {
-      // Llama al servicio para generar el PDF
-      const pdf = await this.pdfService.generatePdfAlumnoRegular('pdf-alumno-regular', datosAlumno );
+      const pdf = await this.pdfService.generatePdfAlumnoRegular('pdf-alumno-regular', datosAlumno, validationCode);
 
-      // Establece la cabecera y envía el PDF
       res.set({
         'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename=example.pdf',
+        'Content-Disposition': 'attachment; filename=certificado.pdf',
       });
 
       return res.send(pdf);
@@ -45,4 +47,5 @@ export class PdfController {
       throw new InternalServerErrorException('Failed to generate PDF.');
     }
   }
+
 }

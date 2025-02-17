@@ -16,6 +16,11 @@ export class PdfValidadorService {
         return await this.pdfValidadorRepository.save(newRecord);
     }
 
+    async createArray(createPdfValidadorDto: CreatePdfValidadorDto[]): Promise<PdfValidador[]> {
+        const newRecord = this.pdfValidadorRepository.create(createPdfValidadorDto);
+        return await this.pdfValidadorRepository.save(newRecord);
+    }
+
     async findAll(): Promise<PdfValidador[]> {
         return await this.pdfValidadorRepository.find();
     }
@@ -30,6 +35,12 @@ export class PdfValidadorService {
 
     async update(id: string, updatePdfValidadorDto: UpdatePdfValidadorDto): Promise<PdfValidador> {
         const record = await this.findOne(id);
+        Object.assign(record, updatePdfValidadorDto);
+        return await this.pdfValidadorRepository.save(record);
+    }
+
+    async updatePay(id: string, updatePdfValidadorDto: UpdatePdfValidadorDto): Promise<PdfValidador> {
+        const record = await this.pdfValidadorRepository.findOne({ where: { uniqueIdPago: id } });
         Object.assign(record, updatePdfValidadorDto);
         return await this.pdfValidadorRepository.save(record);
     }

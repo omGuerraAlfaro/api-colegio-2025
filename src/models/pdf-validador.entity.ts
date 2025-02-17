@@ -58,4 +58,10 @@ export class PdfValidador {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @Column({ type: 'varchar', nullable: true })
+  uniqueIdPago: string;
+
+  @Column()
+  rutApoderado: string;
 }

@@ -31,5 +31,22 @@ export class PaymentController {
         const confirmResult = await this.paymentService.comprobarTransferencia(confirmTranfDTO.buy_order, confirmTranfDTO.correo)
         return confirmResult;
     }
+
+    @Post('initiate/certificado')
+    async initiateCertificado(@Body(ValidationPipe) createTransactionDto: CreateTransactionDto): Promise<any> {
+        const response = await this.paymentService.createTransactionForCertificados(
+            createTransactionDto.buyOrder,
+            createTransactionDto.sessionId,
+            createTransactionDto.amount,
+            createTransactionDto.returnUrl
+        );
+        return response;
+    }
+
+    @Post('confirm/certificado')
+    async confirmCertificado(@Body(ValidationPipe) confirmTransactionDto: ConfirmTransactionDto): Promise<any> {
+        const transactionResult = await this.paymentService.confirmTransactionForCertificados(confirmTransactionDto.token);
+        return transactionResult;
+    }
 }
 

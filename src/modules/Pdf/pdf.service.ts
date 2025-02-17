@@ -9,6 +9,7 @@ import { AlumnoRegularDto } from 'src/dto/alumno-regular.dto';
 import * as QRCode from 'qrcode';
 import { PdfValidadorService } from '../Pdf-Validador/pdf-validador.service';
 import { v4 as uuidv4 } from 'uuid';
+import { log } from 'console';
 
 @Injectable()
 export class PdfService {
@@ -130,43 +131,66 @@ export class PdfService {
     }
   }
 
-  async generatePdfAlumnoRegular(templateName: string, data: AlumnoRegularDto): Promise<Buffer> {
+  async generatePdfAlumnoRegular(
+    templateName: string,
+    data: AlumnoRegularDto | null,
+    validationCodeParam?: string
+  ): Promise<Buffer> {
     let browser: puppeteer.Browser | null = null;
     let page: puppeteer.Page | null = null;
 
     try {
       const templatePath = path.join(process.cwd(), 'src', 'modules', 'templates', `${templateName}.hbs`);
-
       if (!fs.existsSync(templatePath)) {
         console.error('Template not found:', templatePath);
         throw new Error('Template file does not exist.');
       }
 
-      const newValidationId = uuidv4();
+      let newValidationId = '';
+      let templateData: any;
 
-      await this.pdfValidadorService.create({
-        validationCode: newValidationId,
-        certificateType: data.tipo_certificado,
-        certificateNumber: (data as any).numero_matricula || null,
-        primerNombreAlumno: data.primer_nombre_alumno,
-        segundoNombreAlumno: data.segundo_nombre_alumno,
-        primerApellidoAlumno: data.primer_apellido_alumno,
-        segundoApellidoAlumno: data.segundo_apellido_alumno,
-        curso: Number(data.curso),
-        rut: data.rut,
-        dv: data.dv,
-        isErp: data.isErp
-      });
+      if (data && data.isErp) {
+        newValidationId = uuidv4();
+
+        await this.pdfValidadorService.create({
+          validationCode: newValidationId,
+          certificateType: data.tipo_certificado,
+          certificateNumber: data.numero_matricula.toString() || null,
+          primerNombreAlumno: data.primer_nombre_alumno,
+          segundoNombreAlumno: data.segundo_nombre_alumno,
+          primerApellidoAlumno: data.primer_apellido_alumno,
+          segundoApellidoAlumno: data.segundo_apellido_alumno,
+          curso: Number(data.curso),
+          rut: data.rut,
+          dv: data.dv,
+          isErp: data.isErp,
+          rutApoderado: data.rutApoderado
+        });
+
+        templateData = { ...data };
+      } else {
+        if (!validationCodeParam) {
+          throw new Error('El validationCode es obligatorio cuando data es null o isErp es false.');
+        }
+        const dataPdf = await this.pdfValidadorService.findOne(validationCodeParam);
+        // console.log(dataPdf);
+        
+        if (!dataPdf) {
+          throw new Error('No se encontró registro para el validationCode proporcionado.');
+        }
+        newValidationId = dataPdf.validationCode;
+        templateData = { ...dataPdf };
+      }
 
       const validationUrl = `https://www.colegioandeschile.cl/validar-certificado?id=${newValidationId}`;
       const qrCodeDataUrl = await QRCode.toDataURL(validationUrl);
 
-      handlebars.registerHelper('formatRut', function (rut) {
-        const rutStr = rut.toString();
-        return rutStr.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-      });
+      templateData = { ...templateData, qrCode: qrCodeDataUrl, newValidationId };
 
-      handlebars.registerHelper('getCursoName', function (cursoId) {
+      handlebars.registerHelper('formatRut', (rut) => {
+        return rut.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      });
+      handlebars.registerHelper('getCursoName', (cursoId) => {
         const id = parseInt(cursoId, 10);
         switch (id) {
           case 1: return "Pre-Kinder";
@@ -182,40 +206,37 @@ export class PdfService {
           default: return "Curso Desconocido";
         }
       });
-
-      handlebars.registerHelper('getCursoNameType', function (cursoId) {
+      handlebars.registerHelper('getCursoNameType', (cursoId) => {
         const id = parseInt(cursoId, 10);
         return id <= 2 ? "Educación Parvularia" : "Educación Básica";
       });
-
-      handlebars.registerHelper('getGeneroName', function (genero) {
+      handlebars.registerHelper('getGeneroName', (genero) => {
         switch (genero) {
           case 'F': return "Femenino";
           case 'M': return "Masculino";
           default: return "Desconocido";
         }
       });
-
-      handlebars.registerHelper('calcularValorAnual', function (valor_mensualidad) {
+      handlebars.registerHelper('calcularValorAnual', (valor_mensualidad) => {
         const valorMensual = parseFloat(valor_mensualidad);
         const valorAnual = valorMensual * 10;
         return valorAnual.toLocaleString('es-CL');
       });
-
-      handlebars.registerHelper('formatearValor', function (valor_mensualidad) {
+      handlebars.registerHelper('formatearValor', (valor_mensualidad) => {
         const valorMensual = parseFloat(valor_mensualidad);
         return valorMensual.toLocaleString('es-CL');
       });
 
+      // Leer y compilar el template
       const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
       const template = handlebars.compile(htmlTemplate);
-      const html = template({ ...data, qrCode: qrCodeDataUrl, newValidationId: newValidationId });
+      const html = template(templateData);
 
+      // Iniciar Puppeteer para generar el PDF
       browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
-
       page = await browser.newPage();
       await page.setContent(html);
 
@@ -261,4 +282,5 @@ export class PdfService {
       }
     }
   }
+
 }

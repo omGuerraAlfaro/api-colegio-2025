@@ -12,6 +12,8 @@ export class CreatePdfValidadorDto {
     readonly rut?: string;
     readonly dv?: string;
     readonly isErp?: boolean;
+    readonly uniqueIdPago?: string;
+    readonly rutApoderado: string;
 }
 export class UpdatePdfValidadorDto {
     readonly certificateType?: string;
@@ -19,4 +21,8 @@ export class UpdatePdfValidadorDto {
     readonly validationCode?: string;
     readonly isValid?: boolean;
     readonly validatedAt?: Date;
+    readonly isPagada?: boolean;
+    readonly pagadaAt?: Date;
+    readonly rutApoderado?: string;
+
 }

@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, Query, NotFoundException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, Query, NotFoundException, InternalServerErrorException } from '@nestjs/common';
 import { PdfValidadorService } from './pdf-validador.service';
 import { CreatePdfValidadorDto, UpdatePdfValidadorDto } from 'src/dto/pdf-validador.dto';
 
@@ -12,6 +12,17 @@ export class PdfValidadorController {
         return await this.pdfValidadorService.create(createPdfValidadorDto);
     }
 
+    @Post('crear')
+    async createApp(@Body() createPdfValidadorDtos: CreatePdfValidadorDto[]) {
+      try {
+        return await this.pdfValidadorService.createArray(createPdfValidadorDtos);
+      } catch (error) {
+        console.error('Error al crear PdfValidador:', error);
+        // Opcional: lanzar una excepción HTTP con más información:
+        throw new InternalServerErrorException('Error al crear los registros');
+      }
+    }
+    
     // Obtener todos los registros
     @Get()
     async findAll() {
