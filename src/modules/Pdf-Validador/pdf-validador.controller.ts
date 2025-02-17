@@ -29,11 +29,11 @@ export class PdfValidadorController {
         return await this.pdfValidadorService.findAll();
     }
 
-    // Obtener un registro por id
-    // @Get(':id')
-    // async findOne(@Param('id') id: string) {
-    //     return await this.pdfValidadorService.findOne(id);
-    // }
+    //Obtener registros pagados por rut de apoderado
+    @Get('rut/:rut')
+    async findOne(@Param('rut') rut: string) {
+        return await this.pdfValidadorService.findOneByRutApoderado(rut);
+    }
 
     // Endpoint para validar el certificado (por ejemplo: /pdf-validador/validar-certificado?id=<id>)
     @Get('validar-certificado')
