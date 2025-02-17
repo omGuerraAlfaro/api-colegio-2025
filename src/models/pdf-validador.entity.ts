@@ -65,7 +65,7 @@ export class PdfValidador {
   @Column()
   rutApoderado: string;
 
-  @Column({ type: 'timestamp', nullable: true })
+  @Column({ type: 'date', nullable: true })
   expirationDate: Date;
 
 }

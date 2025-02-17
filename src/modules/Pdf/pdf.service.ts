@@ -11,6 +11,7 @@ import { PdfValidadorService } from '../Pdf-Validador/pdf-validador.service';
 import { v4 as uuidv4 } from 'uuid';
 import { addDays, format, startOfDay } from 'date-fns';
 import { es } from 'date-fns/locale';
+import { log } from 'console';
 
 @Injectable()
 export class PdfService {
@@ -150,10 +151,14 @@ export class PdfService {
       let newValidationId = '';
       let templateData: any;
 
+      console.log(data);
+      
       if (data && data.isErp) {
         newValidationId = uuidv4();
 
-        await this.pdfValidadorService.create({
+        const expirationDate = startOfDay(addDays(new Date(), 30));
+
+        const newRecord = await this.pdfValidadorService.create({
           validationCode: newValidationId,
           certificateType: data.tipo_certificado,
           certificateNumber: data.numero_matricula.toString() || null,
@@ -166,17 +171,17 @@ export class PdfService {
           dv: data.dv,
           isErp: data.isErp,
           rutApoderado: data.rutApoderado,
-          expirationDate: startOfDay(addDays(new Date(), 30))
+          expirationDate
         });
 
-        templateData = { ...data };
+        templateData = { ...data, expirationDate };
       } else {
         if (!validationCodeParam) {
           throw new Error('El validationCode es obligatorio cuando data es null o isErp es false.');
         }
         const dataPdf = await this.pdfValidadorService.findOne(validationCodeParam);
-        // console.log(dataPdf);
-        
+        console.log(dataPdf);
+
         if (!dataPdf) {
           throw new Error('No se encontró registro para el validationCode proporcionado.');
         }
@@ -229,6 +234,8 @@ export class PdfService {
         return valorMensual.toLocaleString('es-CL');
       });
       handlebars.registerHelper('formatDate', (date) => {
+        console.log(date);
+
         if (!date) return 'Fecha inválida';
         return format(new Date(date), "dd 'de' MMMM 'de' yyyy", { locale: es });
       });
