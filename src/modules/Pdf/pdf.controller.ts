@@ -1,4 +1,4 @@
-import { Controller, Get, Res, Query, InternalServerErrorException, Body, Post } from '@nestjs/common';
+import { Controller, Get, Res, Query, InternalServerErrorException, Body, Post, Header } from '@nestjs/common';
 import { PdfService } from './pdf.service';
 import { Response } from 'express';
 import { MatriculaDto } from 'src/dto/matricula.dto';
@@ -39,7 +39,6 @@ export class PdfController {
       res.set({
         'Content-Type': 'application/pdf',
         'Content-Disposition': 'attachment; filename=certificado.pdf',
-        'Content-Length': pdf.length
       });
 
       return res.send(pdf);
@@ -48,5 +47,26 @@ export class PdfController {
       throw new InternalServerErrorException('Failed to generate PDF.');
     }
   }
+
+  @Post('generate/alumno-regular/app')
+async pdfAlumnoRegular(
+  @Body() dataAlumno: AlumnoRegularDto | null,
+  @Query('validationCode') validationCode: string,
+  @Res() res: Response
+): Promise<void> {
+  try {
+    const pdf = await this.pdfService.generatePdfAlumnoRegular(
+      'pdf-alumno-regular',
+      dataAlumno,
+      validationCode
+    );
+    res.setHeader('Content-Type', 'application/pdf');
+    res.setHeader('Content-Disposition', 'attachment; filename="certificado.pdf"');
+    res.end(pdf, 'binary'); // Enviar binario directamente
+  } catch (error) {
+    res.status(500).send('Error al generar PDF');
+  }
+}
+
 
 }

@@ -170,7 +170,7 @@
       <br />
 
       <p class="justificar">
-        Los Andes a <span id="current-date"></span>, el señor Alfredo Gallegos Ávila, 
+        Los Andes a {{formatDate createdAt}}, el señor Alfredo Gallegos Ávila, 
         director del <b>Colegio Particular Andes Chile</b>, certifica que 
         <b>
           {{#if primer_nombre_alumno}}{{primer_nombre_alumno}}{{else}}{{primerNombreAlumno}}{{/if}} 
@@ -212,18 +212,6 @@
   </body>
 
   <script>
-    // Obtener la fecha actual
-    const today = new Date();
-
-    const formattedDate = new Intl.DateTimeFormat('es-CL', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    }).format(today);
-
-    document.getElementById('current-date').textContent = formattedDate;
-
-
     const currentYear = new Date().getFullYear();
     document.getElementById('current-year').textContent = currentYear;
 
