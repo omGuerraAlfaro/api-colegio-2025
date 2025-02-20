@@ -293,4 +293,19 @@ export class UsuarioService {
 
     await this.usuarioRepository.save(user);
   }
+
+  async resetPassword(userId: number): Promise<void> {
+    const user = await this.usuarioRepository.findOne({ where: { id: userId } });
+
+    if (!user) {
+      throw new HttpException('USER_NOT_FOUND', HttpStatus.NOT_FOUND);
+    }
+
+    const newPassword = 'andeschile2025';
+    const hashedPassword = await hash(newPassword, 10);
+
+    user.password = hashedPassword;
+    await this.usuarioRepository.save(user);
+  }
+
 }
