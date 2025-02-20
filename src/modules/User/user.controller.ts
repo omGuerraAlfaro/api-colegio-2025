@@ -113,9 +113,9 @@ export class UsuarioController {
     await this.usuarioService.changePassword(id, oldPassword, newPassword);
   }
 
-  @Patch('reset-password/:id')
-  async resetPassword(@Param('id') id: number): Promise<{ message: string }> {
-    await this.usuarioService.resetPassword(id);
+  @Patch('reset-password/:rut')
+  async resetPassword(@Param('rut') rut: string): Promise<{ message: string }> {
+    await this.usuarioService.resetPassword(rut);
     return { message: 'Password reset successfully' };
   }
 }
