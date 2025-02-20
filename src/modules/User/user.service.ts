@@ -295,7 +295,7 @@ export class UsuarioService {
   }
 
   async resetPassword(userId: number): Promise<void> {
-    const user = await this.usuarioRepository.findOne({ where: { id: userId } });
+    const user = await this.usuarioRepository.findOne({ where: { apoderado_id: userId } });
 
     if (!user) {
       throw new HttpException('USER_NOT_FOUND', HttpStatus.NOT_FOUND);
