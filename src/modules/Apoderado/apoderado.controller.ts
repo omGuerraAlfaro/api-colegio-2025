@@ -82,6 +82,19 @@ export class ApoderadoController {
     }
   }
 
+  @Get('suplente/rut/:rut')
+  async getApoderadoSuplenteByRut(@Param('rut') rut: string) {
+    try {
+      const apoderado = await this.apoderadoService.findApoderadoSuplenteByRut(rut);
+      if (!apoderado) {
+        throw new NotFoundException('Apoderado no encontrado');
+      }
+      return apoderado;
+    } catch (error) {
+      throw new InternalServerErrorException('Error al buscar el apoderado');
+    }
+  }
+
   @Put(':id')
   async updateApoderado(@Param('id') id: number, @Body() apoderadoData: ApoderadoAloneDTO): Promise<Apoderado> {
     try {

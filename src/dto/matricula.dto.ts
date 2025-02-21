@@ -107,12 +107,12 @@ export class InscripcionDto {
 
   @IsString()
   @IsNotEmpty()
-  
+
   primer_apellido_apoderado: string;
 
   @IsString()
   @IsNotEmpty()
-  
+
   segundo_apellido_apoderado: string;
 
   @IsString()
@@ -271,7 +271,7 @@ export class MatriculaDto {
 
   @IsString()
   @IsNotEmpty()
-  
+
   primer_apellido_apoderado_suplente: string;
 
   @IsString()
@@ -321,4 +321,20 @@ export class MatriculaDto {
   @IsNumber()
   @IsNotEmpty()
   valor_mensualidad?: number;
+}
+
+export class NuevoEstudianteDto {
+  // IDs de los apoderados ya existentes
+  @IsNumber()
+  @IsNotEmpty()
+  apoderadoId: number;
+
+  @IsNumber()
+  @IsNotEmpty()
+  apoderadoSuplenteId: number;
+
+  @ValidateNested({ each: true })
+  @IsArray()
+  @Type(() => EstudianteDto)
+  estudiantes: EstudianteDto[];
 }

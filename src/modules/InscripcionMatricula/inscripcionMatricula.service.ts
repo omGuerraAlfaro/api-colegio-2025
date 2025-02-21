@@ -7,7 +7,7 @@ import { CorreoService } from '../Correo/correo.service';
 import { Apoderado } from 'src/models/Apoderado.entity';
 import { ApoderadoService } from '../Apoderado/apoderado.service';
 import { ApoderadoDTO } from 'src/dto/apoderado.dto';
-import { InscripcionDto } from 'src/dto/matricula.dto';
+import { InscripcionDto, NuevoEstudianteDto } from 'src/dto/matricula.dto';
 import { Estudiante } from 'src/models/Estudiante.entity';
 import { ApoderadoEstudiante } from 'src/models/ApoderadoEstudiante.entity';
 import { EstudianteCurso } from 'src/models/CursoEstudiante.entity';
@@ -207,16 +207,16 @@ export class InscripcionMatriculaService {
 
       const apoderado = this.apoderadoRepository.create(inscripcionMatricula);
       apoderado.primer_nombre_apoderado = apoderado.primer_nombre_apoderado.toUpperCase();
-      apoderado.segundo_nombre_apoderado = apoderado.segundo_nombre_apoderado ? apoderado.segundo_nombre_apoderado.toUpperCase() : apoderado.segundo_nombre_apoderado;       
+      apoderado.segundo_nombre_apoderado = apoderado.segundo_nombre_apoderado ? apoderado.segundo_nombre_apoderado.toUpperCase() : apoderado.segundo_nombre_apoderado;
       apoderado.primer_apellido_apoderado = apoderado.primer_apellido_apoderado.toUpperCase();
       apoderado.segundo_apellido_apoderado = apoderado.segundo_apellido_apoderado.toUpperCase();
       apoderado.direccion = apoderado.direccion.toUpperCase();
-      apoderado.rut =  apoderado.rut.replace(/\./g, '');
+      apoderado.rut = apoderado.rut.replace(/\./g, '');
       const savedApoderado = await this.apoderadoRepository.save(apoderado);
-      
+
       const apoderadoSuplente = this.apoderadoSuplenteRepository.create(inscripcionMatricula);
       apoderadoSuplente.primer_nombre_apoderado_suplente = apoderadoSuplente.primer_nombre_apoderado_suplente.toUpperCase();
-      apoderadoSuplente.segundo_nombre_apoderado_suplente = apoderadoSuplente.segundo_nombre_apoderado_suplente ? apoderadoSuplente.segundo_nombre_apoderado_suplente.toUpperCase() : apoderadoSuplente.segundo_nombre_apoderado_suplente;  
+      apoderadoSuplente.segundo_nombre_apoderado_suplente = apoderadoSuplente.segundo_nombre_apoderado_suplente ? apoderadoSuplente.segundo_nombre_apoderado_suplente.toUpperCase() : apoderadoSuplente.segundo_nombre_apoderado_suplente;
       apoderadoSuplente.primer_apellido_apoderado_suplente = apoderadoSuplente.primer_apellido_apoderado_suplente.toUpperCase();
       apoderadoSuplente.segundo_apellido_apoderado_suplente = apoderadoSuplente.segundo_apellido_apoderado_suplente.toUpperCase();
       apoderadoSuplente.rut_apoderado_suplente = apoderadoSuplente.rut_apoderado_suplente.replace(/\./g, '');
@@ -227,7 +227,7 @@ export class InscripcionMatriculaService {
       for (const estudianteData of inscripcionMatricula.estudiantes) {
         const estudiante = this.estudianteRepository.create(estudianteData);
         estudiante.primer_nombre_alumno = estudiante.primer_nombre_alumno.toUpperCase();
-        estudiante.segundo_nombre_alumno = estudiante.segundo_nombre_alumno ? estudiante.segundo_nombre_alumno.toUpperCase() : estudiante.segundo_nombre_alumno;      
+        estudiante.segundo_nombre_alumno = estudiante.segundo_nombre_alumno ? estudiante.segundo_nombre_alumno.toUpperCase() : estudiante.segundo_nombre_alumno;
         estudiante.primer_apellido_alumno = estudiante.primer_apellido_alumno.toUpperCase();
         estudiante.segundo_apellido_alumno = estudiante.segundo_apellido_alumno.toUpperCase();
         estudiante.rut = estudiante.rut.replace(/\./g, '');
@@ -403,6 +403,46 @@ export class InscripcionMatriculaService {
       });
     }
   }
+
+  async agregarEstudiantes(nuevoEstudianteDto: NuevoEstudianteDto): Promise<any[]> {
+    const estudiantesGuardados = [];
+
+    for (const estudianteDto of nuevoEstudianteDto.estudiantes) {
+      // Crear y formatear el estudiante
+      const estudiante = this.estudianteRepository.create(estudianteDto);
+      estudiante.primer_nombre_alumno = estudiante.primer_nombre_alumno.toUpperCase();
+      estudiante.segundo_nombre_alumno = estudiante.segundo_nombre_alumno ? estudiante.segundo_nombre_alumno.toUpperCase() : estudiante.segundo_nombre_alumno;
+      estudiante.primer_apellido_alumno = estudiante.primer_apellido_alumno.toUpperCase();
+      estudiante.segundo_apellido_alumno = estudiante.segundo_apellido_alumno.toUpperCase();
+      estudiante.rut = estudiante.rut.replace(/\./g, '');
+      estudiante.fecha_matricula = new Date();
+
+      const savedEstudiante = await this.estudianteRepository.save(estudiante);
+      estudiantesGuardados.push(savedEstudiante);
+
+      // Relacionar el estudiante con el apoderado existente
+      const apoderadoEstudiante = new ApoderadoEstudiante();
+      apoderadoEstudiante.apoderado_id = Number(nuevoEstudianteDto.apoderadoId);
+      apoderadoEstudiante.estudiante_id = savedEstudiante.id;
+      await this.apoderadoEstudianteRepository.save(apoderadoEstudiante);
+
+      // Relacionar el estudiante con el apoderado suplente existente
+      const apoderadoSuplenteEstudiante = new ApoderadoSuplenteEstudiante();
+      apoderadoSuplenteEstudiante.apoderado_suplente_id = Number(nuevoEstudianteDto.apoderadoSuplenteId);
+      apoderadoSuplenteEstudiante.estudiante_id = savedEstudiante.id;
+      await this.apoderadoSuplenteEstudianteRepository.save(apoderadoSuplenteEstudiante);
+
+      // Relacionar el estudiante con el curso
+      const estudianteCurso = new EstudianteCurso();
+      estudianteCurso.curso_id = estudianteDto.cursoId;
+      estudianteCurso.estudiante_id = savedEstudiante.id;
+      await this.estudianteCursoRepository.save(estudianteCurso);
+    }
+
+    return estudiantesGuardados;
+  }
+
+
 
   async remove(id: number): Promise<void> {
     await this.inscripcionMatriculaRepository.delete(id);
