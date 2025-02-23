@@ -21,8 +21,10 @@ export class PdfValidadorService {
         const newRecords = this.pdfValidadorRepository.create(createPdfValidadorDto);
 
         newRecords.forEach(record => {
-            const expiration = addDays(new Date(record.createdAt), 30);
-            record.expirationDate = new Date(expiration.getFullYear(), expiration.getMonth(), expiration.getDate());
+            const createdDate = record.createdAt ? new Date(record.createdAt) : new Date();
+            const expiration = addDays(createdDate, 30);
+
+            record.expirationDate = expiration.toISOString().split('T')[0] as unknown as Date;
         });
 
         return await this.pdfValidadorRepository.save(newRecords);
