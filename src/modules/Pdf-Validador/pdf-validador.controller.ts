@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Put, Param, Delete, Query, NotFoundException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Put, Param, Delete, Query, NotFoundException, InternalServerErrorException, BadRequestException } from '@nestjs/common';
 import { PdfValidadorService } from './pdf-validador.service';
 import { CreatePdfValidadorDto, UpdatePdfValidadorDto } from 'src/dto/pdf-validador.dto';
 
@@ -44,6 +44,10 @@ export class PdfValidadorController {
         
         if (!record) {
             throw new NotFoundException(`Registro con id ${id} no encontrado`);
+        }
+
+        if (record.expirationDate && new Date() > record.expirationDate) {
+            throw new BadRequestException(`El certificado ha expirado y no puede ser validado.`);
         }
 
         // Si ya está validado, devolvemos un mensaje informativo
