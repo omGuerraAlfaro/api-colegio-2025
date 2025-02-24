@@ -14,15 +14,15 @@ export class PdfValidadorController {
 
     @Post('crear')
     async createApp(@Body() createPdfValidadorDtos: CreatePdfValidadorDto[]) {
-      try {
-        return await this.pdfValidadorService.createArray(createPdfValidadorDtos);
-      } catch (error) {
-        console.error('Error al crear PdfValidador:', error);
-        // Opcional: lanzar una excepción HTTP con más información:
-        throw new InternalServerErrorException('Error al crear los registros');
-      }
+        try {
+            return await this.pdfValidadorService.createArray(createPdfValidadorDtos);
+        } catch (error) {
+            console.error('Error al crear PdfValidador:', error);
+            // Opcional: lanzar una excepción HTTP con más información:
+            throw new InternalServerErrorException('Error al crear los registros');
+        }
     }
-    
+
     // Obtener todos los registros
     @Get()
     async findAll() {
@@ -40,14 +40,18 @@ export class PdfValidadorController {
     async validar(@Query('id') id: string) {
         // Buscar el registro por id
         const record = await this.pdfValidadorService.findOne(id);
-        delete record.validationCode;
-        
+
         if (!record) {
             throw new NotFoundException(`Registro con id ${id} no encontrado`);
         }
 
-        if (record.expirationDate && new Date() > record.expirationDate) {
-            throw new BadRequestException(`El certificado ha expirado y no puede ser validado.`);
+        // Evaluar la fecha de expiración antes de cualquier otra validación
+        if (record.expirationDate) {
+            const expiration = new Date(record.expirationDate);
+            const now = new Date();
+            if (now > expiration) {
+                throw new BadRequestException(`El certificado ha expirado y no puede ser validado.`);
+            }
         }
 
         // Si ya está validado, devolvemos un mensaje informativo
@@ -63,8 +67,10 @@ export class PdfValidadorController {
 
         const updatedRecord = await this.pdfValidadorService.update(id, updateData);
         delete updatedRecord.validationCode;
+
         return { message: 'Certificado validado exitosamente', data: updatedRecord };
     }
+
 
     // Actualizar un registro por id
     @Put(':id')
