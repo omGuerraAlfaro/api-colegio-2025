@@ -15,14 +15,12 @@ import { CalendarioAsistencia } from 'src/models/CalendarioAsistencia';
 @Module({
   imports: [
     TypeOrmModule.forFeature([
-      InscripcionMatricula,ApoderadoSuplente,ApoderadoSuplenteEstudiante
+      InscripcionMatricula,ApoderadoSuplente,ApoderadoSuplenteEstudiante,Asistencia,CalendarioAsistencia
     ]),
     CorreoModule,
     UsuarioModule,
     ApoderadoModule,
-    Estudiante,
-    Asistencia,
-    CalendarioAsistencia
+    Estudiante
   ],
   controllers: [InscripcionMatriculaController],
   providers: [InscripcionMatriculaService],
