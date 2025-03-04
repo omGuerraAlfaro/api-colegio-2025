@@ -152,7 +152,7 @@ export class PdfService {
       let templateData: any;
 
       console.log(data);
-      
+
       if (data && data.isErp) {
         newValidationId = uuidv4();
 
@@ -174,7 +174,11 @@ export class PdfService {
           expirationDate
         });
 
-        templateData = { ...data, expirationDate };
+        templateData = {
+          ...data,
+          expirationDate,
+          createdAt: newRecord.createdAt
+        };
       } else {
         if (!validationCodeParam) {
           throw new Error('El validationCode es obligatorio cuando data es null o isErp es false.');
@@ -239,6 +243,12 @@ export class PdfService {
         if (!date) return 'Fecha inválida';
         return format(new Date(date), "dd 'de' MMMM 'de' yyyy", { locale: es });
       });
+      handlebars.registerHelper('formatDate2', (date) => {
+        console.log(date);
+
+        if (!date) return 'Fecha inválida';
+        return format(new Date(date), "dd 'de' MMMM 'de' yyyy", { locale: es });
+      });
 
       // Leer y compilar el template
       const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
@@ -262,9 +272,9 @@ export class PdfService {
         headerTemplate: `<p></p>`,
         footerTemplate: `<div style="font-size:10px; text-align:center;"> Página <span class="pageNumber"></span> de <span class="totalPages"></span> </div>`
       });
-      
+
       return Buffer.from(pdfBuffer);
-      
+
     } catch (error) {
       console.error('Error generating PDF:', error.message, error.stack);
       throw new InternalServerErrorException('Failed to generate PDF.');
