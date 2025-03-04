@@ -9,6 +9,8 @@ import { Estudiante } from 'src/models/Estudiante.entity';
 import { ApoderadoSuplente } from 'src/models/ApoderadoSuplente.entity';
 import { ApoderadoSuplenteEstudiante } from 'src/models/ApoderadoSuplenteEstudiante.entity';
 import { UsuarioModule } from '../User/user.module';
+import { Asistencia } from 'src/models/Asistencia.entity';
+import { CalendarioAsistencia } from 'src/models/CalendarioAsistencia';
 
 @Module({
   imports: [
@@ -18,9 +20,9 @@ import { UsuarioModule } from '../User/user.module';
     CorreoModule,
     UsuarioModule,
     ApoderadoModule,
-    Estudiante
-    
-    
+    Estudiante,
+    Asistencia,
+    CalendarioAsistencia
   ],
   controllers: [InscripcionMatriculaController],
   providers: [InscripcionMatriculaService],
