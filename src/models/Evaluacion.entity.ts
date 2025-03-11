@@ -13,7 +13,7 @@ export class Evaluacion {
     @Column({ type: 'varchar', length: 50 })
     nombre_evaluacion: string;
 
-    @ManyToOne(() => Curso, (curso) => curso.notas)
+    @ManyToOne(() => Curso, (curso) => curso.evaluacion)
     @JoinColumn({ name: 'id_curso' })
     curso: Curso;
 

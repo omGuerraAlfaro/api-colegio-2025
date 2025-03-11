@@ -19,9 +19,6 @@ export class Asignatura {
     @OneToMany(() => Asignatura, asignatura => asignatura.asignaturas)
     asignaturas: Asignatura[];
 
-    @OneToMany(() => Nota, (nota) => nota.asignatura)
-    notas: Nota[];
-
     @OneToMany(() => Evaluacion, (evaluacion) => evaluacion.asignatura)
     evaluaciones: Evaluacion[];
 

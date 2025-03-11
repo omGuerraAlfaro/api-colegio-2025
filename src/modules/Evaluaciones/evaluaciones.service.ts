@@ -18,10 +18,10 @@ export class EvaluacionService {
     async create(createEvaluacionDto: CreateEvaluacionDto): Promise<Evaluacion> {
         const nuevaEvaluacion = this.evaluacionRepository.create({
             nombre_evaluacion: createEvaluacionDto.nombreEvaluacion,
-            curso: { id: createEvaluacionDto.cursoId },
             asignatura: { id: createEvaluacionDto.asignaturaId },
             semestre: { id_semestre: createEvaluacionDto.semestreId },
             id_tipo_evaluacion: { id_evaluacion: createEvaluacionDto.tipoEvaluacionId },
+            // curso: { id: createEvaluacionDto.cursoId },
         });
         return await this.evaluacionRepository.save(nuevaEvaluacion);
     }
@@ -59,14 +59,14 @@ export class EvaluacionService {
     }
 
     // EvaluacionService o NotasService
-    async getEvaluacionesConNotas(cursoId: number, asignaturaId: number): Promise<Evaluacion[]> {
-        return await this.evaluacionRepository.find({
-            where: {
-                curso: { id: cursoId },
-                asignatura: { id: asignaturaId },
-            },
-            relations: ['notas', 'notas.estudiante'],
-        });
-    }
+    // async getEvaluacionesConNotas(cursoId: number, asignaturaId: number): Promise<Evaluacion[]> {
+    //     return await this.evaluacionRepository.find({
+    //         where: {
+    //             curso: { id: cursoId },
+    //             asignatura: { id: asignaturaId },
+    //         },
+    //         relations: ['notas', 'notas.estudiante'],
+    //     });
+    // }
 
 }

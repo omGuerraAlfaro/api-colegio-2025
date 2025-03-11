@@ -16,10 +16,7 @@ export class Semestre {
 
     @Column({ type: 'date' })
     fecha_fin: Date;
-
-    @OneToMany(() => Nota, (nota) => nota.semestre)
-    notas: Nota[];
-
+    
     @OneToMany(() => Asistencia, (asistencia) => asistencia.semestre)
     asistencias: Asistencia[];
 

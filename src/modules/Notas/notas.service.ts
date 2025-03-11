@@ -70,12 +70,12 @@ export class NotasService {
     }): Promise<Nota> {
         const nuevaNota = this.notaRepository.create({
             estudiante: { id: data.estudianteId },
-            curso: { id: data.cursoId },
-            asignatura: { id: data.asignaturaId },
             evaluacion: { id_evaluacion: data.evaluacionId },
-            semestre: { id_semestre: data.semestreId },
             nota: data.nota,
             fecha: data.fecha,
+            // curso: { id: data.cursoId },
+            // asignatura: { id: data.asignaturaId },
+            // semestre: { id_semestre: data.semestreId },
         });
 
         return await this.notaRepository.save(nuevaNota);

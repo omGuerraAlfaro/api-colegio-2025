@@ -35,8 +35,8 @@ export class EvaluacionController {
         return { message: 'Evaluación eliminada correctamente' };
     }
 
-    @Get('curso/:idCurso/asignatura/:idAsignatura')
-    async getEvaluacionesConNotas(@Param('idCurso') idCurso: number, @Param('idAsignatura') idAsignatura: number) {
-        return await this.evaluacionService.getEvaluacionesConNotas(idCurso,idAsignatura);
-    }
+    // @Get('curso/:idCurso/asignatura/:idAsignatura')
+    // async getEvaluacionesConNotas(@Param('idCurso') idCurso: number, @Param('idAsignatura') idAsignatura: number) {
+    //     return await this.evaluacionService.getEvaluacionesConNotas(idCurso,idAsignatura);
+    // }
 }
