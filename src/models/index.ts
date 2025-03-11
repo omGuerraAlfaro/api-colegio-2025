@@ -29,6 +29,7 @@ import { Evaluacion } from './Evaluacion.entity';
 import { Semestre } from './Semestre.entity';
 import { CalendarioAsistencia } from './CalendarioAsistencia';
 import { PdfValidador } from './pdf-validador.entity';
+import { TipoEvaluacion } from './TipoEvaluacion.entity';
 
 
 export const entities = [Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudiante, ApoderadoEstudiante,
@@ -36,6 +37,6 @@ export const entities = [Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudian
                         Boleta, EstadoBoleta, Transacciones, EstadoTransaccion, TransactionEntity,
                         NoticiasColegio, NoticiasImages,
                         Correo, InscripcionMatricula, PdfValidador,
-                        Asignatura, Evaluacion, Nota, Semestre,
+                        Asignatura, Evaluacion, TipoEvaluacion, Nota, Semestre,
                         Asistencia, CalendarioEscolar, CalendarioAsistencia];
 

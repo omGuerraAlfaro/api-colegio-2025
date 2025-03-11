@@ -22,7 +22,7 @@ export class Nota {
     @JoinColumn({ name: 'id_asignatura' })
     asignatura: Asignatura;
 
-    @ManyToOne(() => Evaluacion, (evaluacion) => evaluacion.notas, { nullable: true })
+    @ManyToOne(() => Evaluacion, (evaluacion) => evaluacion.notas)
     @JoinColumn({ name: 'id_evaluacion' })
     evaluacion: Evaluacion;
 

@@ -30,6 +30,7 @@ export class NotasService {
             .select([
                 'nota.id_nota AS notaId',
                 'evaluacion.tipo_evaluacion AS tipoEvaluacion',
+                'evaluacion.nombre_evaluacion AS nombreEvaluacion',
                 'nota.nota AS nota',
                 'nota.fecha AS fecha',
             ])
@@ -87,7 +88,7 @@ export class NotasService {
         const nota = await this.notaRepository.findOne({ where: { id_nota: notaId } });
 
         if (!nota) {
-            throw new Error(`Nota with ID ${notaId} not found.`);
+            throw new Error(`Nota con ID ${notaId} no encontrada.`);
         }
 
         if (data.nota !== undefined) {
