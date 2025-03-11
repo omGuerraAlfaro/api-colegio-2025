@@ -3,6 +3,7 @@ import { Asignatura } from './Asignatura.entity';
 import { Semestre } from './Semestre.entity';
 import { Nota } from './Notas.entity';
 import { TipoEvaluacion } from './TipoEvaluacion.entity';
+import { Curso } from './Curso.entity';
 
 @Entity('evaluaciones')
 export class Evaluacion {
@@ -10,10 +11,11 @@ export class Evaluacion {
     id_evaluacion: number;
 
     @Column({ type: 'varchar', length: 50 })
-    nombre_evaluacion: string; // Ejemplo: 'Parcial 1', 'Tarea 2', 'Nota Final'
+    nombre_evaluacion: string;
 
-    // @Column({ type: 'varchar', length: 30 })
-    // tipo_evaluacion: string; // Ejemplo: 'Examen', 'Tarea', 'Proyecto', 'Final'
+    @ManyToOne(() => Curso, (curso) => curso.notas)
+    @JoinColumn({ name: 'id_curso' })
+    curso: Curso;
 
     @ManyToOne(() => Asignatura, (asignatura) => asignatura.evaluaciones)
     @JoinColumn({ name: 'id_asignatura' })
