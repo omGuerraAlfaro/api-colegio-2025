@@ -155,17 +155,24 @@ export class NotasService {
                 // Traemos los estudiantes del curso
                 .leftJoin('curso.cursoConnection', 'cursoEstudiante')
                 .leftJoin('cursoEstudiante.estudiante', 'estudiante')
-                // LEFT JOIN a notas (podría no haber)
-                .leftJoin('estudiante.notas', 'nota')
-                // LEFT JOIN a evaluacion, filtrando por asignatura y semestre en la cláusula ON
+                // Subquery para traer las evaluaciones filtradas por asignatura y semestre (usando la tabla "evaluaciones")
                 .leftJoin(
-                    'nota.evaluacion',
+                    subQuery => {
+                        return subQuery
+                            .select('evaluacion.id_evaluacion', 'id')
+                            .addSelect('evaluacion.nombre_evaluacion', 'nombre_evaluacion')
+                            .addSelect('evaluacion.id_tipo_evaluacion', 'id_tipo_evaluacion')
+                            .from('evaluaciones', 'evaluacion')
+                            .where('evaluacion.id_asignatura = :asignaturaId', { asignaturaId })
+                            .andWhere('evaluacion.id_semestre = :semestreId', { semestreId });
+                    },
                     'evaluacion',
-                    'evaluacion.id_asignatura = :asignaturaId AND evaluacion.id_semestre = :semestreId',
-                    { asignaturaId, semestreId }
+                    '1=1'
                 )
-                // LEFT JOIN al tipo de evaluación
-                .leftJoin('evaluacion.id_tipo_evaluacion', 'tipoEvaluacion')
+                // Asociamos la nota correspondiente, si existe, usando la combinación de estudiante y evaluación.
+                .leftJoin('notas', 'nota', 'nota.id_estudiante = estudiante.id AND nota.id_evaluacion = evaluacion.id')
+                // LEFT JOIN al tipo de evaluación, usando el nombre correcto de la tabla "tipo_evaluacion"
+                .leftJoin('tipo_evaluacion', 'tipoEvaluacion', 'tipoEvaluacion.id_evaluacion = evaluacion.id_tipo_evaluacion')
                 // Filtramos por curso
                 .where('curso.id = :cursoId', { cursoId })
                 .select([
@@ -178,7 +185,6 @@ export class NotasService {
                     'tipoEvaluacion.id_evaluacion AS tipoEvaluacionId',
                     'tipoEvaluacion.tipo_evaluacion AS tipoEvaluacionDescripcion'
                 ])
-                // Ordenamos por primer apellido (y adicionalmente por el nombre de evaluación)
                 .orderBy('estudiante.primer_apellido_alumno', 'ASC')
                 .addOrderBy('evaluacion.nombre_evaluacion', 'ASC')
                 .getRawMany();
@@ -194,27 +200,20 @@ export class NotasService {
                         evaluaciones: []
                     };
                 }
-                // Si existe nota (o evaluación) la agregamos
-                if (row.nota !== null) {
-                    estudiantesMap[row.estudianteId].evaluaciones.push({
-                        nombre_evaluacion: row.nombreEvaluacion,
-                        nota: row.nota,
-                        fecha: row.fecha,
-                        tipoEvaluacion: {
-                            id: row.tipoEvaluacionId,
-                            tipo_evaluacion: row.tipoEvaluacionDescripcion,
-                        }
-                    });
-                }
+                // Se agregan las evaluaciones sin importar si la nota es null
+                estudiantesMap[row.estudianteId].evaluaciones.push({
+                    nombre_evaluacion: row.nombreEvaluacion,
+                    nota: row.nota, // Puede ser null
+                    fecha: row.fecha, // Puede ser null
+                    tipoEvaluacion: {
+                        id: row.tipoEvaluacionId,
+                        tipo_evaluacion: row.tipoEvaluacionDescripcion,
+                    }
+                });
             });
 
-            // Convertimos el objeto a un arreglo y asignamos null si no hay evaluaciones
-            let resultado = Object.values(estudiantesMap).map((alumno: any) => {
-                if (alumno.evaluaciones.length === 0) {
-                    alumno.evaluaciones = null;
-                }
-                return alumno;
-            });
+            // Convertimos el objeto a un arreglo
+            let resultado = Object.values(estudiantesMap).map((alumno: any) => alumno);
 
             // Ordenamos el arreglo final por el primer apellido
             resultado = resultado.sort((a, b) =>
