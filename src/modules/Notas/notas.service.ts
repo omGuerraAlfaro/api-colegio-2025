@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { Curso } from 'src/models/Curso.entity';
 import { Evaluacion } from 'src/models/Evaluacion.entity';
 import { Nota } from 'src/models/Notas.entity';
 import { Repository } from 'typeorm';
@@ -11,6 +12,8 @@ export class NotasService {
         private readonly notaRepository: Repository<Nota>,
         @InjectRepository(Evaluacion)
         private readonly evaluacionRepository: Repository<Evaluacion>,
+        @InjectRepository(Curso)
+        private readonly cursoRepository: Repository<Curso>,
     ) { }
 
     async getNotasPorEstudianteAsignaturaSemestre(
@@ -61,10 +64,7 @@ export class NotasService {
 
     async createNota(data: {
         estudianteId: number;
-        cursoId: number;
-        asignaturaId: number;
         evaluacionId: number;
-        semestreId: number;
         nota: number;
         fecha: Date;
     }): Promise<Nota> {
@@ -73,9 +73,6 @@ export class NotasService {
             evaluacion: { id_evaluacion: data.evaluacionId },
             nota: data.nota,
             fecha: data.fecha,
-            // curso: { id: data.cursoId },
-            // asignatura: { id: data.asignaturaId },
-            // semestre: { id_semestre: data.semestreId },
         });
 
         return await this.notaRepository.save(nuevaNota);
@@ -146,39 +143,90 @@ export class NotasService {
         return notas;
     }
 
+    //VERIFICADO
     async getNotasPorCursoAsignatura(
         cursoId: number,
         asignaturaId: number,
         semestreId: number,
     ): Promise<any[]> {
         try {
-            const notas = await this.notaRepository
-                .createQueryBuilder('nota')
+            const rawData = await this.cursoRepository
+                .createQueryBuilder('curso')
+                // Traemos los estudiantes del curso
+                .leftJoin('curso.cursoConnection', 'cursoEstudiante')
+                .leftJoin('cursoEstudiante.estudiante', 'estudiante')
+                // LEFT JOIN a notas (podría no haber)
+                .leftJoin('estudiante.notas', 'nota')
+                // LEFT JOIN a evaluacion, filtrando por asignatura y semestre en la cláusula ON
+                .leftJoin(
+                    'nota.evaluacion',
+                    'evaluacion',
+                    'evaluacion.id_asignatura = :asignaturaId AND evaluacion.id_semestre = :semestreId',
+                    { asignaturaId, semestreId }
+                )
+                // LEFT JOIN al tipo de evaluación
+                .leftJoin('evaluacion.id_tipo_evaluacion', 'tipoEvaluacion')
+                // Filtramos por curso
+                .where('curso.id = :cursoId', { cursoId })
                 .select([
                     'estudiante.id AS estudianteId',
-                    'estudiante.primer_nombre_alumno AS primerNombre',
+                    "CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS estudiante",
                     'estudiante.primer_apellido_alumno AS primerApellido',
-                    'JSON_ARRAYAGG(JSON_OBJECT("nota", nota.nota, "tipo", evaluacion.tipo_evaluacion)) AS notasAgrupadas'
+                    'evaluacion.nombre_evaluacion AS nombreEvaluacion',
+                    'nota.nota AS nota',
+                    'nota.fecha AS fecha',
+                    'tipoEvaluacion.id_evaluacion AS tipoEvaluacionId',
+                    'tipoEvaluacion.tipo_evaluacion AS tipoEvaluacionDescripcion'
                 ])
-                .innerJoin('nota.estudiante', 'estudiante')
-                .innerJoin('nota.curso', 'curso')
-                .innerJoin('nota.asignatura', 'asignatura')
-                .innerJoin('nota.semestre', 'semestre')
-                .innerJoin('nota.evaluacion', 'evaluacion')
-                .where('curso.id = :cursoId', { cursoId })
-                .andWhere('asignatura.id = :asignaturaId', { asignaturaId })
-                .andWhere('semestre.id_semestre = :semestreId', { semestreId })
-                .groupBy('estudiante.id')
+                // Ordenamos por primer apellido (y adicionalmente por el nombre de evaluación)
                 .orderBy('estudiante.primer_apellido_alumno', 'ASC')
+                .addOrderBy('evaluacion.nombre_evaluacion', 'ASC')
                 .getRawMany();
 
-            return notas;
+            // Agrupamos los resultados por estudiante
+            const estudiantesMap: { [key: number]: any } = {};
+
+            rawData.forEach((row) => {
+                if (!estudiantesMap[row.estudianteId]) {
+                    estudiantesMap[row.estudianteId] = {
+                        estudiante: row.estudiante,
+                        primerApellido: row.primerApellido,
+                        evaluaciones: []
+                    };
+                }
+                // Si existe nota (o evaluación) la agregamos
+                if (row.nota !== null) {
+                    estudiantesMap[row.estudianteId].evaluaciones.push({
+                        nombre_evaluacion: row.nombreEvaluacion,
+                        nota: row.nota,
+                        fecha: row.fecha,
+                        tipoEvaluacion: {
+                            id: row.tipoEvaluacionId,
+                            tipo_evaluacion: row.tipoEvaluacionDescripcion,
+                        }
+                    });
+                }
+            });
+
+            // Convertimos el objeto a un arreglo y asignamos null si no hay evaluaciones
+            let resultado = Object.values(estudiantesMap).map((alumno: any) => {
+                if (alumno.evaluaciones.length === 0) {
+                    alumno.evaluaciones = null;
+                }
+                return alumno;
+            });
+
+            // Ordenamos el arreglo final por el primer apellido
+            resultado = resultado.sort((a, b) =>
+                a.primerApellido.localeCompare(b.primerApellido)
+            );
+
+            return resultado;
         } catch (error) {
             console.error('Error en getNotasPorCursoAsignatura:', error);
             throw error;
         }
     }
-
 
 
 

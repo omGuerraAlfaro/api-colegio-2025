@@ -58,15 +58,4 @@ export class EvaluacionService {
         await this.evaluacionRepository.remove(evaluacion);
     }
 
-    // EvaluacionService o NotasService
-    // async getEvaluacionesConNotas(cursoId: number, asignaturaId: number): Promise<Evaluacion[]> {
-    //     return await this.evaluacionRepository.find({
-    //         where: {
-    //             curso: { id: cursoId },
-    //             asignatura: { id: asignaturaId },
-    //         },
-    //         relations: ['notas', 'notas.estudiante'],
-    //     });
-    // }
-
 }
