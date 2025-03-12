@@ -148,84 +148,111 @@ export class NotasService {
         cursoId: number,
         asignaturaId: number,
         semestreId: number,
-    ): Promise<any[]> {
+      ): Promise<any[]> {
         try {
-            const rawData = await this.cursoRepository
-                .createQueryBuilder('curso')
-                // Traemos los estudiantes del curso
-                .leftJoin('curso.cursoConnection', 'cursoEstudiante')
-                .leftJoin('cursoEstudiante.estudiante', 'estudiante')
-                // Subquery para traer las evaluaciones filtradas por asignatura y semestre (usando la tabla "evaluaciones")
-                .leftJoin(
-                    subQuery => {
-                        return subQuery
-                            .select('evaluacion.id_evaluacion', 'id')
-                            .addSelect('evaluacion.nombre_evaluacion', 'nombre_evaluacion')
-                            .addSelect('evaluacion.id_tipo_evaluacion', 'id_tipo_evaluacion')
-                            .from('evaluaciones', 'evaluacion')
-                            .where('evaluacion.id_asignatura = :asignaturaId', { asignaturaId })
-                            .andWhere('evaluacion.id_semestre = :semestreId', { semestreId });
-                    },
-                    'evaluacion',
-                    '1=1'
-                )
-                // Asociamos la nota correspondiente, si existe, usando la combinación de estudiante y evaluación.
-                .leftJoin('notas', 'nota', 'nota.id_estudiante = estudiante.id AND nota.id_evaluacion = evaluacion.id')
-                // LEFT JOIN al tipo de evaluación, usando el nombre correcto de la tabla "tipo_evaluacion"
-                .leftJoin('tipo_evaluacion', 'tipoEvaluacion', 'tipoEvaluacion.id_evaluacion = evaluacion.id_tipo_evaluacion')
-                // Filtramos por curso
-                .where('curso.id = :cursoId', { cursoId })
-                .select([
-                    'estudiante.id AS estudianteId',
-                    "CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS estudiante",
-                    'estudiante.primer_apellido_alumno AS primerApellido',
-                    'evaluacion.nombre_evaluacion AS nombreEvaluacion',
-                    'nota.nota AS nota',
-                    'nota.fecha AS fecha',
-                    'tipoEvaluacion.id_evaluacion AS tipoEvaluacionId',
-                    'tipoEvaluacion.tipo_evaluacion AS tipoEvaluacionDescripcion'
-                ])
-                .orderBy('estudiante.primer_apellido_alumno', 'ASC')
-                .addOrderBy('evaluacion.nombre_evaluacion', 'ASC')
-                .getRawMany();
-
-            // Agrupamos los resultados por estudiante
-            const estudiantesMap: { [key: number]: any } = {};
-
-            rawData.forEach((row) => {
-                if (!estudiantesMap[row.estudianteId]) {
-                    estudiantesMap[row.estudianteId] = {
-                        estudiante: row.estudiante,
-                        primerApellido: row.primerApellido,
-                        evaluaciones: []
-                    };
+          const rawData = await this.cursoRepository
+            .createQueryBuilder('curso')
+            .leftJoin('curso.cursoConnection', 'cursoEstudiante')
+            .leftJoin('cursoEstudiante.estudiante', 'estudiante')
+            .leftJoin(
+              subQuery => {
+                return subQuery
+                  .select('evaluacion.id_evaluacion', 'id')
+                  .addSelect('evaluacion.nombre_evaluacion', 'nombre_evaluacion')
+                  .addSelect('evaluacion.id_tipo_evaluacion', 'id_tipo_evaluacion')
+                  .from('evaluaciones', 'evaluacion')
+                  .where('evaluacion.id_asignatura = :asignaturaId', { asignaturaId })
+                  .andWhere('evaluacion.id_semestre = :semestreId', { semestreId })
+                  .andWhere('evaluacion.id_curso = :cursoId', { cursoId });
+              },
+              'evaluacion',
+              '1=1'
+            )
+            .leftJoin(
+              'notas',
+              'nota',
+              'nota.id_estudiante = estudiante.id AND nota.id_evaluacion = evaluacion.id'
+            )
+            .leftJoin(
+              'tipo_evaluacion',
+              'tipoEvaluacion',
+              'tipoEvaluacion.id_evaluacion = evaluacion.id_tipo_evaluacion'
+            )
+            .where('curso.id = :cursoId', { cursoId })
+            .select([
+              'estudiante.id AS estudianteId',
+              "CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS estudiante",
+              'estudiante.primer_apellido_alumno AS primerApellido',
+              'evaluacion.nombre_evaluacion AS nombreEvaluacion',
+              'nota.nota AS nota',
+              'nota.fecha AS fecha',
+              'tipoEvaluacion.id_evaluacion AS tipoEvaluacionId',
+              'tipoEvaluacion.tipo_evaluacion AS tipoEvaluacionDescripcion'
+            ])
+            .orderBy('estudiante.primer_apellido_alumno', 'ASC')
+            .addOrderBy('evaluacion.nombre_evaluacion', 'ASC')
+            .getRawMany();
+      
+          // Si no hay rows en lo absoluto, retorna [] de inmediato
+          if (!rawData || rawData.length === 0) {
+            return [];
+          }
+      
+          // Ahora, si el LEFT JOIN devolvió filas con nombreEvaluacion = null (sin evaluaciones reales),
+          // verificamos si TODAS las filas están en esa condición
+          const hayEvaluacionesReales = rawData.some(row => row.nombreEvaluacion != null);
+      
+          // Si NO hay evaluaciones (todas las filas tienen nombreEvaluacion nulo), retornamos []
+          if (!hayEvaluacionesReales) {
+            return [];
+          }
+      
+          // Caso contrario, armamos la estructura
+          const estudiantesMap: { [key: number]: any } = {};
+      
+          rawData.forEach((row) => {
+            // Si aún no existe el estudiante en el mapa, lo creamos
+            if (!estudiantesMap[row.estudianteId]) {
+              estudiantesMap[row.estudianteId] = {
+                estudiante: row.estudiante,
+                primerApellido: row.primerApellido,
+                evaluaciones: []
+              };
+            }
+      
+            // Solo añadimos la evaluación si el nombreEvaluacion no es nulo
+            if (row.nombreEvaluacion) {
+              estudiantesMap[row.estudianteId].evaluaciones.push({
+                nombre_evaluacion: row.nombreEvaluacion,
+                nota: row.nota, // Puede ser null
+                fecha: row.fecha, // Puede ser null
+                tipoEvaluacion: {
+                  id: row.tipoEvaluacionId,
+                  tipo_evaluacion: row.tipoEvaluacionDescripcion,
                 }
-                // Se agregan las evaluaciones sin importar si la nota es null
-                estudiantesMap[row.estudianteId].evaluaciones.push({
-                    nombre_evaluacion: row.nombreEvaluacion,
-                    nota: row.nota, // Puede ser null
-                    fecha: row.fecha, // Puede ser null
-                    tipoEvaluacion: {
-                        id: row.tipoEvaluacionId,
-                        tipo_evaluacion: row.tipoEvaluacionDescripcion,
-                    }
-                });
-            });
-
-            // Convertimos el objeto a un arreglo
-            let resultado = Object.values(estudiantesMap).map((alumno: any) => alumno);
-
-            // Ordenamos el arreglo final por el primer apellido
-            resultado = resultado.sort((a, b) =>
-                a.primerApellido.localeCompare(b.primerApellido)
-            );
-
-            return resultado;
+              });
+            }
+          });
+      
+          let resultado = Object.values(estudiantesMap);
+      
+          // Por si quieres filtrar a los estudiantes que se quedaron sin evaluaciones
+          resultado = resultado.filter((alumno: any) => alumno.evaluaciones.length > 0);
+      
+          // Finalmente, si el resultado quedó vacío, retornamos []
+          if (resultado.length === 0) {
+            return [];
+          }
+      
+          // O si deseas que se devuelva igual el listado de estudiantes (aunque no tengan evaluaciones),
+          // puedes omitir el filter y retornar 'resultado' directamente.
+          return resultado;
         } catch (error) {
-            console.error('Error en getNotasPorCursoAsignatura:', error);
-            throw error;
+          console.error('Error en getNotasPorCursoAsignatura:', error);
+          throw error;
         }
-    }
+      }
+      
 
 
 
