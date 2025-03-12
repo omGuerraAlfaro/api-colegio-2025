@@ -18,6 +18,7 @@ import { PdfModule } from "./Pdf/pdf.module";
 import { NotasModule } from "./Notas/notas.module";
 import { EvaluacionModule } from "./Evaluaciones/evaluaciones.module";
 import { PdfValidadorModule } from "./Pdf-Validador/pdf-validador.module";
+import { SemestreModule } from "./Semestre/semestre.module";
 
 export {
      ApoderadoModule,
@@ -39,5 +40,6 @@ export {
      PdfModule,
      NotasModule,
      EvaluacionModule,
-     PdfValidadorModule
+     PdfValidadorModule,
+     SemestreModule
 };

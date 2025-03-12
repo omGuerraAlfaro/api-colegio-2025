@@ -23,7 +23,8 @@ import {
   PdfModule,
   NotasModule,
   PdfValidadorModule,
-  EvaluacionModule
+  EvaluacionModule,
+  SemestreModule
 } from './modules';
 
 @Module({
@@ -49,6 +50,7 @@ import {
     NotasModule,
     EvaluacionModule,
     PdfValidadorModule,
+    SemestreModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: 'localhost',

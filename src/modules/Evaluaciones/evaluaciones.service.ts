@@ -21,7 +21,7 @@ export class EvaluacionService {
             asignatura: { id: createEvaluacionDto.asignaturaId },
             semestre: { id_semestre: createEvaluacionDto.semestreId },
             id_tipo_evaluacion: { id_evaluacion: createEvaluacionDto.tipoEvaluacionId },
-            // curso: { id: createEvaluacionDto.cursoId },
+            curso: { id: createEvaluacionDto.cursoId },
         });
         return await this.evaluacionRepository.save(nuevaEvaluacion);
     }
