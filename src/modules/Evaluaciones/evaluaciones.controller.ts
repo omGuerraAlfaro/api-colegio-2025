@@ -21,7 +21,7 @@ export class EvaluacionController {
         return await this.evaluacionService.findOne(id);
     }
 
-    @Put(':id')
+    @Put('modificar/:id')
     async update(
         @Param('id') id: number,
         @Body() updateEvaluacionDto: UpdateEvaluacionDto,
@@ -29,7 +29,7 @@ export class EvaluacionController {
         return await this.evaluacionService.update(id, updateEvaluacionDto);
     }
 
-    @Delete(':id')
+    @Delete('eliminar/:id')
     async remove(@Param('id') id: number) {
         await this.evaluacionService.remove(id);
         return { message: 'Evaluación eliminada correctamente' };
