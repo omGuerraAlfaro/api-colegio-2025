@@ -62,21 +62,23 @@ export class NotasService {
     return parseFloat(promedio.promedio || 0);
   }
 
-  async createNota(data: {
+  async createNotas(data: {
     estudianteId: number;
     evaluacionId: number;
     nota: number;
     fecha: Date;
-  }): Promise<Nota> {
-    const nuevaNota = this.notaRepository.create({
-      estudiante: { id: data.estudianteId },
-      evaluacion: { id_evaluacion: data.evaluacionId },
-      nota: data.nota,
-      fecha: data.fecha,
-    });
+  }[]): Promise<Nota[]> {
+    const nuevasNotas = data.map(nota => this.notaRepository.create({
+      estudiante: { id: nota.estudianteId },
+      evaluacion: { id_evaluacion: nota.evaluacionId },
+      nota: nota.nota,
+      fecha: nota.fecha,
+    }));
 
-    return await this.notaRepository.save(nuevaNota);
+    return await this.notaRepository.save(nuevasNotas); // Inserción en lote
   }
+
+
 
   async updateNota(
     notaId: number,
@@ -208,8 +210,8 @@ export class NotasService {
       rawData.forEach((row) => {
         if (!estudiantesMap[row.estudianteId]) {
           estudiantesMap[row.estudianteId] = {
+            id_estudiante: row.estudianteId,
             estudiante: row.estudiante,
-            primerApellido: row.primerApellido,
             evaluaciones: []
           };
         }
