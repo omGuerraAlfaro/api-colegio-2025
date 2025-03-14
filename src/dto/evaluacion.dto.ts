@@ -9,3 +9,15 @@ export class CreateEvaluacionDto {
 export class UpdateEvaluacionDto {
   readonly nombreEvaluacion?: string;
 }
+
+export class CierreSemestreDto {
+  cursoId: number;
+  asignaturaId: number;
+  semestreId: number;
+  estudiantes: {
+    estudianteId: number;
+    notaFinalParcial: number | null;
+    notaFinalTarea: number | null;
+    notaFinal: number | null;
+  }[];
+}

@@ -1,6 +1,7 @@
 import { Controller, Get, Post, Put, Body, Param } from '@nestjs/common';
 import { NotasService } from './notas.service';
 import { Nota } from 'src/models/Notas.entity';
+import { CierreSemestreDto } from 'src/dto/evaluacion.dto';
 
 @Controller('notas')
 export class NotasController {
@@ -85,5 +86,10 @@ export class NotasController {
             asignaturaId,
             semestreId
         );
+    }
+
+    @Post('cierre-semestre')
+    async cierreSemestre(@Body() dto: CierreSemestreDto): Promise<void> {
+        await this.notasService.cierreSemestre(dto);
     }
 }

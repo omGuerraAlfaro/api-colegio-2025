@@ -1,5 +1,6 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
+import { CierreSemestreDto } from 'src/dto/evaluacion.dto';
 import { Curso } from 'src/models/Curso.entity';
 import { Evaluacion } from 'src/models/Evaluacion.entity';
 import { Nota } from 'src/models/Notas.entity';
@@ -265,8 +266,96 @@ export class NotasService {
     }
   }
 
+  /**
+    * Nuevo método para el "Cierre de Semestre".
+    * - Crea 3 evaluaciones: tipo 3 (Final Parcial), 4 (Final Tarea) y 5 (Final).
+    * - Genera las notas de cada estudiante para dichas evaluaciones.
+    */
+  async cierreSemestre(dto: CierreSemestreDto): Promise<void> {
+    console.log(dto)
+    try {
+      // 1. Crear las evaluaciones (tipoEvaluacionId = 3, 4 y 5)
+      const finalParcialEval = this.evaluacionRepository.create({
+        nombre_evaluacion: 'Final Parcial',
+        asignatura: { id: dto.asignaturaId },
+        semestre: { id_semestre: dto.semestreId },
+        id_tipo_evaluacion: { id_evaluacion: 3 },
+        curso: { id: dto.cursoId },
+      });
+      await this.evaluacionRepository.save(finalParcialEval);
 
+      const finalTareaEval = this.evaluacionRepository.create({
+        nombre_evaluacion: 'Final Tarea',
+        asignatura: { id: dto.asignaturaId },
+        semestre: { id_semestre: dto.semestreId },
+        id_tipo_evaluacion: { id_evaluacion: 4 },
+        curso: { id: dto.cursoId },
+      });
+      await this.evaluacionRepository.save(finalTareaEval);
 
+      const finalEval = this.evaluacionRepository.create({
+        nombre_evaluacion: 'Final',
+        asignatura: { id: dto.asignaturaId },
+        semestre: { id_semestre: dto.semestreId },
+        id_tipo_evaluacion: { id_evaluacion: 5 },
+        curso: { id: dto.cursoId },
+      });
+      await this.evaluacionRepository.save(finalEval);
+
+      // 2. Construir array de notas para cada estudiante
+      const hoy = new Date();
+      const notasAInsertar: {
+        estudianteId: number;
+        evaluacionId: number;
+        nota: number | null;
+        fecha: Date;
+      }[] = [];
+
+      for (const est of dto.estudiantes) {
+        // Final Parcial
+        if (est.notaFinalParcial !== null) {
+          notasAInsertar.push({
+            estudianteId: est.estudianteId,
+            evaluacionId: finalParcialEval.id_evaluacion,
+            nota: est.notaFinalParcial,
+            fecha: hoy,
+          });
+        }
+
+        // Final Tarea
+        if (est.notaFinalTarea !== null) {
+          notasAInsertar.push({
+            estudianteId: est.estudianteId,
+            evaluacionId: finalTareaEval.id_evaluacion,
+            nota: est.notaFinalTarea,
+            fecha: hoy,
+          });
+        }
+
+        // Nota Final
+        if (est.notaFinal !== null) {
+          notasAInsertar.push({
+            estudianteId: est.estudianteId,
+            evaluacionId: finalEval.id_evaluacion,
+            nota: est.notaFinal,
+            fecha: hoy,
+          });
+        }
+      }
+
+      // 3. Reutilizar createNotas para guardar en la base de datos
+      if (notasAInsertar.length > 0) {
+        await this.createNotas(notasAInsertar);
+      }
+
+    } catch (error) {
+      // Puedes registrar el error en un log o simplemente mostrarlo en consola
+      console.error('Error en cierreSemestre:', error);
+
+      // Lanza una excepción para que NestJS la maneje y retorne un 500 (o el código que estimes)
+      throw new InternalServerErrorException('Ocurrió un error al cerrar el semestre.');
+    }
+  }
 
 
 }
