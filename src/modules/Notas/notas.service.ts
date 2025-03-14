@@ -65,20 +65,40 @@ export class NotasService {
   async createNotas(data: {
     estudianteId: number;
     evaluacionId: number;
-    nota: number;
+    nota: number | null;
     fecha: Date;
-  }[]): Promise<Nota[]> {
-    const nuevasNotas = data.map(nota => this.notaRepository.create({
-      estudiante: { id: nota.estudianteId },
-      evaluacion: { id_evaluacion: nota.evaluacionId },
-      nota: nota.nota,
-      fecha: nota.fecha,
-    }));
+  }[]): Promise<void> {
+    for (const notaData of data) {
+      if (notaData.nota === null) {
+        // Eliminar la nota si es null
+        await this.notaRepository.delete({
+          estudiante: { id: notaData.estudianteId },
+          evaluacion: { id_evaluacion: notaData.evaluacionId },
+        });
+      } else {
+        let notaExistente = await this.notaRepository.findOne({
+          where: {
+            estudiante: { id: notaData.estudianteId },
+            evaluacion: { id_evaluacion: notaData.evaluacionId },
+          },
+        });
 
-    return await this.notaRepository.save(nuevasNotas); // Inserción en lote
+        if (notaExistente) {
+          notaExistente.nota = notaData.nota;
+          notaExistente.fecha = notaData.fecha;
+          await this.notaRepository.save(notaExistente);
+        } else {
+          const nuevaNota = this.notaRepository.create({
+            estudiante: { id: notaData.estudianteId },
+            evaluacion: { id_evaluacion: notaData.evaluacionId },
+            nota: notaData.nota,
+            fecha: notaData.fecha,
+          });
+          await this.notaRepository.save(nuevaNota);
+        }
+      }
+    }
   }
-
-
 
   async updateNota(
     notaId: number,

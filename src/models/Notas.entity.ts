@@ -18,7 +18,7 @@ export class Nota {
     @JoinColumn({ name: 'id_evaluacion' })
     evaluacion: Evaluacion;
 
-    @Column({ type: 'decimal', precision: 5, scale: 1 })
+    @Column({ type: 'decimal', precision: 2, scale: 1 })
     nota: number;
 
     @Column({ type: 'date' })

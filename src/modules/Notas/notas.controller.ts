@@ -35,16 +35,15 @@ export class NotasController {
     }
 
     // Crear una nueva nota
-    @Post('nuevas-notas') // Le agregamos un endpoint más específico
+    @Post('nuevas-notas')
     async createNotas(@Body() data: {
         estudianteId: number;
         evaluacionId: number;
-        nota: number;
+        nota: number | null;
         fecha: Date;
-    }[]): Promise<Nota[]> {
-        return await this.notasService.createNotas(data);
+    }[]): Promise<void> {
+        await this.notasService.createNotas(data);
     }
-
 
     // Actualizar una nota existente
     @Put('/:notaId')
