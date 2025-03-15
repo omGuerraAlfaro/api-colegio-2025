@@ -206,7 +206,7 @@ export class NotasService {
           'estudiante.id AS estudianteId',
           "CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS estudiante",
           'estudiante.primer_apellido_alumno AS primerApellido',
-          'evaluacion.idEvaluacion AS idEvaluacion', // Agregado ID de evaluación
+          'evaluacion.idEvaluacion AS idEvaluacion',
           'evaluacion.nombre_evaluacion AS nombreEvaluacion',
           'nota.nota AS nota',
           'nota.fecha AS fecha',
@@ -221,25 +221,32 @@ export class NotasService {
         return [];
       }
 
+      // Verificamos si al menos hay evaluaciones con nombre
       const hayEvaluacionesReales = rawData.some(row => row.nombreEvaluacion != null);
       if (!hayEvaluacionesReales) {
         return [];
       }
 
-      const estudiantesMap: { [key: number]: any } = {};
+      // Usamos un Map para agrupar a los estudiantes en O(1)
+      const estudiantesMap = new Map<number, any>();
 
-      rawData.forEach((row) => {
-        if (!estudiantesMap[row.estudianteId]) {
-          estudiantesMap[row.estudianteId] = {
+      for (const row of rawData) {
+        // Obtenemos o creamos el objeto del estudiante
+        let estudianteObj = estudiantesMap.get(row.estudianteId);
+        if (!estudianteObj) {
+          estudianteObj = {
             id_estudiante: row.estudianteId,
             estudiante: row.estudiante,
+            primerApellido: row.primerApellido,
             evaluaciones: []
           };
+          estudiantesMap.set(row.estudianteId, estudianteObj);
         }
 
+        // Si la fila tiene una evaluación con nombre, la agregamos
         if (row.nombreEvaluacion) {
-          estudiantesMap[row.estudianteId].evaluaciones.push({
-            id_evaluacion: row.idEvaluacion, // Ahora tenemos el ID de la evaluación
+          estudianteObj.evaluaciones.push({
+            id_evaluacion: row.idEvaluacion,
             nombre_evaluacion: row.nombreEvaluacion,
             nota: row.nota,
             fecha: row.fecha,
@@ -249,15 +256,24 @@ export class NotasService {
             }
           });
         }
-      });
+      }
 
-      let resultado = Object.values(estudiantesMap);
+      // Convertimos el Map a array
+      let resultado = Array.from(estudiantesMap.values());
 
-      resultado = resultado.filter((alumno: any) => alumno.evaluaciones.length > 0);
+      // Filtramos solo los que tengan evaluaciones
+      resultado = resultado.filter(e => e.evaluaciones.length > 0);
 
       if (resultado.length === 0) {
         return [];
       }
+
+      // Ordenamos por primerApellido para asegurar el orden final
+      resultado.sort((a, b) => {
+        const apellidoA = (a.primerApellido || '').trim().toLowerCase();
+        const apellidoB = (b.primerApellido || '').trim().toLowerCase();
+        return apellidoA.localeCompare(apellidoB);
+      });
 
       return resultado;
     } catch (error) {
@@ -265,6 +281,7 @@ export class NotasService {
       throw error;
     }
   }
+
 
   /**
     * Nuevo método para el "Cierre de Semestre".

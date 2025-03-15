@@ -30,7 +30,7 @@ export class EstudianteService {
       segundo_apellido_alumno: estudiante.segundo_apellido_alumno,
       fecha_nacimiento_alumno: estudiante.fecha_nacimiento_alumno,
       fecha_matricula: estudiante.fecha_matricula,
-      rut: estudiante.rut+'-'+estudiante.dv,
+      rut: estudiante.rut + '-' + estudiante.dv,
       genero_alumno: estudiante.genero_alumno,
       alergia_alimento_alumno: estudiante.alergia_alimento_alumno,
       alergia_medicamento_alumno: estudiante.alergia_medicamento_alumno,
@@ -67,22 +67,33 @@ export class EstudianteService {
   }
 
   async getCountByGender(): Promise<{ masculinoCount: number; femeninoCount: number }> {
-    const maleCount = await this.estudianteRepository.count({ where: { genero_alumno: 'M' } });
-    const femaleCount = await this.estudianteRepository.count({ where: { genero_alumno: 'F' } });
+    const maleCount = await this.estudianteRepository.count({
+      where: {
+        genero_alumno: 'M',
+        estado_estudiante: true
+      }
+    });
+    const femaleCount = await this.estudianteRepository.count({
+      where: {
+        genero_alumno: 'F',
+        estado_estudiante: true
+      }
+    });
 
     return { masculinoCount: maleCount, femeninoCount: femaleCount };
   }
 
+
   async updateEstudiante(id: number, updateData: UpdateEstudianteDto): Promise<Estudiante | null> {
     const estudiante = await this.estudianteRepository.findOne({ where: { id } });
-  
+
     if (!estudiante) {
       return null; // Estudiante no encontrado
     }
-  
+
     // Actualizar los campos del estudiante con los datos proporcionados
     Object.assign(estudiante, updateData);
-  
+
     // Guardar los cambios
     return await this.estudianteRepository.save(estudiante);
   }
