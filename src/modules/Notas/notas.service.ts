@@ -272,35 +272,68 @@ export class NotasService {
     * - Genera las notas de cada estudiante para dichas evaluaciones.
     */
   async cierreSemestre(dto: CierreSemestreDto): Promise<void> {
-    console.log(dto)
+    console.log(dto);
     try {
-      // 1. Crear las evaluaciones (tipoEvaluacionId = 3, 4 y 5)
-      const finalParcialEval = this.evaluacionRepository.create({
-        nombre_evaluacion: 'Final Parcial',
-        asignatura: { id: dto.asignaturaId },
-        semestre: { id_semestre: dto.semestreId },
-        id_tipo_evaluacion: { id_evaluacion: 3 },
-        curso: { id: dto.cursoId },
+      // 1. Verificar o crear las evaluaciones (tipoEvaluacionId = 3, 4 y 5)
+      let finalParcialEval = await this.evaluacionRepository.findOne({
+        where: {
+          nombre_evaluacion: 'Final Parcial',
+          asignatura: { id: dto.asignaturaId },
+          semestre: { id_semestre: dto.semestreId },
+          id_tipo_evaluacion: { id_evaluacion: 3 },
+          curso: { id: dto.cursoId },
+        },
       });
-      await this.evaluacionRepository.save(finalParcialEval);
+      if (!finalParcialEval) {
+        finalParcialEval = this.evaluacionRepository.create({
+          nombre_evaluacion: 'Final Parcial',
+          asignatura: { id: dto.asignaturaId },
+          semestre: { id_semestre: dto.semestreId },
+          id_tipo_evaluacion: { id_evaluacion: 3 },
+          curso: { id: dto.cursoId },
+        });
+        await this.evaluacionRepository.save(finalParcialEval);
+      }
 
-      const finalTareaEval = this.evaluacionRepository.create({
-        nombre_evaluacion: 'Final Tarea',
-        asignatura: { id: dto.asignaturaId },
-        semestre: { id_semestre: dto.semestreId },
-        id_tipo_evaluacion: { id_evaluacion: 4 },
-        curso: { id: dto.cursoId },
+      let finalTareaEval = await this.evaluacionRepository.findOne({
+        where: {
+          nombre_evaluacion: 'Final Tarea',
+          asignatura: { id: dto.asignaturaId },
+          semestre: { id_semestre: dto.semestreId },
+          id_tipo_evaluacion: { id_evaluacion: 4 },
+          curso: { id: dto.cursoId },
+        },
       });
-      await this.evaluacionRepository.save(finalTareaEval);
+      if (!finalTareaEval) {
+        finalTareaEval = this.evaluacionRepository.create({
+          nombre_evaluacion: 'Final Tarea',
+          asignatura: { id: dto.asignaturaId },
+          semestre: { id_semestre: dto.semestreId },
+          id_tipo_evaluacion: { id_evaluacion: 4 },
+          curso: { id: dto.cursoId },
+        });
+        await this.evaluacionRepository.save(finalTareaEval);
+      }
 
-      const finalEval = this.evaluacionRepository.create({
-        nombre_evaluacion: 'Final',
-        asignatura: { id: dto.asignaturaId },
-        semestre: { id_semestre: dto.semestreId },
-        id_tipo_evaluacion: { id_evaluacion: 5 },
-        curso: { id: dto.cursoId },
+      let finalEval = await this.evaluacionRepository.findOne({
+        where: {
+          nombre_evaluacion: 'Final',
+          asignatura: { id: dto.asignaturaId },
+          semestre: { id_semestre: dto.semestreId },
+          id_tipo_evaluacion: { id_evaluacion: 5 },
+          curso: { id: dto.cursoId },
+        },
       });
-      await this.evaluacionRepository.save(finalEval);
+      if (!finalEval) {
+        finalEval = this.evaluacionRepository.create({
+          nombre_evaluacion: 'Final',
+          asignatura: { id: dto.asignaturaId },
+          semestre: { id_semestre: dto.semestreId },
+          id_tipo_evaluacion: { id_evaluacion: 5 },
+          curso: { id: dto.cursoId },
+        });
+        await this.evaluacionRepository.save(finalEval);
+      }
 
       // 2. Construir array de notas para cada estudiante
       const hoy = new Date();
@@ -321,7 +354,6 @@ export class NotasService {
             fecha: hoy,
           });
         }
-
         // Final Tarea
         if (est.notaFinalTarea !== null) {
           notasAInsertar.push({
@@ -331,8 +363,7 @@ export class NotasService {
             fecha: hoy,
           });
         }
-
-        // Nota Final
+        // Final
         if (est.notaFinal !== null) {
           notasAInsertar.push({
             estudianteId: est.estudianteId,
@@ -343,19 +374,61 @@ export class NotasService {
         }
       }
 
-      // 3. Reutilizar createNotas para guardar en la base de datos
+      // 3. Guardar (o actualizar) las notas que no son null
       if (notasAInsertar.length > 0) {
         await this.createNotas(notasAInsertar);
       }
 
-    } catch (error) {
-      // Puedes registrar el error en un log o simplemente mostrarlo en consola
-      console.error('Error en cierreSemestre:', error);
+      // 4. Eliminar la evaluación si no hay notas (o el usuario la "quitó" por completo)
 
-      // Lanza una excepción para que NestJS la maneje y retorne un 500 (o el código que estimes)
+      // -- Final Parcial --
+      if (finalParcialEval) {
+        // ¿Alguna nota en notasAInsertar pertenece a esta evaluación?
+        const existeNotaParcial = notasAInsertar.some(
+          (n) => n.evaluacionId === finalParcialEval.id_evaluacion,
+        );
+
+        // Si no hay notas, se elimina evaluación y sus notas (si existieran)
+        if (!existeNotaParcial) {
+          await this.notaRepository.delete({
+            evaluacion: { id_evaluacion: finalParcialEval.id_evaluacion },
+          });
+          await this.evaluacionRepository.remove(finalParcialEval);
+        }
+      }
+
+      // -- Final Tarea --
+      if (finalTareaEval) {
+        const existeNotaTarea = notasAInsertar.some(
+          (n) => n.evaluacionId === finalTareaEval.id_evaluacion,
+        );
+        if (!existeNotaTarea) {
+          await this.notaRepository.delete({
+            evaluacion: { id_evaluacion: finalTareaEval.id_evaluacion },
+          });
+          await this.evaluacionRepository.remove(finalTareaEval);
+        }
+      }
+
+      // -- Final --
+      if (finalEval) {
+        const existeNotaFinal = notasAInsertar.some(
+          (n) => n.evaluacionId === finalEval.id_evaluacion,
+        );
+        if (!existeNotaFinal) {
+          await this.notaRepository.delete({
+            evaluacion: { id_evaluacion: finalEval.id_evaluacion },
+          });
+          await this.evaluacionRepository.remove(finalEval);
+        }
+      }
+
+    } catch (error) {
+      console.error('Error en cierreSemestre:', error);
       throw new InternalServerErrorException('Ocurrió un error al cerrar el semestre.');
     }
   }
+
 
 
 }

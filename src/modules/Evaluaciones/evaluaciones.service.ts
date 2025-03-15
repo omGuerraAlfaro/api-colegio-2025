@@ -4,6 +4,7 @@ import { CreateEvaluacionDto, UpdateEvaluacionDto } from 'src/dto/evaluacion.dto
 import { Asignatura } from 'src/models/Asignatura.entity';
 import { Curso } from 'src/models/Curso.entity';
 import { Evaluacion } from 'src/models/Evaluacion.entity';
+import { Nota } from 'src/models/Notas.entity';
 import { Semestre } from 'src/models/Semestre.entity';
 import { TipoEvaluacion } from 'src/models/TipoEvaluacion.entity';
 import { Repository } from 'typeorm';
@@ -13,6 +14,8 @@ export class EvaluacionService {
     constructor(
         @InjectRepository(Evaluacion)
         private readonly evaluacionRepository: Repository<Evaluacion>,
+        @InjectRepository(Nota)
+        private readonly notaRepository: Repository<Nota>
     ) { }
 
     async create(createEvaluacionDto: CreateEvaluacionDto): Promise<Evaluacion> {
@@ -54,8 +57,17 @@ export class EvaluacionService {
     }
 
     async remove(id: number): Promise<void> {
+        // Se obtiene la evaluación, o se lanza NotFoundException si no existe
         const evaluacion = await this.findOne(id);
+
+        // Se eliminan todas las notas asociadas a esta evaluación
+        await this.notaRepository.delete({
+            evaluacion: { id_evaluacion: evaluacion.id_evaluacion }
+        });
+
+        // Se elimina la evaluación
         await this.evaluacionRepository.remove(evaluacion);
     }
+
 
 }
