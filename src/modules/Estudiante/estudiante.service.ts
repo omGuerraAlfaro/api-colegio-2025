@@ -16,12 +16,15 @@ export class EstudianteService {
 
 
   async findAll() {
-    const estudiantes = await this.estudianteRepository.createQueryBuilder("estudiante")
+    const estudiantes = await this.estudianteRepository
+      .createQueryBuilder("estudiante")
       .leftJoinAndSelect("estudiante.cursoConnection", "cursoConnection")
       .leftJoinAndSelect("cursoConnection.curso", "curso")
+      // Agregas el orden aquí:
+      .orderBy("estudiante.primer_apellido_alumno", "ASC")
       .getMany();
 
-    // Mapear el resultado para incluir solo el curso y toda la data del estudiante
+    // Mapeas el resultado para incluir solo el curso y toda la data del estudiante
     return estudiantes.map(estudiante => ({
       id: estudiante.id,
       primer_nombre_alumno: estudiante.primer_nombre_alumno,
@@ -44,9 +47,10 @@ export class EstudianteService {
       apto_educacion_fisica: estudiante.apto_educacion_fisica,
       observaciones_alumno: estudiante.observaciones_alumno,
       estado_estudiante: estudiante.estado_estudiante,
-      curso: estudiante.cursoConnection.map(cc => cc.curso)
+      curso: estudiante.cursoConnection.map(cc => cc.curso),
     }));
   }
+
 
 
   async findByRut(rut: string) {
@@ -66,7 +70,7 @@ export class EstudianteService {
     return null;
   }
 
-  async getCountByGender(): Promise<{ masculinoCount: number; femeninoCount: number }> {
+  async getCountByGender(): Promise<{ masculinoCount: number; femeninoCount: number; out: number; masculinoCountOut: number; femeninoCountOut: number }> {
     const maleCount = await this.estudianteRepository.count({
       where: {
         genero_alumno: 'M',
@@ -80,7 +84,25 @@ export class EstudianteService {
       }
     });
 
-    return { masculinoCount: maleCount, femeninoCount: femaleCount };
+    const out = await this.estudianteRepository.count({
+      where: {
+        estado_estudiante: false
+      }
+    });
+    const maleCountOut = await this.estudianteRepository.count({
+      where: {
+        genero_alumno: 'M',
+        estado_estudiante: false
+      }
+    });
+    const femaleCountOut = await this.estudianteRepository.count({
+      where: {
+        genero_alumno: 'F',
+        estado_estudiante: false
+      }
+    });
+
+    return { masculinoCount: maleCount, femeninoCount: femaleCount, out: out, masculinoCountOut: maleCountOut, femeninoCountOut: femaleCountOut  };
   }
 
 
