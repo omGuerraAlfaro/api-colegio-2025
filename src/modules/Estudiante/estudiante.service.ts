@@ -102,7 +102,7 @@ export class EstudianteService {
       }
     });
 
-    return { masculinoCount: maleCount, femeninoCount: femaleCount, out: out, masculinoCountOut: maleCountOut, femeninoCountOut: femaleCountOut  };
+    return { masculinoCount: maleCount, femeninoCount: femaleCount, out: out, masculinoCountOut: maleCountOut, femeninoCountOut: femaleCountOut };
   }
 
 
@@ -119,6 +119,30 @@ export class EstudianteService {
     // Guardar los cambios
     return await this.estudianteRepository.save(estudiante);
   }
+
+  async findByRutWithApoderados(rut: string) {
+    const estudiante = await this.estudianteRepository.findOne({
+      where: { rut },
+      relations: [
+        'apoderadosConnection',
+        'apoderadosConnection.apoderado',  // Relación para obtener los detalles de cada apoderado
+        'apoderadosSuplenteConnection',
+        'apoderadosSuplenteConnection.apoderado'  // Relación para obtener los detalles de cada apoderado suplente
+      ],
+    });
+
+    if (estudiante) {
+      const { apoderadosConnection, apoderadosSuplenteConnection, ...rest } = estudiante;
+      return {
+        ...rest,
+        // Extraemos el detalle completo de cada apoderado
+        apoderados: apoderadosConnection.map(conn => conn.apoderado),
+        apoderadosSuplentes: apoderadosSuplenteConnection.map(conn => conn.apoderado),
+      };
+    }
+    return null;
+  }
+
 
 
 }

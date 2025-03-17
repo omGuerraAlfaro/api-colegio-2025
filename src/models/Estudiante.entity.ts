@@ -12,6 +12,7 @@ import { EstudianteCurso } from './CursoEstudiante.entity';
 import { AnotacionesEstudiante } from './AnotacionesEstudiantes.entity';
 import { Asistencia } from './Asistencia.entity';
 import { Nota } from './Notas.entity';
+import { ApoderadoSuplenteEstudiante } from './ApoderadoSuplenteEstudiante.entity';
 
 @Entity()
 export class Estudiante {
@@ -86,6 +87,9 @@ export class Estudiante {
 
     @OneToMany(() => ApoderadoEstudiante, apoderadoEstudiante => apoderadoEstudiante.estudiante)
     apoderadosConnection: ApoderadoEstudiante[];
+
+    @OneToMany(() => ApoderadoEstudiante, apoderadoSuplenteEstudiante => apoderadoSuplenteEstudiante.estudiante)
+    apoderadosSuplenteConnection: ApoderadoSuplenteEstudiante[];
 
     @OneToMany(() => EstudianteCurso, cursoEstudiante => cursoEstudiante.estudiante)
     cursoConnection: EstudianteCurso[];

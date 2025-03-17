@@ -7,6 +7,7 @@ import {
   HttpException,
   HttpStatus,
   InternalServerErrorException,
+  NotFoundException,
   Param,
   Patch,
   Post,
@@ -48,6 +49,15 @@ export class EstudianteController {
     }
 
     return updatedEstudiante;
+  }
+
+  @Get(':rut/apoderados')
+  async getEstudianteApoderados(@Param('rut') rut: string) {
+    const estudiante = await this.estudianteService.findByRutWithApoderados(rut);
+    if (!estudiante) {
+      throw new NotFoundException(`Estudiante con RUT ${rut} no encontrado`);
+    }
+    return estudiante;
   }
 }
 
