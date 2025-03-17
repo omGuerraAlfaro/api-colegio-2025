@@ -17,12 +17,13 @@ export class AnotacionController {
         @Param('estudianteId') estudianteId: number,
         @Body() createAnotacionDto: CreateAnotacionDto
     ) {
-        const { anotacion_titulo, anotacion_descripcion, es_positiva, es_negativa, anotacion_estado, asignaturaId } = createAnotacionDto;
+        const { anotacion_titulo, anotacion_descripcion, es_positiva, es_negativa, es_neutra, anotacion_estado, asignaturaId } = createAnotacionDto;
         const anotacionData = {
             anotacion_titulo,
             anotacion_descripcion,
             es_positiva,
             es_negativa,
+            es_neutra,
             anotacion_estado
         };
         return await this.anotacionService.createAnotacionForStudent(estudianteId, anotacionData, asignaturaId);

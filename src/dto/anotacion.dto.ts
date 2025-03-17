@@ -37,6 +37,10 @@ export class CreateAnotacionDto {
 
     @IsBoolean()
     @IsOptional()
+    es_neutra?: boolean;
+
+    @IsBoolean()
+    @IsOptional()
     anotacion_estado?: boolean;
 
     @IsNumber()
