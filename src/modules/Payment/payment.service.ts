@@ -324,10 +324,10 @@ export class PaymentService {
                 </tr>
                 ${Array.from(apoderados.values()).map(apoderado => `
                     <tr>
-                        <td>${apoderado.primer_nombre} ${apoderado.segundo_nombre} ${apoderado.primer_apellido} ${apoderado.segundo_apellido}</td>
+                        <td>${apoderado.primer_nombre_apoderado} ${apoderado.segundo_nombre_apoderado} ${apoderado.primer_apellido_apoderado} ${apoderado.segundo_apellido_apoderado}</td>
                         <td>${apoderado.rut}-${apoderado.dv}</td>
-                        <td>${apoderado.telefono}</td>
-                        <td>${apoderado.correo_electronico}</td>
+                        <td>${apoderado.telefono_apoderado}</td>
+                        <td>${apoderado.correo_apoderado}</td>
                     </tr>
                 `).join('')}
             </table>
@@ -349,8 +349,8 @@ export class PaymentService {
                             <td>${boleta.id}</td>
                             <td>${boleta.detalle}</td>
                             <td>$ ${Math.round(parseFloat(boleta.total))}</td>
-                            <td>${boleta.rut_estudiante}</td>
-                            <td>${estudiante ? `${estudiante.primer_nombre} ${estudiante.segundo_nombre} ${estudiante.primer_apellido} ${estudiante.segundo_apellido}` : ''}</td>
+                            <td>${estudiante.rut}-${estudiante.dv}</td>
+                            <td>${estudiante ? `${estudiante.primer_nombre_alumno} ${estudiante.segundo_nombre_alumno} ${estudiante.primer_apellido_alumno} ${estudiante.segundo_apellido_alumno}` : ''}</td>
                         </tr>
                     `;
         }).join('')}
@@ -368,7 +368,7 @@ export class PaymentService {
             ${apoderadosHtml}
             <br>
             ${boletasHtml}
-            <p>Próximas 24 horas para confirmar.</p>
+            <p><b>Próximas 24 horas para confirmar.</b></p>
             <h3>Colegio Andes Chile – Educando con Amor</h3>
         `;
 
