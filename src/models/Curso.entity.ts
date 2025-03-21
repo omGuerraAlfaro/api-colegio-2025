@@ -12,6 +12,7 @@ import { Estudiante } from './Estudiante.entity';
 import { Asistencia } from './Asistencia.entity';
 import { Nota } from './Notas.entity';
 import { Evaluacion } from './Evaluacion.entity';
+import { InscripcionTaller } from './InscripcionTaller.entity';
 @Entity()
 export class Curso {
 
@@ -40,6 +41,9 @@ export class Curso {
     @ManyToOne(() => Evaluacion, (evaluacion) => evaluacion.notas)
     @JoinColumn({ name: 'id_evaluacion' })
     evaluacion: Evaluacion;
+
+    @OneToMany(() => InscripcionTaller, inscripcionTaller => inscripcionTaller.estudiante)
+    inscripciones: InscripcionTaller[];
 
     addStudent(student: Estudiante) {
         const connection = new EstudianteCurso();

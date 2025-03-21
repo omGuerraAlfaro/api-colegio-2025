@@ -437,6 +437,8 @@ export class InscripcionMatriculaService {
         html: correoHtml,
       };
 
+      this.logger.log(`Matricula creada!!!!`);
+
       try {
         await this.correoService.enviarCorreo(mailOptionsAdm);
         console.log('Correo enviado con éxito');

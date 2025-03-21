@@ -30,6 +30,16 @@ export class CursoController {
     return await this.cursoService.findAll();
   }
 
+  @Get('all/prebasica')
+  async getAllCursosPreBasica() {
+    return await this.cursoService.findAllCursosPreBasica();
+  }
+
+  @Get('all/basica')
+  async getAllCursosBasica() {
+    return await this.cursoService.findAllCursosBasica();
+  }
+
   @Get('estudiantes')
   async getCursosConEstudiantes() {
     return await this.cursoService.findAllCursosWithEstudiantes();

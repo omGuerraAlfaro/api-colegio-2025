@@ -14,6 +14,7 @@ import { AsignaturaModule } from "./Asignatura/asignatura.module";
 import { AsistenciaModule } from "./Asistencia/asistencia.module";
 import { CalendarioEscolarModule } from "./CalendarioEscolar/calendario-escolar.module";
 import { InscripcionMatriculaModule } from "./InscripcionMatricula/inscripcionMatricula.module";
+import { InscripcionTallerModule } from "./InscripcionTaller/inscripcionTaller.module";
 import { PdfModule } from "./Pdf/pdf.module";
 import { NotasModule } from "./Notas/notas.module";
 import { EvaluacionModule } from "./Evaluaciones/evaluaciones.module";
@@ -37,6 +38,7 @@ export {
      AsistenciaModule,
      CalendarioEscolarModule,
      InscripcionMatriculaModule,
+     InscripcionTallerModule,
      PdfModule,
      NotasModule,
      EvaluacionModule,

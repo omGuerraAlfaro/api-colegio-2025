@@ -1,7 +1,7 @@
 import { Get, Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Curso } from 'src/models/Curso.entity';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThan, Repository } from 'typeorm';
 
 @Injectable()
 export class CursoService {
@@ -15,8 +15,20 @@ export class CursoService {
     return await this.cursoRepository.findOne({ where: { id: id } });
   }
 
-  async findAll(){
+  async findAll() {
     return await this.cursoRepository.find()
+  }
+
+  async findAllCursosPreBasica() {
+    return await this.cursoRepository.find({
+      where: { id: LessThanOrEqual(2) },
+    });
+  }
+
+  async findAllCursosBasica() {
+    return await this.cursoRepository.find({
+      where: { id: MoreThan(2) },
+    });
   }
 
   async findAllWithTeacher(): Promise<Curso[]> {
@@ -91,11 +103,11 @@ export class CursoService {
       .leftJoinAndSelect("estudiante.apoderadosConnection", "apoderadoEstudiante")
       .leftJoinAndSelect("apoderadoEstudiante.apoderado", "apoderado")
       .getMany();
-  
+
     return cursos.map(curso => {
       const { cursoConnection, ...cursoData } = curso;
       const apoderadosMap = new Map();
-  
+
       cursoConnection.forEach(conn => {
         conn.estudiante.apoderadosConnection.forEach(ae => {
           if (!apoderadosMap.has(ae.apoderado.id)) {
@@ -110,28 +122,28 @@ export class CursoService {
           }
         });
       });
-  
+
       return {
         ...cursoData,
         apoderadoWithEstudiantes: Array.from(apoderadosMap.values())
       };
     });
   }
-  
+
   async findAllCursosWithEstudiantes() {
     const cursos = await this.cursoRepository
       .createQueryBuilder("curso")
       .leftJoinAndSelect("curso.cursoConnection", "cursoEstudiante")
       .leftJoinAndSelect("cursoEstudiante.estudiante", "estudiante")
       .getMany();
-  
+
     return cursos.map(curso => {
       const { cursoConnection, ...cursoData } = curso;
-  
+
       const estudiantes = cursoConnection.map(conn => ({
         ...conn.estudiante
       }));
-  
+
       return {
         ...cursoData,
         estudiantes
@@ -146,16 +158,30 @@ export class CursoService {
       .leftJoin("cursoEstudiante.estudiante", "estudiante")
       .where("estudiante.rut = :rut", { rut })
       .getOne();
-  
+
     if (!curso) {
       throw new Error(`No course found for student with RUT: ${rut}`);
     }
-  
+
     return curso;
   }
-  
-  
-  
+
+  async findCursoIdByEstudianteId(estudianteId: number): Promise<number | null> {
+    const result = await this.cursoRepository
+      .createQueryBuilder('curso')
+      .leftJoin('curso.cursoConnection', 'cursoEstudiante')
+      .leftJoin('cursoEstudiante.estudiante', 'estudiante')
+      .where('estudiante.id = :estudianteId', { estudianteId })
+      .select('curso.id', 'id') // solo selecciona el ID del curso
+      .getRawOne();
+
+    return result?.id ?? null;
+  }
+
+
+
+
+
 
 
 

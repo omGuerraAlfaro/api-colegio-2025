@@ -24,7 +24,8 @@ import {
   NotasModule,
   PdfValidadorModule,
   EvaluacionModule,
-  SemestreModule
+  SemestreModule,
+  InscripcionTallerModule
 } from './modules';
 
 @Module({
@@ -46,6 +47,7 @@ import {
     AsistenciaModule,
     CalendarioEscolarModule,
     InscripcionMatriculaModule,
+    InscripcionTallerModule,
     PdfModule,
     NotasModule,
     EvaluacionModule,

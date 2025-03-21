@@ -30,13 +30,17 @@ import { Semestre } from './Semestre.entity';
 import { CalendarioAsistencia } from './CalendarioAsistencia';
 import { PdfValidador } from './pdf-validador.entity';
 import { TipoEvaluacion } from './TipoEvaluacion.entity';
+import { InscripcionTaller } from './InscripcionTaller.entity';
+import { TipoTaller } from './TipoTaller.entity';
 
 
-export const entities = [Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudiante, ApoderadoEstudiante,
-                        Estudiante, Profesor, Curso, EstudianteCurso, Anotacion, AnotacionesEstudiante, Usuarios, Administrador, SubAdministrador,
-                        Boleta, EstadoBoleta, Transacciones, EstadoTransaccion, TransactionEntity,
-                        NoticiasColegio, NoticiasImages,
-                        Correo, InscripcionMatricula, PdfValidador,
-                        Asignatura, Evaluacion, TipoEvaluacion, Nota, Semestre,
-                        Asistencia, CalendarioEscolar, CalendarioAsistencia];
+export const entities = [
+    Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudiante, ApoderadoEstudiante,
+    Estudiante, Profesor, Curso, EstudianteCurso, Anotacion, AnotacionesEstudiante, Usuarios, Administrador, SubAdministrador,
+    Boleta, EstadoBoleta, Transacciones, EstadoTransaccion, TransactionEntity,
+    NoticiasColegio, NoticiasImages,
+    Correo, InscripcionMatricula, InscripcionTaller, PdfValidador,
+    Asignatura, Evaluacion, TipoEvaluacion, TipoTaller, Nota, Semestre,
+    Asistencia, CalendarioEscolar, CalendarioAsistencia
+];
 

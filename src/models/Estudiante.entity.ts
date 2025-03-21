@@ -13,6 +13,7 @@ import { AnotacionesEstudiante } from './AnotacionesEstudiantes.entity';
 import { Asistencia } from './Asistencia.entity';
 import { Nota } from './Notas.entity';
 import { ApoderadoSuplenteEstudiante } from './ApoderadoSuplenteEstudiante.entity';
+import { InscripcionTaller } from './InscripcionTaller.entity';
 
 @Entity()
 export class Estudiante {
@@ -99,5 +100,9 @@ export class Estudiante {
 
     @OneToMany(() => Nota, (nota) => nota.estudiante)
     notas: Nota[];
+
+    @OneToMany(() => InscripcionTaller, inscripcionTaller => inscripcionTaller.estudiante)
+    inscripciones: InscripcionTaller[];
+
 
 }
