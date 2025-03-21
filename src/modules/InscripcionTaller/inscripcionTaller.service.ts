@@ -65,9 +65,9 @@ export class InscripcionTallerService {
 
       this.logger.log(`Inscripción creada: Estudiante ID ${id_alumno} - Curso ID ${idCurso} - Taller ID ${id_taller}`);
 
-      const correoHtml = `
+      const correoHtmlApoderado = `
         <div style="font-family: Arial, sans-serif; padding: 10px;">
-          <h2 style="color: #2c3e50;">Confirmación de Inscripción Taller 2024</h2>
+          <h2 style="color: #2c3e50;">Confirmación de Inscripción Taller 2025</h2>
           <p>Estimado/a apoderado/a,</p>
           <p>Se ha registrado correctamente la inscripción del estudiante:</p>
           <ul>
@@ -77,15 +77,37 @@ export class InscripcionTallerService {
           </ul>
           <p>Ante cualquier duda, puede comunicarse con nosotros.</p>
           <br>
-          <p style="color: #7f8c8d;">Atentamente,<br>Equipo Colegio Andes</p>
+          <p style="color: #7f8c8d;">Atentamente,<br>Equipo Colegio Andes Chile</p>
         </div>
       `;
 
+      const correoHtmlColegio = `
+        <div style="font-family: Arial, sans-serif; padding: 10px;">
+          <h2 style="color: #2c3e50;">Confirmación de Inscripción Taller 2025</h2>
+          <p>Estimado/a</p>
+          <p>Se ha registrado correctamente la inscripción del estudiante:</p>
+          <ul>
+            <li><strong>Nombre:</strong> ${estudiante.primer_nombre_alumno ?? ''} ${estudiante.segundo_nombre_alumno ?? ''} ${estudiante.primer_apellido_alumno ?? ''} ${estudiante.segundo_apellido_alumno ?? ''}</li>
+            <li><strong>Curso:</strong> ${curso?.nombre}</li>
+            <li><strong>Taller inscrito:</strong> ${tipoTaller.descripcion_taller}</li>
+          </ul>
+          <p>Correo Automático.</p>
+          <br>
+          <p style="color: #7f8c8d;">Atentamente,<br>Sistemas Colegio Andes Chile</p>
+        </div>
+      `;
+
+      const mailOptionsApoderado = {
+        from: 'contacto@colegioandeschile.cl',
+        to: [correo],
+        subject: 'Confirmación Inscripción Taller 2025',
+        html: correoHtmlApoderado,
+      };
       const mailOptionsAdm = {
         from: 'contacto@colegioandeschile.cl',
-        to: [correo, 'omarrrrignacio@gmail.com'],
-        subject: 'Confirmación Inscripción Taller 2024',
-        html: correoHtml,
+        to: ['omar.guerra@outlook.cl'],
+        subject: 'Confirmación Inscripción Taller 2025',
+        html: correoHtmlColegio,
       };
 
       try {
