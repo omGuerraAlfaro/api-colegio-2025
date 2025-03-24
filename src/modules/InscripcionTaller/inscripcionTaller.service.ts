@@ -58,7 +58,7 @@ export class InscripcionTallerService {
         estudiante,
         curso,
         tipo_taller: tipoTaller,
-        fecha_matricula_inscripcion: new Date(),
+        fecha_inscripcion: new Date(),
       });
 
       const saved = await this.inscripcionTallerRepository.save(nuevaInscripcion);
