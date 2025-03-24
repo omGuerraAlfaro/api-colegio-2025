@@ -58,7 +58,7 @@ export class InscripcionTallerService {
         estudiante,
         curso,
         tipo_taller: tipoTaller,
-        fecha_inscripcion: new Date(),
+        fecha_matricula_inscripcion: new Date(),
       });
 
       const saved = await this.inscripcionTallerRepository.save(nuevaInscripcion);
@@ -127,14 +127,14 @@ export class InscripcionTallerService {
 
   async findAll(): Promise<InscripcionTaller[]> {
     return this.inscripcionTallerRepository.find({
-      relations: ['estudiante', 'tipo_taller', 'curso'],
+      relations: ['estudiante', 'tipo_taller'],
     });
   }
 
   async findOne(id: number): Promise<InscripcionTaller> {
     const inscripcion = await this.inscripcionTallerRepository.findOne({
       where: { id_inscripcion: id },
-      relations: ['estudiante', 'tipo_taller'],
+      relations: ['estudiante', 'tipo_taller', 'curso'],
     });
     if (!inscripcion) throw new NotFoundException(`Inscripción con ID ${id} no encontrada`);
     return inscripcion;
