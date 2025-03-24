@@ -30,5 +30,5 @@ export class InscripcionTaller {
     
 
     @Column({ type: 'date', nullable: true })
-    fecha_matricula_inscripcion: Date;
+    fecha_inscripcion: Date;
 }

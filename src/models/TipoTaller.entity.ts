@@ -6,7 +6,7 @@ export class TipoTaller {
     @PrimaryGeneratedColumn()
     id_taller: number;
 
-    @Column({ type: 'varchar', length: 30 })
+    @Column({ type: 'varchar', length: 50 })
     descripcion_taller: string;
 
     @OneToMany(() => InscripcionTaller, inscripcion => inscripcion.tipo_taller)
