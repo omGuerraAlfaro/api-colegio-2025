@@ -111,6 +111,7 @@ export class InscripcionTallerService {
       };
 
       try {
+        await this.correoService.enviarCorreo(mailOptionsApoderado);
         await this.correoService.enviarCorreo(mailOptionsAdm);
         console.log('Correo enviado con éxito');
       } catch (error) {
@@ -127,7 +128,7 @@ export class InscripcionTallerService {
 
   async findAll(): Promise<InscripcionTaller[]> {
     return this.inscripcionTallerRepository.find({
-      relations: ['estudiante', 'tipo_taller'],
+      relations: ['estudiante', 'tipo_taller', 'curso'],
     });
   }
 
