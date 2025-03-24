@@ -127,7 +127,7 @@ export class InscripcionTallerService {
 
   async findAll(): Promise<InscripcionTaller[]> {
     return this.inscripcionTallerRepository.find({
-      relations: ['estudiante', 'tipo_taller'],
+      relations: ['estudiante', 'tipo_taller', 'curso'],
     });
   }
 
