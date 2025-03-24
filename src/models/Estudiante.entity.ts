@@ -89,7 +89,7 @@ export class Estudiante {
     @OneToMany(() => ApoderadoEstudiante, apoderadoEstudiante => apoderadoEstudiante.estudiante)
     apoderadosConnection: ApoderadoEstudiante[];
 
-    @OneToMany(() => ApoderadoEstudiante, apoderadoSuplenteEstudiante => apoderadoSuplenteEstudiante.estudiante)
+    @OneToMany(() => ApoderadoSuplenteEstudiante, apoderadoSuplenteEstudiante => apoderadoSuplenteEstudiante.estudiante)
     apoderadosSuplenteConnection: ApoderadoSuplenteEstudiante[];
 
     @OneToMany(() => EstudianteCurso, cursoEstudiante => cursoEstudiante.estudiante)

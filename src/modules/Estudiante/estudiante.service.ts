@@ -125,9 +125,9 @@ export class EstudianteService {
       where: { rut },
       relations: [
         'apoderadosConnection',
-        'apoderadosConnection.apoderado',  // Relación para obtener los detalles de cada apoderado
+        'apoderadosConnection.apoderado',
         'apoderadosSuplenteConnection',
-        'apoderadosSuplenteConnection.apoderado'  // Relación para obtener los detalles de cada apoderado suplente
+        'apoderadosSuplenteConnection.apoderado'
       ],
     });
 
