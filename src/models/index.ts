@@ -11,9 +11,7 @@ import { Boleta } from './Boleta.entity';
 import { Transacciones } from './Transacciones.entity';
 import { EstadoTransaccion } from './EstadoTransaccion.entity';
 import { EstadoBoleta } from './EstadoBoleta.entity';
-
 import { Administrador } from './Administrador.entity';
-
 import { Correo } from './Correo.entity';
 import { Anotacion } from './Anotaciones.entity';
 import { AnotacionesEstudiante } from './AnotacionesEstudiantes.entity';
@@ -32,15 +30,69 @@ import { PdfValidador } from './pdf-validador.entity';
 import { TipoEvaluacion } from './TipoEvaluacion.entity';
 import { InscripcionTaller } from './InscripcionTaller.entity';
 import { TipoTaller } from './TipoTaller.entity';
+import { EvaluacionPreBasica } from './EvaluacionPreBasica.entity';
+import { NotaPreBasica } from './NotasPreBasica.entity';
+import { AsignaturaPreBasica } from './AsignaturaPreBasica.entity';
+import { TipoEvaluacionPreBasica } from './TipoEvaluacionPreBasica.entity';
 
 
 export const entities = [
-    Apoderado, ApoderadoSuplente, ApoderadoSuplenteEstudiante, ApoderadoEstudiante,
-    Estudiante, Profesor, Curso, EstudianteCurso, Anotacion, AnotacionesEstudiante, Usuarios, Administrador, SubAdministrador,
-    Boleta, EstadoBoleta, Transacciones, EstadoTransaccion, TransactionEntity,
-    NoticiasColegio, NoticiasImages,
-    Correo, InscripcionMatricula, InscripcionTaller, PdfValidador,
-    Asignatura, Evaluacion, TipoEvaluacion, TipoTaller, Nota, Semestre,
-    Asistencia, CalendarioEscolar, CalendarioAsistencia
-];
+    // Entidades de Apoderado
+    Apoderado,
+    ApoderadoSuplente,
+    ApoderadoSuplenteEstudiante,
+    ApoderadoEstudiante,
+  
+    // Entidades de Estudiante
+    Estudiante,
+    EstudianteCurso,
+    Anotacion,
+    AnotacionesEstudiante,
+  
+    // Entidades académicas y docentes
+    Profesor,
+    Curso,
+  
+    // Asignaturas, evaluaciones y notas
+    Asignatura,
+    AsignaturaPreBasica,
+    Evaluacion,
+    EvaluacionPreBasica,
+    TipoEvaluacion,
+    TipoEvaluacionPreBasica,
+    TipoTaller,
+    Nota,
+    NotaPreBasica,
+    Semestre,
+  
+    // Asistencia
+    Asistencia,
+  
+    // Usuarios y administración
+    Usuarios,
+    Administrador,
+    SubAdministrador,
+  
+    // Entidades financieras y transaccionales
+    Boleta,
+    EstadoBoleta,
+    Transacciones,
+    EstadoTransaccion,
+    TransactionEntity,
+  
+    // Noticias y comunicaciones
+    NoticiasColegio,
+    NoticiasImages,
+    Correo,
+  
+    // Inscripciones
+    InscripcionMatricula,
+    InscripcionTaller,
+  
+    // Entidades menos relevantes
+    PdfValidador,
+    CalendarioEscolar,
+    CalendarioAsistencia
+  ];
+  
 

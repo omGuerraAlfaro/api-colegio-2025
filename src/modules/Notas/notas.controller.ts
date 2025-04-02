@@ -2,6 +2,7 @@ import { Controller, Get, Post, Put, Body, Param } from '@nestjs/common';
 import { NotasService } from './notas.service';
 import { Nota } from 'src/models/Notas.entity';
 import { CierreSemestreDto } from 'src/dto/evaluacion.dto';
+import { CreateNotasDto } from 'src/dto/notas.dto';
 
 @Controller('notas')
 export class NotasController {
@@ -37,14 +38,10 @@ export class NotasController {
 
     // Crear una nueva nota
     @Post('nuevas-notas')
-    async createNotas(@Body() data: {
-        estudianteId: number;
-        evaluacionId: number;
-        nota: number | null;
-        fecha: Date;
-    }[]): Promise<void> {
+    async createNotas(@Body() data: CreateNotasDto): Promise<void> {
         await this.notasService.createNotas(data);
     }
+
 
     // Actualizar una nota existente
     @Put('/:notaId')

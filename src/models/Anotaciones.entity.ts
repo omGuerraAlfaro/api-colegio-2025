@@ -9,6 +9,7 @@ import {
 } from 'typeorm';
 import { AnotacionesEstudiante } from './AnotacionesEstudiantes.entity';
 import { Asignatura } from './Asignatura.entity';
+import { AsignaturaPreBasica } from './AsignaturaPreBasica.entity';
 
 @Entity()
 export class Anotacion {
@@ -36,12 +37,13 @@ export class Anotacion {
     @Column({ type: 'boolean', default: true })
     anotacion_estado: boolean;
 
-    @Column({ nullable: true })
-    asignatura_id: number;
-
-    @ManyToOne(() => Asignatura, asignatura => asignatura.id)
+    @ManyToOne(() => Asignatura, { nullable: true })
     @JoinColumn({ name: 'asignatura_id' })
     asignatura: Asignatura;
+
+    @ManyToOne(() => AsignaturaPreBasica, { nullable: true })
+    @JoinColumn({ name: 'asignatura_prebasica_id' })
+    asignaturaPreBasica: AsignaturaPreBasica;
 
     @OneToMany(() => AnotacionesEstudiante, anotacionesEstudiante => anotacionesEstudiante.anotacion, {
         cascade: true,

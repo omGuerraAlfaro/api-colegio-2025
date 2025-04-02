@@ -1,9 +1,8 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
-import { Nota } from "./Notas.entity";
-import { Evaluacion } from "./Evaluacion.entity";
+import { EvaluacionPreBasica } from "./EvaluacionPreBasica.entity";
 
-@Entity('asignatura')
-export class Asignatura {
+@Entity('asignatura_prebasica')
+export class AsignaturaPreBasica {
     @PrimaryGeneratedColumn()
     id: number;
 
@@ -16,7 +15,7 @@ export class Asignatura {
     @Column({ default: true })
     estado_asignatura: boolean;
 
-    @OneToMany(() => Evaluacion, (evaluacion) => evaluacion.asignatura)
-    evaluaciones: Evaluacion[];
+    @OneToMany(() => EvaluacionPreBasica, (evaluacion) => evaluacion.asignatura)
+    evaluaciones: EvaluacionPreBasica[];
 
 }

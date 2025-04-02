@@ -55,10 +55,10 @@ import {
     SemestreModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '44.207.168.60',
+      host: 'localhost',
       port: 3306,
-      username: 'colegioa_omarignacio',
-      password: 'tZk+2t]rxUG3',
+      username: 'root',
+      password: '',
       database: 'colegioa_colegio2025',
       entities,
       synchronize: true

@@ -44,5 +44,10 @@ export class CreateAnotacionDto {
     anotacion_estado?: boolean;
 
     @IsNumber()
-    asignaturaId: number;
+    @IsOptional()
+    asignaturaId?: number;
+
+    @IsNumber()
+    @IsOptional()
+    asignaturaPreBasicaId?: number;
 }

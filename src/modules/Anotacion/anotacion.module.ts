@@ -6,13 +6,15 @@ import { AnotacionService } from './anotacion.service';
 import { AnotacionController } from './anotacion.controller';
 import { Anotacion } from 'src/models/Anotaciones.entity';
 import { Asignatura } from 'src/models/Asignatura.entity';
+import { AsignaturaPreBasica } from 'src/models/AsignaturaPreBasica.entity';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([
       Anotacion,
       AnotacionesEstudiante,
-      Asignatura
+      Asignatura,
+      AsignaturaPreBasica
     ]),
   ],
   controllers: [AnotacionController],

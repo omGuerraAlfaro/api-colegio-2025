@@ -1,10 +1,12 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateEvaluacionDto, UpdateEvaluacionDto } from 'src/dto/evaluacion.dto';
 import { Asignatura } from 'src/models/Asignatura.entity';
 import { Curso } from 'src/models/Curso.entity';
 import { Evaluacion } from 'src/models/Evaluacion.entity';
+import { EvaluacionPreBasica } from 'src/models/EvaluacionPreBasica.entity';
 import { Nota } from 'src/models/Notas.entity';
+import { NotaPreBasica } from 'src/models/NotasPreBasica.entity';
 import { Semestre } from 'src/models/Semestre.entity';
 import { TipoEvaluacion } from 'src/models/TipoEvaluacion.entity';
 import { Repository } from 'typeorm';
@@ -15,18 +17,42 @@ export class EvaluacionService {
         @InjectRepository(Evaluacion)
         private readonly evaluacionRepository: Repository<Evaluacion>,
         @InjectRepository(Nota)
-        private readonly notaRepository: Repository<Nota>
+        private readonly notaRepository: Repository<Nota>,
+        @InjectRepository(NotaPreBasica)
+        private readonly notaPreBasicaRepository: Repository<NotaPreBasica>,
+        @InjectRepository(EvaluacionPreBasica)
+        private readonly evaluacionPreBasicaRepository: Repository<EvaluacionPreBasica>,
     ) { }
 
-    async create(createEvaluacionDto: CreateEvaluacionDto): Promise<Evaluacion> {
-        const nuevaEvaluacion = this.evaluacionRepository.create({
-            nombre_evaluacion: createEvaluacionDto.nombreEvaluacion,
-            asignatura: { id: createEvaluacionDto.asignaturaId },
-            semestre: { id_semestre: createEvaluacionDto.semestreId },
-            id_tipo_evaluacion: { id_evaluacion: createEvaluacionDto.tipoEvaluacionId },
-            curso: { id: createEvaluacionDto.cursoId },
-        });
-        return await this.evaluacionRepository.save(nuevaEvaluacion);
+
+    async createPreBasica(createEvaluacionDto: CreateEvaluacionDto): Promise<EvaluacionPreBasica> {
+        try {
+            const nuevaEvaluacion = this.evaluacionPreBasicaRepository.create({
+                nombre_evaluacion: createEvaluacionDto.nombreEvaluacion,
+                asignatura: { id: createEvaluacionDto.asignaturaId },
+                semestre: { id_semestre: createEvaluacionDto.semestreId },
+                id_tipo_evaluacion: { id_evaluacion: createEvaluacionDto.tipoEvaluacionId },
+                curso: { id: createEvaluacionDto.cursoId },
+            });
+            return await this.evaluacionPreBasicaRepository.save(nuevaEvaluacion);
+        } catch (error) {
+            throw new InternalServerErrorException(`Error al crear evaluación pre básica: ${error.message}`);
+        }
+    }
+
+    async createBasica(createEvaluacionDto: CreateEvaluacionDto): Promise<Evaluacion> {
+        try {
+            const nuevaEvaluacion = this.evaluacionRepository.create({
+                nombre_evaluacion: createEvaluacionDto.nombreEvaluacion,
+                asignatura: { id: createEvaluacionDto.asignaturaId },
+                semestre: { id_semestre: createEvaluacionDto.semestreId },
+                id_tipo_evaluacion: { id_evaluacion: createEvaluacionDto.tipoEvaluacionId },
+                curso: { id: createEvaluacionDto.cursoId },
+            });
+            return await this.evaluacionRepository.save(nuevaEvaluacion);
+        } catch (error) {
+            throw new InternalServerErrorException(`Error al crear evaluación básica: ${error.message}`);
+        }
     }
 
     async findAll(): Promise<Evaluacion[]> {

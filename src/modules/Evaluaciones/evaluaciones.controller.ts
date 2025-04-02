@@ -8,7 +8,11 @@ export class EvaluacionController {
 
     @Post()
     async create(@Body() createEvaluacionDto: CreateEvaluacionDto) {
-        return await this.evaluacionService.create(createEvaluacionDto);
+        if (createEvaluacionDto.cursoId == 1 || createEvaluacionDto.cursoId == 2) {
+            return await this.evaluacionService.createPreBasica(createEvaluacionDto);
+        } else {
+            return await this.evaluacionService.createBasica(createEvaluacionDto);
+        }
     }
 
     @Get()

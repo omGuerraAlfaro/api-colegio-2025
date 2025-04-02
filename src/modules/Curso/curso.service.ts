@@ -135,6 +135,7 @@ export class CursoService {
       .createQueryBuilder("curso")
       .leftJoinAndSelect("curso.cursoConnection", "cursoEstudiante")
       .leftJoinAndSelect("cursoEstudiante.estudiante", "estudiante")
+      .where('estudiante.estado_estudiante = :estado', { estado: true })
       .getMany();
 
     return cursos.map(curso => {

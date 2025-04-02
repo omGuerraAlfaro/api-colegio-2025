@@ -1,9 +1,10 @@
-import { Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { AnotacionDto } from 'src/dto/anotacion.dto';
 import { Anotacion } from 'src/models/Anotaciones.entity';
 import { AnotacionesEstudiante } from 'src/models/AnotacionesEstudiantes.entity';
 import { Asignatura } from 'src/models/Asignatura.entity';
+import { AsignaturaPreBasica } from 'src/models/AsignaturaPreBasica.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -15,36 +16,69 @@ export class AnotacionService {
         private readonly anotacionEstudianteRepository: Repository<AnotacionesEstudiante>,
         @InjectRepository(Asignatura)
         private readonly asignaturaRepository: Repository<Asignatura>,
+        @InjectRepository(AsignaturaPreBasica)
+        private readonly asignaturaPreBasicaRepository: Repository<AsignaturaPreBasica>,
     ) { }
 
     async getAnotacionesByEstudianteId(estudianteId: number): Promise<AnotacionDto[]> {
         const anotacionesEstudiantes = await this.anotacionEstudianteRepository.find({
             where: { estudiante_id: estudianteId },
-            relations: ['anotacion', 'anotacion.asignatura'],
+            relations: [
+                'anotacion',
+                'anotacion.asignatura',
+                'anotacion.asignaturaPreBasica',
+            ],
         });
 
-        return anotacionesEstudiantes.map(ae => ae.anotacion);
+        return anotacionesEstudiantes.map((anotacionEstudiante) => {
+            const { anotacion, ...rest } = anotacionEstudiante;
+            return {
+                ...rest,
+                ...anotacion,
+                asignatura: anotacion.asignatura ? anotacion.asignatura : null,
+                asignaturaPreBasica: anotacion.asignaturaPreBasica ? anotacion.asignaturaPreBasica : null,
+            };
+        });
     }
 
     async createAnotacionForStudent(
         estudianteId: number,
         anotacionData: Partial<Anotacion>,
-        asignaturaId: number | null
+        asignaturaId?: number,
+        asignaturaPreBasicaId?: number,
     ): Promise<Anotacion> {
+        console.log('asignaturaId', asignaturaId);
+        console.log('asignaturaPreBasicaId', asignaturaPreBasicaId);
+        
         let asignatura: Asignatura | null = null;
+        let asignaturaPreBasica: AsignaturaPreBasica | null = null;
 
-        // Si asignaturaId no es nulo, buscar la asignatura por ID
-        if (asignaturaId !== null && asignaturaId !== undefined) {
+        // Validación: solo uno debe estar presente
+        if (asignaturaId && asignaturaPreBasicaId) {
+            throw new BadRequestException('Solo puede asignar una asignatura o una asignatura pre básica, no ambas.');
+        }
+
+        // Buscar asignatura si se pasó el ID
+        if (asignaturaId) {
             asignatura = await this.asignaturaRepository.findOne({ where: { id: asignaturaId } });
             if (!asignatura) {
-                throw new NotFoundException('Asignatura not found');
+                throw new NotFoundException('Asignatura no encontrada');
+            }
+        }
+
+        // Buscar asignatura pre básica si se pasó el ID
+        if (asignaturaPreBasicaId) {
+            asignaturaPreBasica = await this.asignaturaPreBasicaRepository.findOne({ where: { id: asignaturaPreBasicaId } });
+            if (!asignaturaPreBasica) {
+                throw new NotFoundException('Asignatura PreBásica no encontrada');
             }
         }
 
         // Crear la anotación
         const newAnotacion = this.anotacionRepository.create({
             ...anotacionData,
-            asignatura: asignatura ?? null, // Asignar null si no hay asignatura
+            asignatura: asignatura ?? null,
+            asignaturaPreBasica: asignaturaPreBasica ?? null,
         });
 
         const savedAnotacion = await this.anotacionRepository.save(newAnotacion);
@@ -60,58 +94,82 @@ export class AnotacionService {
         return savedAnotacion;
     }
 
-    // Método DELETE: elimina la anotación para un estudiante específico
+
     async deleteAnotacionForStudent(estudianteId: number, anotacionId: number): Promise<void> {
-        // Buscar la relación entre estudiante y anotación
         const anotacionEstudiante = await this.anotacionEstudianteRepository.findOne({
             where: { estudiante_id: estudianteId, anotacion: { id: anotacionId } },
-            relations: ['anotacion']
+            relations: ['anotacion'],
         });
+
         if (!anotacionEstudiante) {
             throw new NotFoundException('La anotación no fue encontrada para este estudiante');
         }
-        // Eliminar la relación
+
         await this.anotacionEstudianteRepository.remove(anotacionEstudiante);
 
-        // Opcional: Si la anotación no está asociada a ningún otro estudiante, se elimina de la tabla de anotaciones
         const relacionesRestantes = await this.anotacionEstudianteRepository.find({
-            where: { anotacion: { id: anotacionId } }
+            where: { anotacion: { id: anotacionId } },
         });
+
         if (relacionesRestantes.length === 0) {
             await this.anotacionRepository.delete(anotacionId);
         }
     }
 
-    // Método PUT: actualiza una anotación existente
+
     async updateAnotacion(
         anotacionId: number,
         anotacionData: Partial<Anotacion>,
-        asignaturaId?: number | null
+        asignaturaId?: number | null,
+        asignaturaPreBasicaId?: number | null
     ): Promise<Anotacion> {
-        // Buscar la anotación existente
+        // Validar que solo se envíe uno
+        if (asignaturaId && asignaturaPreBasicaId) {
+            throw new BadRequestException('Solo puede actualizar a una asignatura o una asignatura pre básica, no ambas');
+        }
+
+        // Buscar la anotación
         let anotacion = await this.anotacionRepository.findOne({
             where: { id: anotacionId },
-            relations: ['asignatura']
+            relations: ['asignatura', 'asignaturaPreBasica'],
         });
+
         if (!anotacion) {
             throw new NotFoundException('Anotación no encontrada');
         }
-        // Si se envía asignaturaId, actualizar la relación con la asignatura
+
+        // Actualizar asignatura si se proporciona
         if (asignaturaId !== undefined) {
             if (asignaturaId !== null) {
                 const asignatura = await this.asignaturaRepository.findOne({ where: { id: asignaturaId } });
                 if (!asignatura) {
-                    throw new NotFoundException('Asignatura not found');
+                    throw new NotFoundException('Asignatura no encontrada');
                 }
                 anotacion.asignatura = asignatura;
+                anotacion.asignaturaPreBasica = null;
             } else {
-                // Permitir asignar null para remover la asignatura relacionada
                 anotacion.asignatura = null;
             }
         }
-        // Actualizar los demás campos de la anotación
+
+        // Actualizar asignatura pre básica si se proporciona
+        if (asignaturaPreBasicaId !== undefined) {
+            if (asignaturaPreBasicaId !== null) {
+                const prebasica = await this.asignaturaPreBasicaRepository.findOne({ where: { id: asignaturaPreBasicaId } });
+                if (!prebasica) {
+                    throw new NotFoundException('Asignatura PreBásica no encontrada');
+                }
+                anotacion.asignaturaPreBasica = prebasica;
+                anotacion.asignatura = null;
+            } else {
+                anotacion.asignaturaPreBasica = null;
+            }
+        }
+
+        // Actualizar otros campos
         anotacion = { ...anotacion, ...anotacionData };
 
         return await this.anotacionRepository.save(anotacion);
     }
+
 }

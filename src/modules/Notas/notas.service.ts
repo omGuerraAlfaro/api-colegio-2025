@@ -1,9 +1,12 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CierreSemestreDto } from 'src/dto/evaluacion.dto';
+import { CreateNotasDto } from 'src/dto/notas.dto';
 import { Curso } from 'src/models/Curso.entity';
 import { Evaluacion } from 'src/models/Evaluacion.entity';
+import { EvaluacionPreBasica } from 'src/models/EvaluacionPreBasica.entity';
 import { Nota } from 'src/models/Notas.entity';
+import { NotaPreBasica } from 'src/models/NotasPreBasica.entity';
 import { Repository } from 'typeorm';
 
 @Injectable()
@@ -13,6 +16,10 @@ export class NotasService {
     private readonly notaRepository: Repository<Nota>,
     @InjectRepository(Evaluacion)
     private readonly evaluacionRepository: Repository<Evaluacion>,
+    @InjectRepository(NotaPreBasica)
+    private readonly notaPreBasicaRepository: Repository<NotaPreBasica>,
+    @InjectRepository(EvaluacionPreBasica)
+    private readonly evaluacionPreBasicaRepository: Repository<EvaluacionPreBasica>,
     @InjectRepository(Curso)
     private readonly cursoRepository: Repository<Curso>,
   ) { }
@@ -63,21 +70,28 @@ export class NotasService {
     return parseFloat(promedio.promedio || 0);
   }
 
-  async createNotas(data: {
-    estudianteId: number;
-    evaluacionId: number;
-    nota: number | null;
-    fecha: Date;
-  }[]): Promise<void> {
-    for (const notaData of data) {
+  async createNotas(dto: CreateNotasDto): Promise<void> {
+    const { cursoId, notas } = dto;
+
+    // Forzamos el cast a Repository<any> para evitar problemas de unión de tipos.
+    const notaRepo = (cursoId === 1 || cursoId === 2
+      ? this.notaPreBasicaRepository
+      : this.notaRepository) as Repository<any>;
+    // Si en algún momento necesitas el repositorio de evaluaciones, puedes hacer lo mismo:
+    // const evaluacionRepo = (cursoId === 1 || cursoId === 2
+    //     ? this.evaluacionPreBasicaRepository
+    //     : this.evaluacionRepository) as Repository<any>;
+
+    for (const notaData of notas) {
       if (notaData.nota === null) {
         // Eliminar la nota si es null
-        await this.notaRepository.delete({
+        await notaRepo.delete({
           estudiante: { id: notaData.estudianteId },
           evaluacion: { id_evaluacion: notaData.evaluacionId },
         });
       } else {
-        let notaExistente = await this.notaRepository.findOne({
+        // Buscar si ya existe la nota
+        let notaExistente = await notaRepo.findOne({
           where: {
             estudiante: { id: notaData.estudianteId },
             evaluacion: { id_evaluacion: notaData.evaluacionId },
@@ -85,17 +99,19 @@ export class NotasService {
         });
 
         if (notaExistente) {
+          // Actualizar la nota existente
           notaExistente.nota = notaData.nota;
           notaExistente.fecha = notaData.fecha;
-          await this.notaRepository.save(notaExistente);
+          await notaRepo.save(notaExistente);
         } else {
-          const nuevaNota = this.notaRepository.create({
+          // Crear una nueva nota
+          const nuevaNota = notaRepo.create({
             estudiante: { id: notaData.estudianteId },
             evaluacion: { id_evaluacion: notaData.evaluacionId },
             nota: notaData.nota,
             fecha: notaData.fecha,
           });
-          await this.notaRepository.save(nuevaNota);
+          await notaRepo.save(nuevaNota);
         }
       }
     }
@@ -124,6 +140,7 @@ export class NotasService {
     return await this.notaRepository.save(nota);
   }
 
+  //Endpoint para app movil
   async getNotasResumenPorEstudianteSemestre(estudianteId: number, semestreId: number): Promise<any[]> {
     const resumen = await this.notaRepository
       .createQueryBuilder('nota')
@@ -147,7 +164,7 @@ export class NotasService {
       promedio: parseFloat(r.promedio),
     }));
   }
-
+  //Endpoint para app movil
   async getNotasPorEvaluacion(evaluacionId: number): Promise<any[]> {
     const notas = await this.notaRepository
       .createQueryBuilder('nota')
@@ -173,6 +190,10 @@ export class NotasService {
     semestreId: number,
   ): Promise<any[]> {
     try {
+      const evaluacionesTable = (cursoId === 1 || cursoId === 2) ? 'evaluaciones_prebasica' : 'evaluaciones';
+      const notasTable = (cursoId === 1 || cursoId === 2) ? 'notas_prebasica' : 'notas';
+      const tipoEvaluacionTable = (cursoId === 1 || cursoId === 2) ? 'tipo_evaluacion_prebasica' : 'tipo_evaluacion';
+
       const rawData = await this.cursoRepository
         .createQueryBuilder('curso')
         .leftJoin('curso.cursoConnection', 'cursoEstudiante')
@@ -183,7 +204,7 @@ export class NotasService {
               .select('evaluacion.id_evaluacion', 'idEvaluacion')
               .addSelect('evaluacion.nombre_evaluacion', 'nombre_evaluacion')
               .addSelect('evaluacion.id_tipo_evaluacion', 'id_tipo_evaluacion')
-              .from('evaluaciones', 'evaluacion')
+              .from(evaluacionesTable, 'evaluacion')
               .where('evaluacion.id_asignatura = :asignaturaId', { asignaturaId })
               .andWhere('evaluacion.id_semestre = :semestreId', { semestreId })
               .andWhere('evaluacion.id_curso = :cursoId', { cursoId });
@@ -192,16 +213,17 @@ export class NotasService {
           '1=1'
         )
         .leftJoin(
-          'notas',
+          notasTable,
           'nota',
           'nota.id_estudiante = estudiante.id AND nota.id_evaluacion = evaluacion.idEvaluacion'
         )
         .leftJoin(
-          'tipo_evaluacion',
+          tipoEvaluacionTable,
           'tipoEvaluacion',
           'tipoEvaluacion.id_evaluacion = evaluacion.id_tipo_evaluacion'
         )
         .where('curso.id = :cursoId', { cursoId })
+        .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
         .select([
           'estudiante.id AS estudianteId',
           "CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS estudiante",
@@ -258,11 +280,8 @@ export class NotasService {
         }
       }
 
-      // Convertimos el Map a array
-      let resultado = Array.from(estudiantesMap.values());
-
-      // Filtramos solo los que tengan evaluaciones
-      resultado = resultado.filter(e => e.evaluaciones.length > 0);
+      // Convertimos el Map a array y filtramos solo los que tengan evaluaciones
+      let resultado = Array.from(estudiantesMap.values()).filter(e => e.evaluaciones.length > 0);
 
       if (resultado.length === 0) {
         return [];
@@ -391,9 +410,14 @@ export class NotasService {
         }
       }
 
+      const createNotasDto = {
+        cursoId: dto.cursoId,
+        notas: notasAInsertar,
+      };
+      
       // 3. Guardar (o actualizar) las notas que no son null
       if (notasAInsertar.length > 0) {
-        await this.createNotas(notasAInsertar);
+        await this.createNotas(createNotasDto);
       }
 
       // 4. Eliminar la evaluación si no hay notas (o el usuario la "quitó" por completo)
