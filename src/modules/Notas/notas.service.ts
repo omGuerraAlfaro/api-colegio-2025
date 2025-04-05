@@ -71,12 +71,62 @@ export class NotasService {
   }
 
   async createNotas(dto: CreateNotasDto): Promise<void> {
-    const { cursoId, notas } = dto;
-
+    // Se extiende el DTO para incluir asignaturaId (y semestreId si se requiere)
+    const { cursoId, notas, asignaturaId, semestreId } = dto;
+    // Selección del repositorio según el curso (en este ejemplo, pre-básica usa un repositorio distinto)
     const notaRepo = (cursoId === 1 || cursoId === 2
       ? this.notaPreBasicaRepository
       : this.notaRepository) as Repository<any>;
 
+    // Lógica especial para la asignatura 3 (por ejemplo, para inglés en prebasica a 4to básico)
+    if (asignaturaId === 3) {
+      // Se busca la evaluación de "Nota Inglés" (se asume que está asociada a asignatura 4, de lenguaje)
+      const englishEvaluacion = await this.evaluacionRepository.findOne({
+        where: {
+          nombre_evaluacion: 'Nota Inglés',
+          asignatura: { id: 4 }, // se usa la asignatura 4 para "Nota Inglés"
+          semestre: { id_semestre: semestreId },
+          id_tipo_evaluacion: { id_evaluacion: 1 },
+          curso: { id: cursoId },
+        },
+      });
+
+      if (englishEvaluacion) {
+        // Para cada nota, se actualiza o crea la nota en la evaluación de "Nota Inglés"
+        for (const notaData of notas) {
+          // Por ejemplo, si deseas replicar la misma nota en la evaluación de inglés:
+          if (notaData.nota === null) {
+            await notaRepo.delete({
+              estudiante: { id: notaData.estudianteId },
+              evaluacion: { id_evaluacion: englishEvaluacion.id_evaluacion },
+            });
+          } else {
+            const notaInglesExistente = await notaRepo.findOne({
+              where: {
+                estudiante: { id: notaData.estudianteId },
+                evaluacion: { id_evaluacion: englishEvaluacion.id_evaluacion },
+              },
+            });
+
+            if (notaInglesExistente) {
+              notaInglesExistente.nota = notaData.nota;
+              notaInglesExistente.fecha = notaData.fecha;
+              await notaRepo.save(notaInglesExistente);
+            } else {
+              const nuevaNotaIngles = notaRepo.create({
+                estudiante: { id: notaData.estudianteId },
+                evaluacion: { id_evaluacion: englishEvaluacion.id_evaluacion },
+                nota: notaData.nota,
+                fecha: notaData.fecha,
+              });
+              await notaRepo.save(nuevaNotaIngles);
+            }
+          }
+        }
+      }
+    }
+
+    // Lógica general para crear o actualizar las notas (ya sea para asignatura 3 o para otras)
     try {
       for (const notaData of notas) {
         if (notaData.nota === null) {
@@ -357,7 +407,7 @@ export class NotasService {
         finalEval = await this.evaluacionRepository.findOne({
           where: {
             nombre_evaluacion: 'Nota Inglés',
-            asignatura: { id: 4 },
+            asignatura: { id: 4 }, //lenguaje
             semestre: { id_semestre: dto.semestreId },
             id_tipo_evaluacion: { id_evaluacion: 1 },
             curso: { id: dto.cursoId },
@@ -366,7 +416,7 @@ export class NotasService {
         if (!finalEval) {
           finalEval = this.evaluacionRepository.create({
             nombre_evaluacion: 'Nota Inglés',
-            asignatura: { id: 4 },
+            asignatura: { id: 4 }, //lenguaje
             semestre: { id_semestre: dto.semestreId },
             id_tipo_evaluacion: { id_evaluacion: 1 },
             curso: { id: dto.cursoId },
@@ -374,6 +424,25 @@ export class NotasService {
           await this.evaluacionRepository.save(finalEval);
         }
 
+        finalEval = await this.evaluacionRepository.findOne({
+          where: {
+            nombre_evaluacion: 'Final',
+            asignatura: { id: dto.asignaturaId },
+            semestre: { id_semestre: dto.semestreId },
+            id_tipo_evaluacion: { id_evaluacion: 5 },
+            curso: { id: dto.cursoId },
+          },
+        });
+        if (!finalEval) {
+          finalEval = this.evaluacionRepository.create({
+            nombre_evaluacion: 'Final',
+            asignatura: { id: dto.asignaturaId },
+            semestre: { id_semestre: dto.semestreId },
+            id_tipo_evaluacion: { id_evaluacion: 5 },
+            curso: { id: dto.cursoId },
+          });
+          await this.evaluacionRepository.save(finalEval);
+        }
       } else {
         finalEval = await this.evaluacionRepository.findOne({
           where: {
@@ -437,6 +506,8 @@ export class NotasService {
 
       const createNotasDto = {
         cursoId: dto.cursoId,
+        asignaturaId: dto.asignaturaId,
+        semestreId: dto.semestreId,
         notas: notasAInsertar,
       };
 
@@ -542,6 +613,8 @@ export class NotasService {
 
       const createNotasDto = {
         cursoId: dto.cursoId,
+        asignaturaId: dto.asignaturaId,
+        semestreId: dto.semestreId,
         notas: notasAInsertar,
       };
 

@@ -25,17 +25,31 @@ export class EvaluacionController {
         return await this.evaluacionService.findOne(id);
     }
 
-    @Put('modificar/:id')
-    async update(
+    @Put('modificarPreBasica/:id')
+    async updatePreBasica(
         @Param('id') id: number,
         @Body() updateEvaluacionDto: UpdateEvaluacionDto,
     ) {
-        return await this.evaluacionService.update(id, updateEvaluacionDto);
+        return await this.evaluacionService.updatePreBasica(id, updateEvaluacionDto);
     }
 
-    @Delete('eliminar/:id')
-    async remove(@Param('id') id: number) {
-        await this.evaluacionService.remove(id);
+    @Put('modificarBasica/:id')
+    async updateBasica(
+        @Param('id') id: number,
+        @Body() updateEvaluacionDto: UpdateEvaluacionDto,
+    ) {
+        return await this.evaluacionService.updateBasica(id, updateEvaluacionDto);
+    }
+
+    @Delete('eliminarPreBasica/:id')
+    async removePreBasica(@Param('id') id: number) {
+        await this.evaluacionService.removePreBasica(id);
+        return { message: 'Evaluación eliminada correctamente' };
+    }
+    
+    @Delete('eliminarBasica/:id')
+    async removeBasica(@Param('id') id: number) {
+        await this.evaluacionService.removeBasica(id);
         return { message: 'Evaluación eliminada correctamente' };
     }
 

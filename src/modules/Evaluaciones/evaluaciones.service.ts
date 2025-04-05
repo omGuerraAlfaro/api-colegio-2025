@@ -72,7 +72,19 @@ export class EvaluacionService {
         return evaluacion;
     }
 
-    async update(id: number, updateEvaluacionDto: UpdateEvaluacionDto): Promise<Evaluacion> {
+    async updatePreBasica(id: number, updateEvaluacionDto: UpdateEvaluacionDto): Promise<EvaluacionPreBasica> {
+        const evaluacion = await this.evaluacionPreBasicaRepository.findOne({
+            where: { id_evaluacion: id }
+        });
+
+        if (updateEvaluacionDto.nombreEvaluacion !== undefined) {
+            evaluacion.nombre_evaluacion = updateEvaluacionDto.nombreEvaluacion;
+        }
+
+        return await this.evaluacionPreBasicaRepository.save(evaluacion);
+    }
+
+    async updateBasica(id: number, updateEvaluacionDto: UpdateEvaluacionDto): Promise<Evaluacion> {
         const evaluacion = await this.findOne(id);
 
         if (updateEvaluacionDto.nombreEvaluacion !== undefined) {
@@ -82,11 +94,26 @@ export class EvaluacionService {
         return await this.evaluacionRepository.save(evaluacion);
     }
 
-    async remove(id: number): Promise<void> {
+    async removePreBasica(id: number): Promise<void> {
         // Se obtiene la evaluación, o se lanza NotFoundException si no existe
-        const evaluacion = await this.findOne(id);
+        const evaluacion = await this.evaluacionPreBasicaRepository.findOne({
+            where: { id_evaluacion: id }
+        });
 
-        // Se eliminan todas las notas asociadas a esta evaluación
+        await this.notaPreBasicaRepository.delete({
+            evaluacion: { id_evaluacion: evaluacion.id_evaluacion }
+        });
+
+        // Se elimina la evaluación
+        await this.evaluacionPreBasicaRepository.remove(evaluacion);
+    }
+
+    async removeBasica(id: number): Promise<void> {
+        // Se obtiene la evaluación, o se lanza NotFoundException si no existe
+        const evaluacion = await this.evaluacionRepository.findOne({
+            where: { id_evaluacion: id }
+        });
+
         await this.notaRepository.delete({
             evaluacion: { id_evaluacion: evaluacion.id_evaluacion }
         });
