@@ -21,3 +21,12 @@ export class CierreSemestreDto {
     notaFinal: number | null;
   }[];
 }
+export class CierreSemestrePreBasicaDto {
+  cursoId: number;
+  asignaturaId: number;
+  semestreId: number;
+  estudiantes: {
+    estudianteId: number;
+    conceptoFinalParcial: number | null;
+  }[];
+}

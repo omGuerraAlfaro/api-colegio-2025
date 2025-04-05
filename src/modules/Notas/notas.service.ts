@@ -1,6 +1,6 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { CierreSemestreDto } from 'src/dto/evaluacion.dto';
+import { CierreSemestreDto, CierreSemestrePreBasicaDto } from 'src/dto/evaluacion.dto';
 import { CreateNotasDto } from 'src/dto/notas.dto';
 import { Curso } from 'src/models/Curso.entity';
 import { Evaluacion } from 'src/models/Evaluacion.entity';
@@ -73,49 +73,50 @@ export class NotasService {
   async createNotas(dto: CreateNotasDto): Promise<void> {
     const { cursoId, notas } = dto;
 
-    // Forzamos el cast a Repository<any> para evitar problemas de unión de tipos.
     const notaRepo = (cursoId === 1 || cursoId === 2
       ? this.notaPreBasicaRepository
       : this.notaRepository) as Repository<any>;
-    // Si en algún momento necesitas el repositorio de evaluaciones, puedes hacer lo mismo:
-    // const evaluacionRepo = (cursoId === 1 || cursoId === 2
-    //     ? this.evaluacionPreBasicaRepository
-    //     : this.evaluacionRepository) as Repository<any>;
 
-    for (const notaData of notas) {
-      if (notaData.nota === null) {
-        // Eliminar la nota si es null
-        await notaRepo.delete({
-          estudiante: { id: notaData.estudianteId },
-          evaluacion: { id_evaluacion: notaData.evaluacionId },
-        });
-      } else {
-        // Buscar si ya existe la nota
-        let notaExistente = await notaRepo.findOne({
-          where: {
+    try {
+      for (const notaData of notas) {
+        if (notaData.nota === null) {
+          // Eliminar la nota si es null
+          await notaRepo.delete({
             estudiante: { id: notaData.estudianteId },
             evaluacion: { id_evaluacion: notaData.evaluacionId },
-          },
-        });
-
-        if (notaExistente) {
-          // Actualizar la nota existente
-          notaExistente.nota = notaData.nota;
-          notaExistente.fecha = notaData.fecha;
-          await notaRepo.save(notaExistente);
-        } else {
-          // Crear una nueva nota
-          const nuevaNota = notaRepo.create({
-            estudiante: { id: notaData.estudianteId },
-            evaluacion: { id_evaluacion: notaData.evaluacionId },
-            nota: notaData.nota,
-            fecha: notaData.fecha,
           });
-          await notaRepo.save(nuevaNota);
+        } else {
+          // Buscar si ya existe la nota
+          const notaExistente = await notaRepo.findOne({
+            where: {
+              estudiante: { id: notaData.estudianteId },
+              evaluacion: { id_evaluacion: notaData.evaluacionId },
+            },
+          });
+
+          if (notaExistente) {
+            // Actualizar la nota existente
+            notaExistente.nota = notaData.nota;
+            notaExistente.fecha = notaData.fecha;
+            await notaRepo.save(notaExistente);
+          } else {
+            // Crear una nueva nota
+            const nuevaNota = notaRepo.create({
+              estudiante: { id: notaData.estudianteId },
+              evaluacion: { id_evaluacion: notaData.evaluacionId },
+              nota: notaData.nota,
+              fecha: notaData.fecha,
+            });
+            await notaRepo.save(nuevaNota);
+          }
         }
       }
+    } catch (error) {
+      console.error('Error al crear o actualizar notas:', error);
+      throw new Error('Ocurrió un error al procesar las notas');
     }
   }
+
 
   async updateNota(
     notaId: number,
@@ -307,7 +308,7 @@ export class NotasService {
     * - Crea 3 evaluaciones: tipo 3 (Final Parcial), 4 (Final Tarea) y 5 (Final).
     * - Genera las notas de cada estudiante para dichas evaluaciones.
     */
-  async cierreSemestre(dto: CierreSemestreDto): Promise<void> {
+  async cierreSemestreBasica(dto: CierreSemestreDto): Promise<void> {
     console.log(dto);
     try {
       // 1. Verificar o crear las evaluaciones (tipoEvaluacionId = 3, 4 y 5)
@@ -333,42 +334,66 @@ export class NotasService {
 
       let finalTareaEval = await this.evaluacionRepository.findOne({
         where: {
-          nombre_evaluacion: 'Final Tarea',
+          nombre_evaluacion: 'Nota Tareas',
           asignatura: { id: dto.asignaturaId },
           semestre: { id_semestre: dto.semestreId },
-          id_tipo_evaluacion: { id_evaluacion: 4 },
+          id_tipo_evaluacion: { id_evaluacion: 1 },
           curso: { id: dto.cursoId },
         },
       });
       if (!finalTareaEval) {
         finalTareaEval = this.evaluacionRepository.create({
-          nombre_evaluacion: 'Final Tarea',
+          nombre_evaluacion: 'Nota Tareas',
           asignatura: { id: dto.asignaturaId },
           semestre: { id_semestre: dto.semestreId },
-          id_tipo_evaluacion: { id_evaluacion: 4 },
+          id_tipo_evaluacion: { id_evaluacion: 1 },
           curso: { id: dto.cursoId },
         });
         await this.evaluacionRepository.save(finalTareaEval);
       }
 
-      let finalEval = await this.evaluacionRepository.findOne({
-        where: {
-          nombre_evaluacion: 'Final',
-          asignatura: { id: dto.asignaturaId },
-          semestre: { id_semestre: dto.semestreId },
-          id_tipo_evaluacion: { id_evaluacion: 5 },
-          curso: { id: dto.cursoId },
-        },
-      });
-      if (!finalEval) {
-        finalEval = this.evaluacionRepository.create({
-          nombre_evaluacion: 'Final',
-          asignatura: { id: dto.asignaturaId },
-          semestre: { id_semestre: dto.semestreId },
-          id_tipo_evaluacion: { id_evaluacion: 5 },
-          curso: { id: dto.cursoId },
+      let finalEval;
+      if (dto.cursoId <= 6 && dto.asignaturaId === 3) { //solo desde prebasica a 4to basico - asignatura de ingles
+        finalEval = await this.evaluacionRepository.findOne({
+          where: {
+            nombre_evaluacion: 'Nota Inglés',
+            asignatura: { id: 4 },
+            semestre: { id_semestre: dto.semestreId },
+            id_tipo_evaluacion: { id_evaluacion: 1 },
+            curso: { id: dto.cursoId },
+          },
         });
-        await this.evaluacionRepository.save(finalEval);
+        if (!finalEval) {
+          finalEval = this.evaluacionRepository.create({
+            nombre_evaluacion: 'Nota Inglés',
+            asignatura: { id: 4 },
+            semestre: { id_semestre: dto.semestreId },
+            id_tipo_evaluacion: { id_evaluacion: 1 },
+            curso: { id: dto.cursoId },
+          });
+          await this.evaluacionRepository.save(finalEval);
+        }
+
+      } else {
+        finalEval = await this.evaluacionRepository.findOne({
+          where: {
+            nombre_evaluacion: 'Final',
+            asignatura: { id: dto.asignaturaId },
+            semestre: { id_semestre: dto.semestreId },
+            id_tipo_evaluacion: { id_evaluacion: 5 },
+            curso: { id: dto.cursoId },
+          },
+        });
+        if (!finalEval) {
+          finalEval = this.evaluacionRepository.create({
+            nombre_evaluacion: 'Final',
+            asignatura: { id: dto.asignaturaId },
+            semestre: { id_semestre: dto.semestreId },
+            id_tipo_evaluacion: { id_evaluacion: 5 },
+            curso: { id: dto.cursoId },
+          });
+          await this.evaluacionRepository.save(finalEval);
+        }
       }
 
       // 2. Construir array de notas para cada estudiante
@@ -414,7 +439,7 @@ export class NotasService {
         cursoId: dto.cursoId,
         notas: notasAInsertar,
       };
-      
+
       // 3. Guardar (o actualizar) las notas que no son null
       if (notasAInsertar.length > 0) {
         await this.createNotas(createNotasDto);
@@ -470,6 +495,84 @@ export class NotasService {
     }
   }
 
+  async cierreSemestrePreBasica(dto: CierreSemestrePreBasicaDto): Promise<void> {
+    console.log(dto);
+    try {
+      // 1. Verificar o crear las evaluaciones (tipoEvaluacionId = 3, 4 y 5)
+      let finalConceptoEval = await this.evaluacionPreBasicaRepository.findOne({
+        where: {
+          nombre_evaluacion: 'Concepto Final',
+          asignatura: { id: dto.asignaturaId },
+          semestre: { id_semestre: dto.semestreId },
+          id_tipo_evaluacion: { id_evaluacion: 6 },
+          curso: { id: dto.cursoId },
+        },
+      });
+      if (!finalConceptoEval) {
+        finalConceptoEval = this.evaluacionPreBasicaRepository.create({
+          nombre_evaluacion: 'Concepto Final',
+          asignatura: { id: dto.asignaturaId },
+          semestre: { id_semestre: dto.semestreId },
+          id_tipo_evaluacion: { id_evaluacion: 6 },
+          curso: { id: dto.cursoId },
+        });
+        await this.evaluacionPreBasicaRepository.save(finalConceptoEval);
+      }
+
+      // 2. Construir array de notas para cada estudiante
+      const hoy = new Date();
+      const notasAInsertar: {
+        estudianteId: number;
+        evaluacionId: number;
+        nota: number | null;
+        fecha: Date;
+      }[] = [];
+
+      for (const est of dto.estudiantes) {
+        // Final Parcial
+        if (est.conceptoFinalParcial !== null) {
+          notasAInsertar.push({
+            estudianteId: est.estudianteId,
+            evaluacionId: finalConceptoEval.id_evaluacion,
+            nota: est.conceptoFinalParcial,
+            fecha: hoy,
+          });
+        }
+      }
+
+      const createNotasDto = {
+        cursoId: dto.cursoId,
+        notas: notasAInsertar,
+      };
+
+      // 3. Guardar (o actualizar) las notas que no son null
+      if (notasAInsertar.length > 0) {
+        await this.createNotas(createNotasDto);
+      }
+
+      // 4. Eliminar la evaluación si no hay notas (o el usuario la "quitó" por completo)
+
+      // -- Final Parcial --
+      if (finalConceptoEval) {
+        // ¿Alguna nota en notasAInsertar pertenece a esta evaluación?
+        const existeNotaParcial = notasAInsertar.some(
+          (n) => n.evaluacionId === finalConceptoEval.id_evaluacion,
+        );
+
+        // Si no hay notas, se elimina evaluación y sus notas (si existieran)
+        if (!existeNotaParcial) {
+          await this.notaRepository.delete({
+            evaluacion: { id_evaluacion: finalConceptoEval.id_evaluacion },
+          });
+          await this.evaluacionPreBasicaRepository.remove(finalConceptoEval);
+        }
+      }
+
+    } catch (error) {
+      console.error('Error en cierreSemestrePreBasica:', error);
+      throw new InternalServerErrorException('Ocurrió un error al cerrar el semestre.');
+    }
+  }
 
 
 }
