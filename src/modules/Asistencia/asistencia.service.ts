@@ -55,6 +55,40 @@ export class AsistenciaService {
         }
     }
 
+
+    async getAsistenciaByCursoAndSemestreByAlumno(cursoId: number, alumnoId: number, semestreId: number): Promise<any[]> {
+        try {
+            const resultados = await this.asistenciaRepository
+                .createQueryBuilder('asistencia')
+                .innerJoinAndSelect('asistencia.estudiante', 'estudiante')
+                .innerJoinAndSelect('asistencia.curso', 'curso')
+                .innerJoinAndSelect('asistencia.semestre', 'semestre')
+                .innerJoinAndSelect('asistencia.calendario', 'calendario')
+                .where('curso.id = :cursoId', { cursoId })
+                .andWhere('estudiante.id = :alumnoId', { alumnoId })
+                .andWhere('semestre.id_semestre = :semestreId', { semestreId })
+                .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
+                .select([
+                    'estudiante.id AS estudianteId',
+                    `CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS nombreCompleto`,
+                    'JSON_ARRAYAGG(JSON_OBJECT("fecha", calendario.fecha, "estado", asistencia.estado)) AS asistencias',
+                ])
+                .groupBy('estudiante.id')
+                .orderBy('estudiante.primer_apellido_alumno', 'ASC')
+                .getRawMany();
+
+            // Convertir asistencias (string) a objetos JSON
+            return resultados.map((resultado) => ({
+                estudianteId: resultado.estudianteId,
+                nombreCompleto: resultado.nombreCompleto,
+                asistencias: JSON.parse(resultado.asistencias), // Convertimos a objeto JSON
+            }));
+        } catch (error) {
+            console.error('Error fetching asistencia data:', error);
+            throw new Error('Unable to fetch asistencia data. Please check the input parameters and try again.');
+        }
+    }
+
     async createAsistencia(dto: CreateAsistenciaDto): Promise<Asistencia> {
         try {
             const estudiante = new Estudiante();
@@ -226,7 +260,7 @@ export class AsistenciaService {
                 .groupBy('estudiante.id')
                 .orderBy('estudiante.primer_apellido_alumno', 'ASC')
                 .getRawMany();
-    
+
             return resultados.map((resultado) => ({
                 estudianteId: resultado.estudianteId,
                 nombreCompleto: resultado.nombreCompleto,
@@ -245,7 +279,7 @@ export class AsistenciaService {
             throw new Error('Unable to fetch asistencia resumen data. Please check the input parameters and try again.');
         }
     }
-    
+
 
 
     async getAsistenciasResumenPorAlumno(semestreId: number, alumnoId: number): Promise<any> {
@@ -255,13 +289,13 @@ export class AsistenciaService {
                 `SELECT fecha_inicio, fecha_fin FROM semestres WHERE id_semestre = ?`,
                 [semestreId]
             );
-    
+
             if (!semestre.length) {
                 throw new Error('Semestre no encontrado.');
             }
-    
+
             const { fecha_inicio, fecha_fin } = semestre[0];
-    
+
             const resultado = await this.asistenciaRepository
                 .createQueryBuilder('asistencia')
                 .innerJoinAndSelect('asistencia.estudiante', 'estudiante')
@@ -283,11 +317,11 @@ export class AsistenciaService {
                 ])
                 .groupBy('estudiante.id')
                 .getRawOne();
-    
+
             if (!resultado) {
                 throw new Error('No data found for the given alumno and semestre.');
             }
-    
+
             return {
                 estudianteId: resultado.estudianteId,
                 nombreCompleto: resultado.nombreCompleto,
@@ -306,7 +340,7 @@ export class AsistenciaService {
             throw new Error('Unable to fetch asistencia resumen data for alumno. Please check the input parameters and try again.');
         }
     }
-    
+
     async getAsistenciasResumenPorAlumnoToday(
         semestreId: number,
         alumnoId: number,
@@ -318,11 +352,11 @@ export class AsistenciaService {
                 `SELECT fecha_inicio, fecha_fin FROM semestres WHERE id_semestre = ?`,
                 [semestreId]
             );
-    
+
             if (!semestre.length) {
                 throw new Error('Semestre no encontrado.');
             }
-    
+
             const { fecha_inicio, fecha_fin } = semestre[0];
 
             if (new Date(fechaHoy) < new Date(fecha_inicio) || new Date(fechaHoy) > new Date(fecha_fin)) {
@@ -336,7 +370,7 @@ export class AsistenciaService {
                     porcentajeInasistencia: 0,
                 };
             }
-    
+
             const resultado = await this.asistenciaRepository
                 .createQueryBuilder('asistencia')
                 .innerJoinAndSelect('asistencia.estudiante', 'estudiante')
@@ -358,11 +392,11 @@ export class AsistenciaService {
                 ])
                 .groupBy('estudiante.id')
                 .getRawOne();
-    
+
             if (!resultado) {
                 throw new Error('No data found for the given alumno and semestre.');
             }
-    
+
             return {
                 estudianteId: resultado.estudianteId,
                 nombreCompleto: resultado.nombreCompleto,
@@ -381,7 +415,7 @@ export class AsistenciaService {
             throw new Error('Unable to fetch asistencia resumen data for alumno. Please check the input parameters and try again.');
         }
     }
-    
-    
+
+
 
 }
