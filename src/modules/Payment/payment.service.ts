@@ -101,8 +101,8 @@ export class PaymentService {
 
             const { buy_order, amount, session_id, status, accounting_date, transaction_date, authorization_code, payment_type_code, response_code, vci } = response;
             const parts = buy_order.split('-');
-            const rawIds = parts.length === 4 ? parts.slice(-2) : parts.slice(-1);
-            const idsBoletas = rawIds.map((rawId: string) => parseInt(rawId, 10));
+            const rawIds = parts.slice(2);
+            const idsBoletas = rawIds.map(id => parseInt(id, 10));
 
             // Determine transaction status based on VCI
             let estadoTransaccionId;
@@ -450,11 +450,11 @@ export class PaymentService {
                         certificateType: record.certificateType,
                     };
                 })
-            );            
+            );
 
             let estadoTransaccionId;
             console.log(vci);
-            
+
             switch (vci) {
                 case 'TSY':
                 case 'TSYS':
