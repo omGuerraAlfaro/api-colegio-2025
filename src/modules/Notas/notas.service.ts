@@ -648,4 +648,65 @@ export class NotasService {
   }
 
 
+  /**
+   * Retorna todas las notas de todas las asignaturas
+   * para un estudiante y semestre, agrupadas por asignatura.
+   */
+  async getTodasNotasPorEstudianteSemestre(
+    estudianteId: number,
+    semestreId: number,
+  ): Promise<Array<{
+    asignaturaId: number;
+    asignaturaNombre: string;
+    notas: Array<{
+      evaluacionId: number;
+      nombreEvaluacion: string;
+      nota: number;
+      fecha: Date;
+    }>;
+  }>> {
+    // 1) Traemos el raw data
+    const rawData = await this.notaRepository
+      .createQueryBuilder('nota')
+      .innerJoin('nota.evaluacion', 'evaluacion')
+      .innerJoin('nota.asignatura', 'asignatura')
+      .innerJoin('nota.estudiante', 'estudiante')
+      .innerJoin('nota.semestre', 'semestre')
+      .where('estudiante.id = :estudianteId', { estudianteId })
+      .andWhere('semestre.id_semestre = :semestreId', { semestreId })
+      .select([
+        'asignatura.id AS asignaturaId',
+        'asignatura.nombre_asignatura AS asignaturaNombre',
+        'evaluacion.id_evaluacion AS evaluacionId',
+        'evaluacion.nombre_evaluacion AS nombreEvaluacion',
+        'nota.nota AS nota',
+        'nota.fecha AS fecha',
+      ])
+      .orderBy('asignatura.nombre_asignatura', 'ASC')
+      .addOrderBy('nota.fecha', 'ASC')
+      .getRawMany();
+
+    // 2) Agrupamos por asignatura
+    const mapAsignaturas = new Map<number, any>();
+    for (const row of rawData) {
+      let grupo = mapAsignaturas.get(row.asignaturaId);
+      if (!grupo) {
+        grupo = {
+          asignaturaId: row.asignaturaId,
+          asignaturaNombre: row.asignaturaNombre,
+          notas: [],
+        };
+        mapAsignaturas.set(row.asignaturaId, grupo);
+      }
+      grupo.notas.push({
+        evaluacionId: row.evaluacionId,
+        nombreEvaluacion: row.nombreEvaluacion,
+        nota: row.nota,
+        fecha: row.fecha,
+      });
+    }
+
+    return Array.from(mapAsignaturas.values());
+  }
+
 }

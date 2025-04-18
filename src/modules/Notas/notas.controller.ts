@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Put, Body, Param } from '@nestjs/common';
+import { Controller, Get, Post, Put, Body, Param, ParseIntPipe } from '@nestjs/common';
 import { NotasService } from './notas.service';
 import { Nota } from 'src/models/Notas.entity';
 import { CierreSemestreDto, CierreSemestrePreBasicaDto } from 'src/dto/evaluacion.dto';
@@ -94,4 +94,15 @@ export class NotasController {
     async cierreSemestreBasica(@Body() dto: CierreSemestreDto): Promise<void> {
         await this.notasService.cierreSemestreBasica(dto);
     }
+
+    @Get('todas/:estudianteId/:semestreId')
+  getTodas(
+    @Param('estudianteId', ParseIntPipe) estudianteId: number,
+    @Param('semestreId', ParseIntPipe) semestreId: number,
+  ) {
+    return this.notasService.getTodasNotasPorEstudianteSemestre(
+      estudianteId,
+      semestreId,
+    );
+  }
 }
