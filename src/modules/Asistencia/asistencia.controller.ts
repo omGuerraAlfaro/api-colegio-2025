@@ -19,6 +19,14 @@ export class AsistenciaController {
         return await this.asistenciaService.getAsistenciaByCursoAndSemestre(cursoId, semestreId);
     }
 
+    @Post('buscar-alumno')
+    async getAsistenciaByCursoAndSemestreByAlumno(
+        @Body() body: { cursoId: number; alumnoId: number; semestreId: number },
+    ) {
+        const { cursoId, alumnoId, semestreId } = body;
+        return await this.asistenciaService.getAsistenciaByCursoAndSemestreByAlumno(cursoId, alumnoId, semestreId);
+    }
+
     // Crear nueva asistencia
     @Post()
     async createAsistencia(@Body() createAsistenciaDto: CreateAsistenciaDto) {
