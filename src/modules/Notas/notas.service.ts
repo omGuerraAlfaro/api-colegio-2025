@@ -666,13 +666,15 @@ export class NotasService {
     }>;
   }>> {
     try {
-      // 1) Traemos el raw data
       const rawData = await this.notaRepository
         .createQueryBuilder('nota')
+        // 1) Unimos nota → evaluacion
         .innerJoin('nota.evaluacion', 'evaluacion')
-        .innerJoin('nota.asignatura', 'asignatura')
+        // 2) A partir de evaluacion, unimos a Asignatura y Semestre
+        .innerJoin('evaluacion.asignatura', 'asignatura')
+        .innerJoin('evaluacion.semestre', 'semestre')
+        // 3) Finalmente unimos nota → estudiante
         .innerJoin('nota.estudiante', 'estudiante')
-        .innerJoin('nota.semestre', 'semestre')
         .where('estudiante.id = :estudianteId', { estudianteId })
         .andWhere('semestre.id_semestre = :semestreId', { semestreId })
         .select([
@@ -686,8 +688,8 @@ export class NotasService {
         .orderBy('asignatura.nombre_asignatura', 'ASC')
         .addOrderBy('nota.fecha', 'ASC')
         .getRawMany();
-
-      // 2) Agrupamos por asignatura
+  
+      // Agrupamiento por asignatura
       const mapAsignaturas = new Map<number, any>();
       for (const row of rawData) {
         let grupo = mapAsignaturas.get(row.asignaturaId);
@@ -706,14 +708,17 @@ export class NotasService {
           fecha: row.fecha,
         });
       }
-
+  
       return Array.from(mapAsignaturas.values());
     } catch (error) {
       console.error('Error en getTodasNotasPorEstudianteSemestre:', error);
       throw new InternalServerErrorException(
         'Ocurrió un error al obtener todas las notas del estudiante en el semestre.',
+        error
       );
     }
   }
+  
+  
 
 }
