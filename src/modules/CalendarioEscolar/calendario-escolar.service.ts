@@ -8,7 +8,7 @@ export class CalendarioEscolarService {
     constructor(
         @InjectRepository(CalendarioEscolar)
         private readonly calendarioRepository: Repository<CalendarioEscolar>,
-    ) {}
+    ) { }
 
     async getAll(): Promise<CalendarioEscolar[]> {
         return await this.calendarioRepository.find();
@@ -30,5 +30,17 @@ export class CalendarioEscolarService {
 
     async delete(id: number): Promise<void> {
         await this.calendarioRepository.delete(id);
+    }
+
+    async getUpcomingDates(daysAhead: number): Promise<CalendarioEscolar[]> {
+        const today = new Date();
+        const futureDate = new Date(today);
+        futureDate.setDate(today.getDate() + daysAhead);
+
+        return await this.calendarioRepository.createQueryBuilder('calendario')
+            .where('calendario.fecha >= :today', { today })
+            .andWhere('calendario.fecha <= :futureDate', { futureDate })
+            .orderBy('calendario.fecha', 'ASC')
+            .getMany();
     }
 }

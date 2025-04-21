@@ -11,6 +11,11 @@ export class CalendarioEscolarController {
         return await this.calendarioService.getAll();
     }
 
+    @Get('proximas')
+    async getProximasFechas(): Promise<CalendarioEscolar[]>{
+        return await this.calendarioService.getUpcomingDates(10);
+    }
+
     @Get(':id')
     async getById(@Param('id') id: number): Promise<CalendarioEscolar> {
         return await this.calendarioService.getById(id);
