@@ -51,24 +51,32 @@ export class EstudianteService {
     }));
   }
 
-
-
   async findByRut(rut: string) {
     const estudiante = await this.estudianteRepository.findOne({
       where: { rut: rut },
-      relations: ['cursoConnection', 'cursoConnection.curso'],
+      relations: ['cursoConnection', 'cursoConnection.curso', 'cursoConnection.curso.profesorConnection'],
     });
-
+  
     if (estudiante) {
-      // Rename cursoConnection to curso
       const { cursoConnection, ...rest } = estudiante;
+  
+      const cursosConProfesor = cursoConnection.map(conn => {
+        return {
+          ...conn.curso,
+          profesor: conn.curso.profesorConnection,
+          profesorConnection: undefined,
+        };
+      });
+  
       return {
         ...rest,
-        curso: cursoConnection.map(conn => conn.curso),
+        curso: cursosConProfesor,
       };
     }
+  
     return null;
   }
+  
 
   async getCountByGender(): Promise<{ masculinoCount: number; femeninoCount: number; out: number; masculinoCountOut: number; femeninoCountOut: number }> {
     const maleCount = await this.estudianteRepository.count({
