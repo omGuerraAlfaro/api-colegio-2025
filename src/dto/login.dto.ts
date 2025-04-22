@@ -33,3 +33,12 @@ export class RoleDto {
   @IsString()
   id: string;
 }
+
+export class ResetPasswordDto {
+  @IsString()
+  @IsNotEmpty()
+  rut: string;
+
+  @IsEmail()
+  correo: string;
+}

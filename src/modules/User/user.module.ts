@@ -7,6 +7,7 @@ import { Apoderado } from 'src/models/Apoderado.entity';
 import { Profesor } from 'src/models/Profesor.entity';
 import { Administrador } from 'src/models/Administrador.entity';
 import { SubAdministrador } from 'src/models/SubAdministrador.entity';
+import { CorreoModule } from '../Correo/correo.module';
 
 @Module({
   imports: [
@@ -15,8 +16,9 @@ import { SubAdministrador } from 'src/models/SubAdministrador.entity';
       Apoderado,
       Profesor,
       Administrador,
-      SubAdministrador
+      SubAdministrador,
     ]),
+    CorreoModule
   ],
   controllers: [UsuarioController],
   providers: [UsuarioService],

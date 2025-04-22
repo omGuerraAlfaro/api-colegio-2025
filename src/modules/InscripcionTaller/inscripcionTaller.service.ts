@@ -113,7 +113,7 @@ export class InscripcionTallerService {
       try {
         await this.correoService.enviarCorreo(mailOptionsApoderado);
         await this.correoService.enviarCorreo(mailOptionsAdm);
-        console.log('Correo enviado con éxito');
+        console.log('Correo enviado con éxito, INSCRIPCION TALLER');
       } catch (error) {
         console.error('Error al enviar el correo:', error);
       }

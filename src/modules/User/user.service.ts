@@ -7,6 +7,8 @@ import { Repository } from 'typeorm';
 import { Administrador } from 'src/models/Administrador.entity';
 import { hash, compare } from 'bcrypt';
 import { SubAdministrador } from 'src/models/SubAdministrador.entity';
+import { ResetPasswordDto } from 'src/dto/login.dto';
+import { CorreoService } from '../Correo/correo.service';
 
 @Injectable()
 export class UsuarioService {
@@ -23,6 +25,7 @@ export class UsuarioService {
     private readonly administradorRepository: Repository<Administrador>,
     @InjectRepository(SubAdministrador)
     private readonly subAdministradorRepository: Repository<SubAdministrador>,
+    private readonly correoService: CorreoService,
   ) { }
 
   async findAll(): Promise<Usuarios[]> {
@@ -306,6 +309,162 @@ export class UsuarioService {
 
     user.password = hashedPassword;
     await this.usuarioRepository.save(user);
+  }
+
+  async UserResetPassword(
+    dto: ResetPasswordDto,
+  ): Promise<{ success: boolean; message: string }> {
+    const { rut, correo } = dto;
+    const correoUpper = correo.trim().toUpperCase();
+
+    const usuario = await this.usuarioRepository
+      .createQueryBuilder('u')
+      .where('u.username = :rut', { rut })
+      .andWhere('UPPER(u.correo_electronico) = :correo', { correo: correoUpper })
+      .getOne();
+
+    if (!usuario) {
+      throw new HttpException(
+        'Rut o correo no válidos',
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const newPassword = 'andeschile2025';
+    const hashedPassword = await hash(newPassword, 10);
+    usuario.password = hashedPassword;
+    await this.usuarioRepository.save(usuario);
+
+
+    const correoHtml = `
+        <html>
+          <head>
+            <style>
+              body {
+                font-family: Arial, sans-serif;
+                margin: 0;
+                padding: 0;
+                background-color: #f0f0f0;
+              }
+              .container {
+                background-color: #fff;
+                max-width: 600px;
+                margin: 20px auto;
+                padding: 20px;
+                border-radius: 8px;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+                border: 1px solid #ccc;
+              }
+              .header {
+                text-align: center;
+              }
+              .header h1 {
+                color: #333;
+                font-size: 20px;
+                margin: 0;
+              }
+              .logo {
+                width: 120px;
+                display: block;
+                margin: 20px auto 10px;
+              }
+              p {
+                color: #333;
+                font-size: 14px;
+                line-height: 1.6;
+              }
+              .highlight-box {
+                background-color: #e0e0e0;
+                padding: 15px;
+                border-radius: 5px;
+                text-align: center;
+                margin: 20px 0;
+              }
+              .highlight-box .label {
+                font-size: 16px;
+                color: #333;
+                font-weight: bold;
+              }
+              .highlight-box .value {
+                font-size: 18px;
+                font-weight: bold;
+                color: #000;
+              }
+              .footer {
+                text-align: center;
+                margin-top: 20px;
+                font-size: 12px;
+                color: #666;
+              }
+              .download-links {
+                margin: 20px 0;
+                text-align: center;
+              }
+              .download-links a {
+                display: inline-block;
+                margin: 0 10px;
+                padding: 10px 20px;
+                background-color: #007bff;
+                color: #fff;
+                text-decoration: none;
+                border-radius: 5px;
+                transition: background-color 0.3s;
+              }
+              .download-links a:hover {
+                background-color: #0056b3;
+              }
+              .normal-text {
+                font-size: 14px;
+                color: #333;
+                line-height: 1.6;
+                margin-top: 20px;
+              }
+            </style>
+          </head>
+          <body>
+            <div class="container">
+              <div class="header">
+                <h1>Confirmación Restauración Contraseña</h1>
+              </div>
+              <p>Estimado(a) apoderado(a),</p>
+              <p>Estos son los datos de ingreso para nuestra app:</p>
+              <div class="highlight-box">
+                <p class="label">Usuario:</p>
+                <p class="value">${usuario.username}</p>
+                <p class="label">Contraseña:</p>
+                <p class="value">andeschile2025</p>
+                <p>Puede cambiar su contraseña directamente desde la aplicación Móvil Colegio Andes Chile App.</p>
+              </div>
+              
+              <p>Durante el año 2025, la app tendrá muchas sorpresas y actualizaciones. ¡Únete y conéctate con nuestra comunidad online!</p>
+              <p>¡Bienvenidos a nuestra comunidad CACH!</p>
+              <div class="footer normal-text">
+                <img class="logo" src="https://www.colegioandeschile.cl/img/LOGOCOLEGIO.png" alt="Andes Chile Colegio">
+                <p>Colegio Andes Chile - Educando con Amor ❤️</p>
+              </div>
+            </div>
+          </body>
+        </html>
+      `;
+
+    const mailOptions = {
+      from: 'contacto@colegioandeschile.cl',
+      to: usuario.correo_electronico,
+      subject: 'Confirmación Recuperación Contreseña',
+      html: correoHtml,
+    };
+
+    try {
+      await this.correoService.enviarCorreo(mailOptions);
+      console.log('Correo enviado con éxito, UserResetPassword');
+    } catch (error) {
+      console.error('Error al enviar el correo:', error);
+    }
+
+    return {
+      success: true,
+      message: 'Contraseña reseteada correctamente',
+    };
   }
 
 }

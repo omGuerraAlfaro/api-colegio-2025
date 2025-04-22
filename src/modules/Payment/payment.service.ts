@@ -247,7 +247,7 @@ export class PaymentService {
             try {
                 await this.correoService.enviarCorreo(mailOptionsApoderado);
                 await this.correoService.enviarCorreo(mailOptionsAdm);
-                console.log('Correo enviado con éxito');
+                console.log('Correo enviado con éxito TRANSACCION CONFIRM');
             } catch (error) {
                 console.error('Error al enviar el correo:', error);
             }
@@ -400,7 +400,7 @@ export class PaymentService {
         try {
             await this.correoService.enviarCorreo(mailOptionsAdm);
             await this.correoService.enviarCorreo(mailOptionsApoderado);
-            console.log('Correo enviado con éxito');
+            console.log('Correo enviado con éxito, CONFIRM TRANSFERENCIA');
         } catch (error) {
             console.error('Error al enviar el correo:', error);
         }

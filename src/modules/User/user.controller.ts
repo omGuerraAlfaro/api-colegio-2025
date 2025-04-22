@@ -1,8 +1,9 @@
-import { Controller, Get, Post, Body, Response, Param, Patch, HttpException, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Response, Param, Patch, HttpException, HttpStatus, HttpCode } from '@nestjs/common';
 import { UsuarioService } from './user.service';
 import { Usuarios } from 'src/models/User.entity';
 import { Apoderado } from 'src/models/Apoderado.entity';
-import { ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ResetPasswordDto } from 'src/dto/login.dto';
 
 @Controller('usuarios')
 export class UsuarioController {
@@ -118,4 +119,16 @@ export class UsuarioController {
     await this.usuarioService.resetPassword(rut);
     return { message: 'Password reset successfully' };
   }
+
+  @Post('reset-password')
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({ summary: 'Resetear contraseña de usuario' })
+  @ApiResponse({ status: 200, description: 'Contraseña reseteada.' })
+  @ApiResponse({ status: 400, description: 'Rut o correo inválidos.' })
+  async UserResetPassword(
+    @Body() dto: ResetPasswordDto,
+  ): Promise<{ success: boolean; message: string }> {
+    return this.usuarioService.UserResetPassword(dto);
+  }
+  
 }

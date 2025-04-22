@@ -84,7 +84,7 @@ export class AppModule { }
 //   port: 3306,
 //   username: 'root',
 //   password: '',
-//   database: 'colegio-2025-2',
+//   database: 'colegioa_colegio2025',
 //   entities,
 //   synchronize: true
 // }),

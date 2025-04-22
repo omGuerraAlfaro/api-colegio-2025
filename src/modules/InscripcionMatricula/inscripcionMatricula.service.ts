@@ -171,7 +171,7 @@ export class InscripcionMatriculaService {
 
       try {
         await this.correoService.enviarCorreo(mailOptionsAdm);
-        console.log('Correo enviado con éxito');
+        console.log('Correo enviado con éxito, Inscripcion Matricula CREATE');
       } catch (error) {
         console.error('Error al enviar el correo:', error);
       }
@@ -441,7 +441,7 @@ export class InscripcionMatriculaService {
 
       try {
         await this.correoService.enviarCorreo(mailOptionsAdm);
-        console.log('Correo enviado con éxito');
+        console.log('Correo enviado con éxito, CREATE MATRICULA');
       } catch (error) {
         console.error('Error al enviar el correo:', error);
       }
