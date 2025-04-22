@@ -463,7 +463,7 @@ export class UsuarioService {
 
     return {
       success: true,
-      message: 'Contraseña reseteada correctamente',
+      message: 'Tu contraseña ha sido restablecida con éxito. Revisa tu correo para más detalles.',
     };
   }
 
