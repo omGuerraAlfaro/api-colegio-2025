@@ -95,14 +95,16 @@ export class NotasController {
         await this.notasService.cierreSemestreBasica(dto);
     }
 
-    @Get('todas/:estudianteId/:semestreId')
+    @Get('todas/:estudianteId/:semestreId/:cursoId')
   getTodas(
     @Param('estudianteId', ParseIntPipe) estudianteId: number,
     @Param('semestreId', ParseIntPipe) semestreId: number,
+    @Param('cursoId', ParseIntPipe) cursoId: number
   ) {
     return this.notasService.getTodasNotasPorEstudianteSemestre(
       estudianteId,
       semestreId,
+      cursoId
     );
   }
 }

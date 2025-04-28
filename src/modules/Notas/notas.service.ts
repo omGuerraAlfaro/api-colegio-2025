@@ -7,7 +7,7 @@ import { Evaluacion } from 'src/models/Evaluacion.entity';
 import { EvaluacionPreBasica } from 'src/models/EvaluacionPreBasica.entity';
 import { Nota } from 'src/models/Notas.entity';
 import { NotaPreBasica } from 'src/models/NotasPreBasica.entity';
-import { Repository } from 'typeorm';
+import { DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class NotasService {
@@ -22,6 +22,7 @@ export class NotasService {
     private readonly evaluacionPreBasicaRepository: Repository<EvaluacionPreBasica>,
     @InjectRepository(Curso)
     private readonly cursoRepository: Repository<Curso>,
+    private dataSource: DataSource,
   ) { }
 
   async getNotasPorEstudianteAsignaturaSemestre(
@@ -655,6 +656,7 @@ export class NotasService {
   async getTodasNotasPorEstudianteSemestre(
     estudianteId: number,
     semestreId: number,
+    cursoId: number,
   ): Promise<Array<{
     asignaturaId: number;
     asignaturaNombre: string;
@@ -666,31 +668,67 @@ export class NotasService {
     }>;
   }>> {
     try {
-      const rawData = await this.notaRepository
-        .createQueryBuilder('nota')
-        // 1) Unimos nota → evaluacion
-        .innerJoin('nota.evaluacion', 'evaluacion')
-        // 2) A partir de evaluacion, unimos a Asignatura y Semestre
-        .innerJoin('evaluacion.asignatura', 'asignatura')
-        .innerJoin('evaluacion.semestre', 'semestre')
-        // 3) Finalmente unimos nota → estudiante
-        .innerJoin('nota.estudiante', 'estudiante')
-        .where('estudiante.id = :estudianteId', { estudianteId })
-        .andWhere('semestre.id_semestre = :semestreId', { semestreId })
+      // 1) Tablas dinámicas según pre-básica (1,2) o normal
+      const evaluacionesTable =
+        cursoId === 1 || cursoId === 2
+          ? 'evaluaciones_prebasica'
+          : 'evaluaciones';
+      const notasTable =
+        cursoId === 1 || cursoId === 2
+          ? 'notas_prebasica'
+          : 'notas';
+      const asignaturasTable =
+        cursoId === 1 || cursoId === 2
+          ? 'asignatura_prebasica'
+          : 'asignatura';  // singular, según tu entidad
+  
+      // 2) QueryBuilder puro desde el manager para no duplicar alias
+      const rawData = await this.notaRepository.manager
+        .createQueryBuilder()
         .select([
-          'asignatura.id AS asignaturaId',
-          'asignatura.nombre_asignatura AS asignaturaNombre',
-          'evaluacion.id_evaluacion AS evaluacionId',
-          'evaluacion.nombre_evaluacion AS nombreEvaluacion',
-          'nota.nota AS nota',
-          'nota.fecha AS fecha',
+          'a.id                 AS asignaturaId',
+          'a.nombre_asignatura  AS asignaturaNombre',
+          'e.id_evaluacion      AS evaluacionId',
+          'e.nombre_evaluacion  AS nombreEvaluacion',
+          'n.nota               AS nota',
+          'n.fecha              AS fecha',
         ])
-        .orderBy('asignatura.nombre_asignatura', 'ASC')
-        .addOrderBy('nota.fecha', 'ASC')
+        .from(notasTable, 'n')
+        .innerJoin(
+          evaluacionesTable,
+          'e',
+          'n.id_evaluacion = e.id_evaluacion AND e.id_semestre = :semestreId',
+          { semestreId },
+        )
+        .innerJoin(
+          asignaturasTable,
+          'a',
+          'e.id_asignatura = a.id',
+        )
+        .where('n.id_estudiante = :estudianteId', { estudianteId })
+        .orderBy('a.nombre_asignatura', 'ASC')
+        .addOrderBy('n.fecha', 'ASC')
         .getRawMany();
   
-      // Agrupamiento por asignatura
-      const mapAsignaturas = new Map<number, any>();
+      if (rawData.length === 0) {
+        return [];
+      }
+  
+      // 3) Agrupamos en memoria por asignatura
+      const mapAsignaturas = new Map<
+        number,
+        {
+          asignaturaId: number;
+          asignaturaNombre: string;
+          notas: Array<{
+            evaluacionId: number;
+            nombreEvaluacion: string;
+            nota: number;
+            fecha: Date;
+          }>;
+        }
+      >();
+  
       for (const row of rawData) {
         let grupo = mapAsignaturas.get(row.asignaturaId);
         if (!grupo) {
@@ -711,14 +749,21 @@ export class NotasService {
   
       return Array.from(mapAsignaturas.values());
     } catch (error) {
-      console.error('Error en getTodasNotasPorEstudianteSemestre:', error);
+      console.error(
+        'Error en getTodasNotasPorEstudianteSemestre:',
+        error,
+      );
       throw new InternalServerErrorException(
         'Ocurrió un error al obtener todas las notas del estudiante en el semestre.',
-        error
+        error,
       );
     }
   }
   
-  
+
+
 
 }
+
+
+
