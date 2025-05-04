@@ -6,6 +6,7 @@ import { Apoderado } from 'src/models/Apoderado.entity';
 import { ApoderadoService } from '../Apoderado/apoderado.service';
 import { CrearBoletaDto, UpdateBoletaDto, UpdateBoletaDto2 } from 'src/dto/updateBoleta.dto';
 import { Transacciones } from 'src/models/Transacciones.entity';
+import { ResumenApoderadoMorosoDto } from 'src/dto/apoderado.dto';
 
 @Injectable()
 export class BoletaService {
@@ -68,7 +69,7 @@ export class BoletaService {
       .where('boleta.estado_boleta = :estado', { estado: 1 })
       .getMany();
   }
-  
+
 
   async findBoletasPagadasWithTransaccionData(rut_apoderado: string): Promise<any[]> {
     const boletas = await this.boletaRepository.find({
@@ -511,6 +512,104 @@ export class BoletaService {
     }
   }
 
+
+  private calcularNivel(monto: number, diasMax: number): 'verde' | 'amarillo' | 'rojo' {
+    if (monto > 100_000 || diasMax > 30) return 'rojo';
+    if (monto > 50_000 || diasMax > 15)  return 'amarillo';
+    return 'verde';
+  }
+
+  async getApoderadosMorososNew(): Promise<ResumenApoderadoMorosoDto[]> {
+    // 1) Traer agregados por apoderado y mes
+    const raws = await this.boletaRepository
+      .createQueryBuilder('b')
+      .select('ap.id', 'apoderadoId')
+      .addSelect('ap.primer_nombre_apoderado', 'nombre')
+      .addSelect('ap.primer_apellido_apoderado', 'apellido')
+      .addSelect('ap.rut', 'rut')
+      .addSelect('ap.telefono_apoderado', 'telefono')
+      .addSelect('ap.correo_apoderado', 'correo')
+      .addSelect('MONTH(b.fecha_vencimiento)', 'mes')            // 1–12
+      .addSelect('COUNT(b.id)', 'cantidad')
+      .addSelect('SUM(b.total)', 'montoTotal')
+      .addSelect('MAX(DATEDIFF(CURDATE(), b.fecha_vencimiento))', 'diasMora')
+      .addSelect('MAX(b.fecha_vencimiento)', 'fechaUltimo')
+      .innerJoin('b.estadoBoleta', 'eb', 'eb.id = :pendiente', { pendiente: 1 })
+      .innerJoin('b.apoderado', 'ap')
+      .where('b.fecha_vencimiento <= CURDATE()')
+      .groupBy('ap.id')
+      .addGroupBy('mes')
+      .getRawMany<{
+        apoderadoId: number;
+        nombre: string;
+        apellido: string;
+        rut: string;
+        telefono: string;
+        correo: string;
+        mes: number;
+        cantidad: string;    // vienen como string
+        montoTotal: string;
+        diasMora: string;
+        fechaUltimo: Date;
+      }>();
+
+    // 2) Armar estructura en JS
+    const map = new Map<number, ResumenApoderadoMorosoDto>();
+    for (const r of raws) {
+      let dto = map.get(r.apoderadoId);
+      if (!dto) {
+        dto = {
+          id: r.apoderadoId,
+          nombre: `${r.nombre} ${r.apellido}`,
+          rut: r.rut,
+          telefono: r.telefono,
+          correo:  r.correo,
+          totalBoletasVencidas: 0,
+          montoTotalVencido:    0,
+          diasMoraMaximo:       0,
+          fechaUltimoVencimiento: new Date(0),
+          nivelAlerta: 'verde',
+          morosidadPorMes: Array(12).fill(null).map((_, i) => ({
+            mes: i,
+            tieneVencidas: false,
+            cantidad: 0,
+            montoTotal: 0,
+          })),
+        };
+        map.set(r.apoderadoId, dto);
+      }
+
+      const idx = r.mes - 1; // pasar 1–12 a 0–11
+      const cant = parseInt(r.cantidad, 10);
+      const mt   = parseFloat(r.montoTotal);
+      const dm   = parseInt(r.diasMora, 10);
+      const fu   = new Date(r.fechaUltimo);
+
+      // llenar mes
+      dto.morosidadPorMes[idx] = {
+        mes: idx,
+        tieneVencidas: true,
+        cantidad: cant,
+        montoTotal: mt,
+      };
+
+      // actualizar totales
+      dto.totalBoletasVencidas += cant;
+      dto.montoTotalVencido    += mt;
+      dto.diasMoraMaximo        = Math.max(dto.diasMoraMaximo, dm);
+      dto.fechaUltimoVencimiento = dto.fechaUltimoVencimiento > fu
+        ? dto.fechaUltimoVencimiento
+        : fu;
+    }
+
+    // 3) calcular nivel de alerta final
+    const result = Array.from(map.values());
+    result.forEach(d => {
+      d.nivelAlerta = this.calcularNivel(d.montoTotalVencido, d.diasMoraMaximo);
+    });
+
+    return result;
+  }
 
 
 }

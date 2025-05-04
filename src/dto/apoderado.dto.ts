@@ -166,3 +166,27 @@ export class ApoderadoAloneDTO {
     @IsOptional()
     escolaridad?: string | null;
 }
+
+
+export class ResumenApoderadoMorosoDto {
+    id: number;
+    nombre: string;
+    rut: string;
+    telefono?: string;
+    correo?: string;
+
+    totalBoletasVencidas: number;
+    montoTotalVencido: number;
+    diasMoraMaximo: number;
+    fechaUltimoVencimiento: Date;
+    nivelAlerta: 'verde' | 'amarillo' | 'rojo';
+
+    morosidadPorMes: MorosidadMesDto[];
+}
+
+export class MorosidadMesDto {
+    mes: number;           // 0–11
+    tieneVencidas: boolean;
+    cantidad: number;
+    montoTotal: number;
+}

@@ -17,6 +17,8 @@ import { BoletaService } from './boleta.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CrearBoletaDto, UpdateBoletaDto, UpdateBoletaDto2 } from 'src/dto/updateBoleta.dto';
 import { Boleta } from 'src/models/Boleta.entity';
+import { ResumenApoderadoMorosoDto } from 'src/dto/apoderado.dto';
+
 
 @ApiTags('Boletas')
 @Controller('boleta')
@@ -147,5 +149,10 @@ export class BoletaController {
     @Get('total-pagado-por-mes/:fecha')
     async getTotalPagadoPorMes(@Param('fecha') fecha: string) {
         return this.boletaService.getTotalPagadoPorMes(fecha);
+    }
+
+    @Get('morosos/obtener')
+    findMorosos(): Promise<ResumenApoderadoMorosoDto[]> {
+        return this.boletaService.getApoderadosMorososNew();
     }
 }
