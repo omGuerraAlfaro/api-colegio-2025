@@ -513,9 +513,9 @@ export class BoletaService {
   }
 
 
-  private calcularNivel(monto: number, diasMax: number): 'verde' | 'amarillo' | 'rojo' {
-    if (monto > 100_000 || diasMax > 30) return 'rojo';
-    if (monto > 50_000 || diasMax > 15)  return 'amarillo';
+  private calcularNivel(diasMax: number): 'verde' | 'amarillo' | 'rojo' {
+    if (diasMax > 30) return 'rojo';
+    if (diasMax > 15) return 'amarillo';
     return 'verde';
   }
 
@@ -563,10 +563,10 @@ export class BoletaService {
           nombre: `${r.nombre} ${r.apellido}`,
           rut: r.rut,
           telefono: r.telefono,
-          correo:  r.correo,
+          correo: r.correo,
           totalBoletasVencidas: 0,
-          montoTotalVencido:    0,
-          diasMoraMaximo:       0,
+          montoTotalVencido: 0,
+          diasMoraMaximo: 0,
           fechaUltimoVencimiento: new Date(0),
           nivelAlerta: 'verde',
           morosidadPorMes: Array(12).fill(null).map((_, i) => ({
@@ -581,9 +581,9 @@ export class BoletaService {
 
       const idx = r.mes - 1; // pasar 1–12 a 0–11
       const cant = parseInt(r.cantidad, 10);
-      const mt   = parseFloat(r.montoTotal);
-      const dm   = parseInt(r.diasMora, 10);
-      const fu   = new Date(r.fechaUltimo);
+      const mt = parseFloat(r.montoTotal);
+      const dm = parseInt(r.diasMora, 10);
+      const fu = new Date(r.fechaUltimo);
 
       // llenar mes
       dto.morosidadPorMes[idx] = {
@@ -595,8 +595,8 @@ export class BoletaService {
 
       // actualizar totales
       dto.totalBoletasVencidas += cant;
-      dto.montoTotalVencido    += mt;
-      dto.diasMoraMaximo        = Math.max(dto.diasMoraMaximo, dm);
+      dto.montoTotalVencido += mt;
+      dto.diasMoraMaximo = Math.max(dto.diasMoraMaximo, dm);
       dto.fechaUltimoVencimiento = dto.fechaUltimoVencimiento > fu
         ? dto.fechaUltimoVencimiento
         : fu;
@@ -605,7 +605,7 @@ export class BoletaService {
     // 3) calcular nivel de alerta final
     const result = Array.from(map.values());
     result.forEach(d => {
-      d.nivelAlerta = this.calcularNivel(d.montoTotalVencido, d.diasMoraMaximo);
+      d.nivelAlerta = this.calcularNivel(d.diasMoraMaximo);
     });
 
     return result;
