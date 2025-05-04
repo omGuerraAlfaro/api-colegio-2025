@@ -190,3 +190,8 @@ export class MorosidadMesDto {
     cantidad: number;
     montoTotal: number;
 }
+
+export class PorcentajeMesDto {
+    mes: string;
+    porcentaje: number;
+  }

@@ -12,12 +12,13 @@ import {
     Patch,
     Post,
     Put,
+    Query,
 } from '@nestjs/common';
 import { BoletaService } from './boleta.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CrearBoletaDto, UpdateBoletaDto, UpdateBoletaDto2 } from 'src/dto/updateBoleta.dto';
 import { Boleta } from 'src/models/Boleta.entity';
-import { ResumenApoderadoMorosoDto } from 'src/dto/apoderado.dto';
+import { PorcentajeMesDto, ResumenApoderadoMorosoDto } from 'src/dto/apoderado.dto';
 
 
 @ApiTags('Boletas')
@@ -154,5 +155,10 @@ export class BoletaController {
     @Get('morosos/obtener')
     findMorosos(): Promise<ResumenApoderadoMorosoDto[]> {
         return this.boletaService.getApoderadosMorososNew();
+    }
+
+    @Get('porcentaje-pagado/:fecha')
+    async porcentajePagado(@Param('fecha') fecha: string): Promise<PorcentajeMesDto[]> {
+        return this.boletaService.getPorcentajePagadoPorMes(fecha);
     }
 }

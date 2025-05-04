@@ -6,7 +6,7 @@ import { Apoderado } from 'src/models/Apoderado.entity';
 import { ApoderadoService } from '../Apoderado/apoderado.service';
 import { CrearBoletaDto, UpdateBoletaDto, UpdateBoletaDto2 } from 'src/dto/updateBoleta.dto';
 import { Transacciones } from 'src/models/Transacciones.entity';
-import { ResumenApoderadoMorosoDto } from 'src/dto/apoderado.dto';
+import { PorcentajeMesDto, ResumenApoderadoMorosoDto } from 'src/dto/apoderado.dto';
 
 @Injectable()
 export class BoletaService {
@@ -612,4 +612,41 @@ export class BoletaService {
   }
 
 
+  async getPorcentajePagadoPorMes(fecha?: string): Promise<PorcentajeMesDto[]> {
+    try {
+      const currentDate = fecha ? new Date(fecha) : new Date();
+      const yearStart = new Date(currentDate.getFullYear(), 0, 1);
+      const start = yearStart.toISOString().slice(0, 10);
+      const end   = currentDate.toISOString().slice(0, 10);
+
+      const raws: Array<{
+        mes: string;
+        total_generado: string;
+        total_pagado: string;
+      }> = await this.boletaRepository.query(
+        `
+        SELECT
+          DATE_FORMAT(fecha_vencimiento, '%Y-%m-01') AS mes,
+          SUM(total) AS total_generado,
+          SUM(CASE WHEN estado_id = 2 THEN total ELSE 0 END) AS total_pagado
+        FROM boleta
+        WHERE estado_boleta = 1
+          AND fecha_vencimiento BETWEEN ? AND ?
+        GROUP BY DATE_FORMAT(fecha_vencimiento, '%Y-%m')
+        ORDER BY mes ASC;
+        `,
+        [start, end],
+      );
+
+      return raws.map(r => {
+        const gen = parseFloat(r.total_generado) || 0;
+        const pag = parseFloat(r.total_pagado)   || 0;
+        const pct = gen > 0 ? parseFloat(((pag / gen) * 100).toFixed(2)) : 0;
+        return { mes: r.mes, porcentaje: pct };
+      });
+    } catch (error) {
+      console.error('Error calculando % pagado por mes', error);
+      throw new InternalServerErrorException('No se pudo calcular porcentaje pagado por mes');
+    }
+  }
 }
