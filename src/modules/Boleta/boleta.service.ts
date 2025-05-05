@@ -527,6 +527,7 @@ export class BoletaService {
       .addSelect('ap.primer_nombre_apoderado', 'nombre')
       .addSelect('ap.primer_apellido_apoderado', 'apellido')
       .addSelect('ap.rut', 'rut')
+      .addSelect('ap.dv', 'dv')
       .addSelect('ap.telefono_apoderado', 'telefono')
       .addSelect('ap.correo_apoderado', 'correo')
       .addSelect('MONTH(b.fecha_vencimiento)', 'mes')            // 1–12
@@ -537,6 +538,7 @@ export class BoletaService {
       .innerJoin('b.estadoBoleta', 'eb', 'eb.id = :pendiente', { pendiente: 1 })
       .innerJoin('b.apoderado', 'ap')
       .where('b.fecha_vencimiento <= CURDATE()')
+      .andWhere('b.estado_boleta = 1')
       .groupBy('ap.id')
       .addGroupBy('mes')
       .getRawMany<{
@@ -544,6 +546,7 @@ export class BoletaService {
         nombre: string;
         apellido: string;
         rut: string;
+        dv: string;
         telefono: string;
         correo: string;
         mes: number;
@@ -561,7 +564,7 @@ export class BoletaService {
         dto = {
           id: r.apoderadoId,
           nombre: `${r.nombre} ${r.apellido}`,
-          rut: r.rut,
+          rut: `${r.rut}-${r.dv}`,
           telefono: r.telefono,
           correo: r.correo,
           totalBoletasVencidas: 0,
