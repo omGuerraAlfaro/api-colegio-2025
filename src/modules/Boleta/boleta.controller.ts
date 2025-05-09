@@ -60,9 +60,10 @@ export class BoletaController {
     async findBoletasPagadasWithTransaccionData(@Param('rut') rut: string) {
         return await this.boletaService.findBoletasPagadasWithTransaccionData(rut);
     }
-    @Get('historial-transacciones-webpay')
-    async findTransaccionData() {
-        return await this.boletaService.findTransaccionData();
+
+    @Get('transacciones')
+    async findAllTransacciones() {
+        return await this.boletaService.findAllTransacciones();
     }
 
     @Post('crear-boletas-apoderado/:rut')
