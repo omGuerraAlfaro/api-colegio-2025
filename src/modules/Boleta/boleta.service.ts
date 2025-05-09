@@ -105,8 +105,10 @@ export class BoletaService {
   }
 
 
-  async findAllTransacciones(): Promise<any[]> {
-    return await this.transaccionRepository.find();
+  async findAllTransacciones(): Promise<Transacciones[]> {
+    return await this.transaccionRepository.find({
+      relations: ['boleta', 'estadoTransaccion', 'apoderado'],
+    });
   }
 
   // async reenumerateBoletas(): Promise<void> {

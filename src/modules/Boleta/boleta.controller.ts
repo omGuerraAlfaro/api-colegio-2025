@@ -36,6 +36,11 @@ export class BoletaController {
         return await this.boletaService.findAllBoletasConApoderado();
     }
 
+    @Get('transacciones')
+    async findAllTransacciones() {
+        return await this.boletaService.findAllTransacciones();
+    }
+
     // @Post('reenumerate')
     // async reenumerateBoletas(): Promise<void> {
     //     await this.boletaService.reenumerateBoletas();
@@ -59,11 +64,6 @@ export class BoletaController {
     @Get('apoderado-historial-pago/:rut')
     async findBoletasPagadasWithTransaccionData(@Param('rut') rut: string) {
         return await this.boletaService.findBoletasPagadasWithTransaccionData(rut);
-    }
-
-    @Get('transacciones')
-    async findAllTransacciones() {
-        return await this.boletaService.findAllTransacciones();
     }
 
     @Post('crear-boletas-apoderado/:rut')
