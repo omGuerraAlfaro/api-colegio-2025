@@ -70,7 +70,7 @@ export class PaymentService {
 
             for (const idBoleta of idsBoletas) {
                 const boleta = await this.boletaService.findBoletaById(idBoleta);
-                const { rut_apoderado } = boleta;
+                const { rut_apoderado, total } = boleta;
                 const apoderado = await this.apoderadoService.findApoderadoByRut(rut_apoderado);
 
                 await this.transaccionRepository.save({
@@ -78,7 +78,7 @@ export class PaymentService {
                     apoderado_id: apoderado.id,
                     estado_transaccion_id: 1,
                     webpay_transaccion_id: response.token,
-                    monto: amount,
+                    monto: total,
                     fecha_creacion: new Date(),
                     metodo_pago: null,
                     descripcion: 'Pago de boletas pendiente',
