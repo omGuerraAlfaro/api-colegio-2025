@@ -64,8 +64,8 @@ export class PaymentService {
             });
 
             const parts = buyOrder.split('-');
-            const rawIds = parts.length === 4 ? parts.slice(-2) : parts.slice(-1);
-            const idsBoletas = rawIds.map((rawId: string) => parseInt(rawId, 10));
+            const rawIds = parts.slice(2);
+            const idsBoletas = rawIds.map(id => parseInt(id, 10));
 
 
             for (const idBoleta of idsBoletas) {
