@@ -105,6 +105,10 @@ export class BoletaService {
   }
 
 
+  async findTransaccionData(): Promise<any[]> {
+    const transacciones = await this.transaccionRepository.find();
+    return transacciones;
+  }
 
   // async reenumerateBoletas(): Promise<void> {
   //   const boletas = await this.boletaRepository.find({ order: { id: 'ASC' } });
@@ -620,7 +624,7 @@ export class BoletaService {
       const currentDate = fecha ? new Date(fecha) : new Date();
       const yearStart = new Date(currentDate.getFullYear(), 0, 1);
       const start = yearStart.toISOString().slice(0, 10);
-      const end   = currentDate.toISOString().slice(0, 10);
+      const end = currentDate.toISOString().slice(0, 10);
 
       const raws: Array<{
         mes: string;
@@ -643,7 +647,7 @@ export class BoletaService {
 
       return raws.map(r => {
         const gen = parseFloat(r.total_generado) || 0;
-        const pag = parseFloat(r.total_pagado)   || 0;
+        const pag = parseFloat(r.total_pagado) || 0;
         const pct = gen > 0 ? parseFloat(((pag / gen) * 100).toFixed(2)) : 0;
         return { mes: r.mes, porcentaje: pct };
       });
