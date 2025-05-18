@@ -417,8 +417,8 @@ export class InscripcionMatriculaService {
               </div>
               <p>Pueden descargar la app en los siguientes enlaces para ambas plataformas:</p>
               <div class="download-links normal-text">
-                <a href="https://play.google.com/store/apps/details?id=colegio.andes.chile.app&hl=es_CR&pli=1" target="_blank">Descargar para Android</a>
-                <a href="https://apps.apple.com/cl/app/colegio-andes-chile/id6497167780" target="_blank">Descargar para iOS</a>
+                <a href="https://play.google.com/store/apps/details?id=andes.chile.app&hl=es_HN" target="_blank">Descargar para Android</a>
+                <a href="https://apps.apple.com/cl/app/andeschileapp/id6745276843" target="_blank">Descargar para iOS</a>
               </div>
               <p>Durante el año 2025, la app tendrá muchas sorpresas y actualizaciones. ¡Únete y conéctate con nuestra comunidad online!</p>
               <p>¡Bienvenidos a nuestra comunidad CACH!</p>

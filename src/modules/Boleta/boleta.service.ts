@@ -1,7 +1,7 @@
 import { Get, Injectable, InternalServerErrorException, NotFoundException, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Boleta } from 'src/models/Boleta.entity';
-import { In, IsNull, LessThan, MoreThan, Not, Repository } from 'typeorm';
+import { In, IsNull, LessThan, LessThanOrEqual, MoreThan, Not, Repository } from 'typeorm';
 import { Apoderado } from 'src/models/Apoderado.entity';
 import { ApoderadoService } from '../Apoderado/apoderado.service';
 import { CrearBoletaDto, UpdateBoletaDto, UpdateBoletaDto2 } from 'src/dto/updateBoleta.dto';
@@ -619,6 +619,112 @@ export class BoletaService {
     return result;
   }
 
+  /**
+   * Construye el HTML de recordatorio para un apoderado moroso,
+   * cargando el detalle real de cada boleta vencida desde la tabla `boleta`.
+   */
+  async buildHtmlMoroso(dto: ResumenApoderadoMorosoDto): Promise<string> {
+    // 1) Buscamos TODAS las boletas vencidas y activas del apoderado
+    const hoy = new Date();
+    const boletas = await this.boletaRepository.find({
+      where: {
+        apoderado_id: dto.id,
+        estado_id: 1, // 1 = pendiente
+        estado_boleta: true,
+        fecha_vencimiento: LessThanOrEqual(hoy),
+      },
+      order: { fecha_vencimiento: 'ASC' },
+    });
+
+    // 2) Formateamos fecha de hoy
+    const fechaHoy = hoy.toLocaleDateString('es-CL');
+
+    // 3) Mapeamos cada boleta a una línea de lista
+    const detalleBoletas = boletas.length
+      ? boletas.map(b => {
+        // días de mora = diferencia en días entre hoy y la fecha de vencimiento
+        const diffMs = hoy.getTime() - b.fecha_vencimiento.getTime();
+        const diasMora = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+        return `
+            <li>
+              Boleta N° ${b.id} – Fecha venc.: ${b.fecha_vencimiento.toLocaleDateString('es-CL')} – 
+              Monto: $${b.total.toLocaleString('es-CL')} – Días en mora: ${diasMora}
+            </li>
+          `;
+      }).join('')
+      : `<li>No se encontraron boletas vencidas.</li>`;
+
+    // 4) Armamos el HTML completo
+    return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8"/>
+  <title>Recordatorio de Pago Vencido</title>
+  <style>
+    body { margin:0; padding:0; background:#f4f4f4; font-family:Arial,sans-serif; }
+    .container { max-width:600px; margin:20px auto; background:#fff; border-radius:8px; overflow:hidden; box-shadow:0 2px 6px rgba(0,0,0,0.1); }
+    .header { background:#C1272D; padding:20px; text-align:center; }
+    .header img { max-height:60px; }
+    .header h2 { margin:10px 0 0; color:#fff; font-size:18px; }
+    .content { padding:20px; color:#333; font-size:14px; line-height:1.6; border:1px solid #eee; }
+    .content ul { padding-left:20px; }
+    .content li { margin-bottom:8px; }
+    .section { margin:20px 0; }
+    .section strong { color:#00285C; }
+    .footer { background:#eee; padding:15px 20px; font-size:12px; color:#666; text-align:center; }
+    .footer a { color:#C1272D; text-decoration:none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <img src="https://www.colegioandeschile.cl/img/LOGOCOLEGIO.png" alt="Logo Colegio Andes Chile"/>
+      <h2>Finanzas</h2>
+      <h2>Colegio Andes Chile</h2>
+    </div>
+    <div class="content">
+      <p>Hola <strong>${dto.nombre}</strong>,</p>
+      <p>Te escribimos para informarte que a la fecha <strong>${fechaHoy}</strong> cuentas con las siguientes boletas vencidas:</p>
+      <ul>
+        ${detalleBoletas}
+      </ul>
+      <div class="section">
+        <p>Por favor, realiza el pago a la brevedad. Puedes hacerlo mediante:</p>
+        <ul>
+          <li>
+            <strong>Transferencia electrónica</strong> a la cuenta corriente del colegio:<br/>
+            – Banco: Banco Scotiabank<br/>
+            – Tipo de cuenta: Cuenta Corriente<br/>
+            – N° de cuenta: <strong>58011401</strong><br/>
+            – RUT: <strong>77.625.500-9</strong><br/>
+            – Titular: Sociedad Educacional Colegio Andes Chile
+          </li>
+          <li>
+            <strong>Pago en secretaría del colegio</strong>  (efectivo o tarjeta), de lunes a viernes de 09:00 a 16:00.
+          </li>
+          <li>
+            <strong>Pago en línea vía WebPay</strong> desde nuestra app móvil.
+          </li>
+        </ul>
+      </div>
+      <p>Si ya efectuaste el pago, por favor ignora este mensaje o envíanos tu comprobante a 
+        <a href="mailto:finanzas@colegioandeschile.cl">finanzas@colegioandeschile.cl</a>.
+      </p>
+      <p>Quedamos a tu disposición para cualquier duda.</p>
+      <p>Saludos cordiales,<br/>Equipo de Administración<br/>Colegio Andes Chile</p>
+      <p>Teléfono: 34 2 402858<br/>
+         Email: <a href="mailto:finanzas@colegioandeschile.cl">finanzas@colegioandeschile.cl</a>
+      </p>
+    </div>
+    <div class="footer">
+      Colegio Andes Chile – <em>Educando con Amor ❤️</em>
+    </div>
+  </div>
+</body>
+</html>
+    `;
+  }
 
   async getPorcentajePagadoPorMes(fecha?: string): Promise<PorcentajeMesDto[]> {
     try {

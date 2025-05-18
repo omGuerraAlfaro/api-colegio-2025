@@ -27,9 +27,12 @@ import {
   SemestreModule,
   InscripcionTallerModule
 } from './modules';
+import { ScheduleModule } from '@nestjs/schedule';
+import { CronTasksService } from './jobs/cron.jobs.service';
 
 @Module({
   imports: [
+    // ScheduleModule.forRoot(),
     ConfigModule.forRoot({ isGlobal: true }),
     ApoderadoModule,
     EstudianteModule,
@@ -63,7 +66,8 @@ import {
       entities,
       synchronize: true
     }),
-  ]
+  ],
+  // providers: [CronTasksService],
 })
 export class AppModule { }
 

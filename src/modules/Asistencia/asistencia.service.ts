@@ -70,8 +70,23 @@ export class AsistenciaService {
                 .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
                 .select([
                     'estudiante.id AS estudianteId',
-                    `CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS nombreCompleto`,
-                    'JSON_ARRAYAGG(JSON_OBJECT("fecha", calendario.fecha, "estado", asistencia.estado)) AS asistencias',
+                    `CONCAT(
+                            estudiante.primer_nombre_alumno, ' ',
+                            estudiante.primer_apellido_alumno, ' ',
+                            estudiante.segundo_apellido_alumno
+                            ) AS nombreCompleto`,
+                    // Aquí añadimos es_feriado
+                    `JSON_ARRAYAGG(
+                        JSON_OBJECT(
+                            'fecha', calendario.fecha,
+                            'estado', asistencia.estado,
+                            'es_feriado',
+                                CASE 
+                                    WHEN LOWER(calendario.descripcion) LIKE '%feriado%' THEN 1 
+                                    ELSE 0 
+                                END
+                        )
+                    ) AS asistencias`,
                 ])
                 .groupBy('estudiante.id')
                 .orderBy('estudiante.primer_apellido_alumno', 'ASC')

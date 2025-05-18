@@ -194,4 +194,4 @@ export class MorosidadMesDto {
 export class PorcentajeMesDto {
     mes: string;
     porcentaje: number;
-  }
+}
