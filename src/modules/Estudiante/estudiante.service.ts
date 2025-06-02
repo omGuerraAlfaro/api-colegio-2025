@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Curso } from 'src/models/Curso.entity';
 import { Estudiante } from 'src/models/Estudiante.entity';
 import { UpdateEstudianteDto } from 'src/dto/estudiante.dto';
+import { EstudianteCurso } from 'src/models/CursoEstudiante.entity';
 
 @Injectable()
 export class EstudianteService {
@@ -14,6 +15,14 @@ export class EstudianteService {
     private cursoRepository: Repository<Curso>,
   ) { }
 
+  async findById(id: number): Promise<Estudiante | null> {
+    const estudiante = await this.estudianteRepository.findOne({
+      where: { id },
+      relations: ['cursoConnection', 'cursoConnection.curso', 'cursoConnection.curso.profesorConnection'],
+    });
+
+    return estudiante;
+  }
 
   async findAll() {
     const estudiantes = await this.estudianteRepository

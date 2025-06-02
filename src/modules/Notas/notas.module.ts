@@ -16,6 +16,6 @@ import { EvaluacionPreBasica } from 'src/models/EvaluacionPreBasica.entity';
   ],
   controllers: [NotasController],
   providers: [NotasService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, NotasService],
 })
 export class NotasModule {}

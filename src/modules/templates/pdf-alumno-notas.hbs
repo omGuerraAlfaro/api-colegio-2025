@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Informe de Notas</title>
+  <style>
+    /* Fuerza tamaño A4 en landscape al imprimir */
+    {{!-- @page {
+      size: A4 landscape;
+      margin: 80px 20mm;
+    } --}}
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .tabla {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .tabla th,
+    .tabla td {
+      border: 1px solid #000;
+      padding: 6px;
+      font-size: 11px;
+    }
+
+    .tabla th {
+      background-color: #838282;
+      font-weight: bold;
+      text-align: center;
+      color: #fff;
+    }
+
+    .sin-notas {
+      color: #777;
+      font-style: italic;
+      text-align: center;
+    }
+
+    @media print {
+      .contenidoCabeza {
+        top: 0;
+        width: 100%;
+        position: fixed;
+      }
+      .cabeza {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bolder;
+      }
+      .cabeza img {
+        max-width: 5%;
+        margin-right: 50px;
+        height: auto;
+      }
+      .content {
+        margin-top: 50px;
+      }
+      .pies {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        font-size: xx-small;
+        font-weight: bolder;
+        text-align: center;
+      }
+      .page-break {
+        page-break-after: always;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Encabezado fijo -->
+  <div class="contenidoCabeza">
+    <div class="cabeza">
+      <p>Informe de Notas</p>
+      <img
+        class="logo"
+        src="https://www.colegioandeschile.cl/img/LOGO.png"
+        alt="Colegio Andes Chile"
+      />
+    </div>
+    <hr />
+  </div>
+
+  <div class="content">
+    <h3 class="text-center">INFORME PARCIAL DE CALIFICACIONES 2025</h3>
+    <h4 class="text-center">COLEGIO PARTICULAR ANDES-CHILE (14762)</h4>
+    <br />
+
+    <!-- Párrafo con datos dinámicos -->
+    <p style="text-align: justify; line-height: 1.4;">
+      Se otorga el presente certificado de calificaciones a 
+      <strong>
+        {{estudiante.primer_nombre_alumno}} {{estudiante.segundo_nombre_alumno}} 
+        {{estudiante.primer_apellido_alumno}} {{estudiante.segundo_apellido_alumno}}
+      </strong>
+      <br>
+      <strong>RUN:</strong> 
+      {{#if estudiante.rut}}
+        {{formatRutMiles estudiante.rut}}-{{estudiante.dv}}
+      {{else}}
+        – sin RUT –
+      {{/if}},
+      estudiante del Curso <strong>{{curso.nombre}}</strong> de Enseñanza Básica con fecha: 
+      <strong><span id="fecha-informe"></span></strong>, de acuerdo al plan y programas de estudios aprobados por decreto o resolución exenta de educación Nº 2960 de 2012 y reglamento de evaluación y promoción escolar decreto exento Nº DECRETO 67 de 2020.
+    </p>
+
+    <!-- Espacio antes de la tabla de notas -->
+    <div style="height: 20px;"></div>
+
+    <!-- ========== Tabla de Notas ========== -->
+    <table class="tabla">
+      <thead>
+        <tr>
+          <th rowspan="2" style="width: 25%;">Asignaturas</th>
+          <th colspan="10">1° Semestre</th>
+          <th rowspan="2">Prom.</th>
+        </tr>
+        <tr>
+          {{!-- Usar “this” dentro de times para numerar de 0→9 --}}
+          {{#times 10}}
+            <th>{{inc this}}°</th>
+          {{/times}}
+        </tr>
+      </thead>
+      <tbody>
+        {{#each asignaturasConValores}}
+          <tr>
+            <td style="text-transform: capitalize;">{{this.nombre}}</td>
+            {{#each this.valores}}
+              <td style="text-align: center;">
+                {{#if this}}
+                  {{this}}
+                {{else}}
+                  <span class="sin-notas">–</span>
+                {{/if}}
+              </td>
+            {{/each}}
+            <td style="text-align: center; font-weight: bold;">
+              {{#if this.promedio}}
+                {{this.promedio}}
+              {{else}}
+                **
+              {{/if}}
+            </td>
+          </tr>
+        {{/each}}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pie de página fijo -->
+  <div class="pies">
+    <hr />
+    <p>
+      Colegio Andes Chile – Rodríguez 1064, Los Andes – Tel.: 342402858 – Mail: colegioandeschile@gmail.com
+    </p>
+    <p>www.colegioandeschile.cl</p>
+  </div>
+
+  <!-- Script para mostrar la fecha actual -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const fechaSpan = document.getElementById('fecha-informe');
+      if (fechaSpan) {
+        const hoy = new Date();
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const año = hoy.getFullYear();
+        fechaSpan.textContent = `${dia}/${mes}/${año}`;
+      }
+    });
+  </script>
+</body>
+</html>

@@ -13,6 +13,6 @@ import { AsignaturaPreBasica } from 'src/models/AsignaturaPreBasica.entity';
   ],
   controllers: [AsignaturaController],
   providers: [AsignaturaService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, AsignaturaService],
 })
 export class AsignaturaModule {}
