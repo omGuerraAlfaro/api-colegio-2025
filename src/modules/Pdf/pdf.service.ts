@@ -464,8 +464,8 @@ export class PdfService {
           landscape: true,
           printBackground: true,
           margin: {
-            top: '40px',
-            bottom: '40px',
+            top: '20px',
+            bottom: '20px',
             left: '20mm',
             right: '20mm',
           },
