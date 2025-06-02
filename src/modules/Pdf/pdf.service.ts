@@ -316,7 +316,7 @@ export class PdfService {
     } else {
       asignaturas = await this.asignaturaService.getAllAsignaturasBasica();
     }
-    console.log('Asignaturas obtenidas:', asignaturas);
+    // console.log('Asignaturas obtenidas:', asignaturas);
 
     // 2) Obtener todas las notas del estudiante en el semestre
     const notas = await this.notasService.getTodasNotasPorEstudianteSemestre(
@@ -324,21 +324,21 @@ export class PdfService {
       data.semestreId,
       data.cursoId
     );
-    console.log('Notas obtenidas:', JSON.stringify(notas, null, 2));
+    // console.log('Notas obtenidas:', JSON.stringify(notas, null, 2));
 
     // 3) Obtener información del estudiante y del curso
     const estudiante = await this.estudianteService.findById(data.estudianteId);
-    console.log('Estudiante encontrado:', estudiante);
+    // console.log('Estudiante encontrado:', estudiante);
 
     const curso = await this.cursoService.findOneWithCurse(data.cursoId);
-    console.log('Curso encontrado:', curso);
+    // console.log('Curso encontrado:', curso);
 
     // 4) Construir un mapa de notas: { asignaturaId: [ …notas… ] }
     const notasMap: Record<number, any[]> = {};
     notas.forEach((n) => {
       notasMap[n.asignaturaId] = n.notas;
     });
-    console.log('notasMap generado:', notasMap);
+    // console.log('notasMap generado:', notasMap);
 
     // 5) Construir "asignaturasConValores": cada asignatura con un array de 14 valores (string o null)
     interface AsignaturaValores {
