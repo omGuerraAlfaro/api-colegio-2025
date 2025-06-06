@@ -128,7 +128,7 @@ export class CorreoController {
           <div class="container">
             <div class="header">
               <img src="https://www.colegioandeschile.cl/img/LOGOCOLEGIO.png" alt="Logo Colegio Andes Chile" />
-              <h2>Formulario de Postulación 2024</h2>
+              <h2>Formulario de Postulación 2026</h2>
               <h2>Colegio Andes Chile</h2>
             </div>
 
