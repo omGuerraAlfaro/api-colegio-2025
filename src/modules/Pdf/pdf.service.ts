@@ -375,7 +375,8 @@ export class PdfService {
     let cantidad = 0;
 
     for (const [asignaturaId, finales] of Object.entries(finalesMap)) {
-      const asignatura = asignaturas.find((a) => a.id.toString() === asignaturaId);
+      const asignatura = asignaturas.find((a) => a.id === Number(asignaturaId));
+
       const nombreAsignatura = asignatura?.nombre_asignatura?.toLowerCase().trim();
 
       if (nombreAsignatura === 'religión' || nombreAsignatura === 'religion' || nombreAsignatura === 'orientación' || nombreAsignatura === 'orientacion') {
