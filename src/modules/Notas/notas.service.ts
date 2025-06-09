@@ -663,12 +663,17 @@ export class NotasService {
     notas: Array<{
       evaluacionId: number;
       nombreEvaluacion: string;
-      nota: number;
-      fecha: Date;
+      nota: number | null;
+      fecha: Date | null;
+    }>;
+    finales: Array<{
+      evaluacionId: number;
+      nombreEvaluacion: string;
+      nota: number | null;
+      fecha: Date | null;
     }>;
   }>> {
     try {
-      // 1) Tablas dinámicas según pre-básica (1,2) o normal
       const evaluacionesTable =
         cursoId === 1 || cursoId === 2
           ? 'evaluaciones_prebasica'
@@ -680,41 +685,33 @@ export class NotasService {
       const asignaturasTable =
         cursoId === 1 || cursoId === 2
           ? 'asignatura_prebasica'
-          : 'asignatura';  // singular, según tu entidad
-  
-      // 2) QueryBuilder puro desde el manager para no duplicar alias
+          : 'asignatura';
+
       const rawData = await this.notaRepository.manager
         .createQueryBuilder()
         .select([
           'a.id                 AS asignaturaId',
-          'a.nombre_asignatura  AS asignaturaNombre',
-          'e.id_evaluacion      AS evaluacionId',
-          'e.nombre_evaluacion  AS nombreEvaluacion',
-          'n.nota               AS nota',
-          'n.fecha              AS fecha',
+          'a.nombre_asignatura AS asignaturaNombre',
+          'e.id_evaluacion     AS evaluacionId',
+          'e.nombre_evaluacion AS nombreEvaluacion',
+          'n.nota              AS nota',
+          'n.fecha             AS fecha',
         ])
-        .from(notasTable, 'n')
-        .innerJoin(
-          evaluacionesTable,
-          'e',
-          'n.id_evaluacion = e.id_evaluacion AND e.id_semestre = :semestreId',
-          { semestreId },
+        .from(evaluacionesTable, 'e')
+        .leftJoin(
+          notasTable,
+          'n',
+          'n.id_evaluacion = e.id_evaluacion AND n.id_estudiante = :estudianteId',
+          { estudianteId }
         )
-        .innerJoin(
-          asignaturasTable,
-          'a',
-          'e.id_asignatura = a.id',
-        )
-        .where('n.id_estudiante = :estudianteId', { estudianteId })
+        .innerJoin(asignaturasTable, 'a', 'e.id_asignatura = a.id')
+        .where('e.id_semestre = :semestreId AND e.id_curso = :cursoId', { semestreId, cursoId })
         .orderBy('a.nombre_asignatura', 'ASC')
-        .addOrderBy('n.fecha', 'ASC')
+        .addOrderBy('e.id_evaluacion', 'ASC')
         .getRawMany();
-  
-      if (rawData.length === 0) {
-        return [];
-      }
-  
-      // 3) Agrupamos en memoria por asignatura
+
+      if (rawData.length === 0) return [];
+
       const mapAsignaturas = new Map<
         number,
         {
@@ -723,12 +720,18 @@ export class NotasService {
           notas: Array<{
             evaluacionId: number;
             nombreEvaluacion: string;
-            nota: number;
-            fecha: Date;
+            nota: number | null;
+            fecha: Date | null;
+          }>;
+          finales: Array<{
+            evaluacionId: number;
+            nombreEvaluacion: string;
+            nota: number | null;
+            fecha: Date | null;
           }>;
         }
       >();
-  
+
       for (const row of rawData) {
         let grupo = mapAsignaturas.get(row.asignaturaId);
         if (!grupo) {
@@ -736,30 +739,38 @@ export class NotasService {
             asignaturaId: row.asignaturaId,
             asignaturaNombre: row.asignaturaNombre,
             notas: [],
+            finales: [],
           };
           mapAsignaturas.set(row.asignaturaId, grupo);
         }
-        grupo.notas.push({
+
+        const evaluacionNombre = (row.nombreEvaluacion || '').toLowerCase();
+
+        const notaObj = {
           evaluacionId: row.evaluacionId,
           nombreEvaluacion: row.nombreEvaluacion,
-          nota: row.nota,
-          fecha: row.fecha,
-        });
+          nota: row.nota ?? null,
+          fecha: row.fecha ?? null,
+        };
+
+        if (evaluacionNombre.includes('final') && (evaluacionNombre === 'final' || evaluacionNombre === 'final parcial')) {
+          grupo.finales.push(notaObj);
+        } else {
+          grupo.notas.push(notaObj);
+        }
       }
-  
+
       return Array.from(mapAsignaturas.values());
     } catch (error) {
-      console.error(
-        'Error en getTodasNotasPorEstudianteSemestre:',
-        error,
-      );
+      console.error('Error en getTodasNotasPorEstudianteSemestre:', error);
       throw new InternalServerErrorException(
         'Ocurrió un error al obtener todas las notas del estudiante en el semestre.',
         error,
       );
     }
   }
-  
+
+
 
 
 

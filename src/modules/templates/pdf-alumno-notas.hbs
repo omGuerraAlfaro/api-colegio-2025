@@ -1,16 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang='es'>
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset='UTF-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1.0' />
   <title>Informe de Notas</title>
   <style>
-    /* Fuerza tamaño A4 en landscape al imprimir */
-    {{!-- @page {
-      size: A4 landscape;
-      margin: 80px 20mm;
-    } --}}
-
     body {
       margin: 0;
       padding: 0;
@@ -52,53 +46,88 @@
       text-align: center;
     }
 
+.firmas-superpuestas-container {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+  margin-bottom: 30px;
+  page-break-inside: avoid;
+}
+
+.firma-superpuesta {
+  position: relative;
+  width: 200px;
+  text-align: center;
+  font-size: small;
+  min-height: 100px;
+}
+
+.firma-superpuesta .firma {
+  position: absolute;
+  width: 150px;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-30%);
+  z-index: 1;
+}
+
+.firma-superpuesta .timbre {
+  position: absolute;
+  width: 70px;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-40%);
+  opacity: 0.4;
+  z-index: 0;
+}
+
+.firma-superpuesta .info {
+  margin-top: 35px;
+  position: relative;
+  z-index: 2;
+}
+.firma-superpuesta .info p {
+  margin: 2px 0;
+}
+
+.pies{
+  font-size: xx-small;
+  font-weight: bolder;
+  text-align: center;
+  margin-top: 20px;
+}
+
     @media print {
       .contenidoCabeza {
         top: 0;
         width: 100%;
         position: fixed;
       }
+
       .cabeza {
         display: flex;
         justify-content: space-between;
         align-items: center;
         font-weight: bolder;
       }
+
       .cabeza img {
-        max-width: 5%;
+        max-width: 3%;
         margin-right: 50px;
         height: auto;
       }
+
       .content {
-        margin-top: 50px;
+        margin-top: 30px;
       }
-      .pies {
-        position: fixed;
-        bottom: 0;
-        width: 100%;
-        font-size: xx-small;
-        font-weight: bolder;
-        text-align: center;
+
+      .firmas-container {
+        margin-top: 40px;
+        margin-bottom: 60px;
       }
+
       .page-break {
         page-break-after: always;
-      }
-
-      .block {
-        text-align: center;
-        position: relative;
-        margin-top: 20px;
-      }
-
-      .block img {
-        width: 30px;
-        position: absolute;
-        left: 48%;
-        transform: translateX(-10%) translateY(-40%);
-      }
-
-      .block p {
-        margin: 5px 0;
       }
     }
   </style>
@@ -106,104 +135,123 @@
 
 <body>
   <!-- Encabezado fijo -->
-  <div class="contenidoCabeza">
-    <div class="cabeza">
+  <div class='contenidoCabeza'>
+    <div class='cabeza'>
       <p>Informe de Notas</p>
-      <img
-        class="logo"
-        src="https://www.colegioandeschile.cl/img/LOGO.png"
-        alt="Colegio Andes Chile"
-      />
+      <img class='logo' src='https://www.colegioandeschile.cl/img/LOGO.png' alt='Colegio Andes Chile' />
     </div>
     <hr />
   </div>
 
-  <div class="content">
-    <h3 class="text-center">INFORME PARCIAL DE CALIFICACIONES 2025</h3>
-    <h4 class="text-center">COLEGIO PARTICULAR ANDES-CHILE (14762)</h4>
-    <br />
+  <div class='content'>
+    <h3 class='text-center'>INFORME PARCIAL DE CALIFICACIONES 2025</h3>
+    <h4 class='text-center'>COLEGIO PARTICULAR ANDES-CHILE (14762)</h4>
 
-    <!-- Párrafo con datos dinámicos -->
-    <p style="text-align: justify; line-height: 1.4;">
-      Se otorga el presente certificado de calificaciones a 
-      <strong>
-        {{estudiante.primer_nombre_alumno}} {{estudiante.segundo_nombre_alumno}} 
-        {{estudiante.primer_apellido_alumno}} {{estudiante.segundo_apellido_alumno}}
-      </strong>
-      <br>
-      <strong>RUN:</strong> 
+    <p style='text-align: justify; line-height: 1.4;'>
+      Se otorga el presente certificado de calificaciones a
+      <strong>{{estudiante.primer_nombre_alumno}} {{estudiante.segundo_nombre_alumno}} {{estudiante.primer_apellido_alumno}} {{estudiante.segundo_apellido_alumno}}</strong>.
       {{#if estudiante.rut}}
-        {{formatRutMiles estudiante.rut}}-{{estudiante.dv}}
+        <strong>RUN: {{formatRutMiles estudiante.rut}}-{{estudiante.dv}}</strong>,
       {{else}}
-        – sin RUT –
-      {{/if}},
-      estudiante del Curso <strong>{{curso.nombre}}</strong> de Enseñanza Básica con fecha: 
-      <strong><span id="fecha-informe"></span></strong>, de acuerdo al plan y programas de estudios aprobados por decreto o resolución exenta de educación Nº 2960 de 2012 y reglamento de evaluación y promoción escolar decreto exento Nº DECRETO 67 de 2020.
+        <strong>RUN: – sin RUT –</strong>,
+      {{/if}}
+      estudiante del <strong>{{getCursoName cursoId}}</strong> de <strong>{{getCursoNameType cursoId}}</strong> con fecha:
+      <strong><span id='fecha-informe'></span></strong>, de acuerdo al plan y programas de estudios aprobados por decreto o resolución exenta de educación
+      <strong>Nº 2960 de 2012</strong> y reglamento de evaluación y promoción escolar decreto exento <strong>Nº DECRETO 67 de 2020.</strong>
     </p>
 
-    <!-- Espacio antes de la tabla de notas -->
-    <div style="height: 20px;"></div>
+    <div style='height: 20px;'></div>
 
-    <!-- ========== Tabla de Notas ========== -->
-    <table class="tabla">
+    <!-- Tabla de Notas -->
+    <table class='tabla'>
       <thead>
         <tr>
-          <th rowspan="2" style="width: 25%;">Asignaturas</th>
-          <th colspan="10">1° Semestre</th>
-          <th rowspan="2">Prom.</th>
+          <th rowspan='2' style='width: 25%;'>Asignaturas</th>
+          <th colspan='{{maxNotas}}'>
+            {{#esPrimerSemestre semestre}}1° Semestre{{else}}2° Semestre{{/esPrimerSemestre}}
+          </th>
+          <th rowspan='2'>Prom.</th>
         </tr>
         <tr>
-          {{!-- Usar “this” dentro de times para numerar de 0→9 --}}
-          {{#times 10}}
-            <th>{{inc this}}°</th>
-          {{/times}}
+          {{#times maxNotas}}<th>{{inc this}}°</th>{{/times}}
         </tr>
       </thead>
       <tbody>
         {{#each asignaturasConValores}}
-          <tr>
-            <td style="text-transform: capitalize;">{{this.nombre}}</td>
-            {{#each this.valores}}
-              <td style="text-align: center;">
-                {{#if this}}
-                  {{this}}
-                {{else}}
-                  <span class="sin-notas">–</span>
-                {{/if}}
-              </td>
-            {{/each}}
-            <td style="text-align: center; font-weight: bold;">
-              {{#if this.promedio}}
-                {{this.promedio}}
-              {{else}}
-                **
-              {{/if}}
-            </td>
-          </tr>
+        <tr>
+          <td style='text-transform: capitalize;'>{{this.nombre}}</td>
+          {{#each this.valores}}
+          <td style='text-align: center;'>
+            {{#if this}}{{evaluacionNotaIndividual ../this.nombre this}}{{else}}<span class='sin-notas'>–</span>{{/if}}
+          </td>
+          {{/each}}
+          <td style='text-align: center; font-weight: bold;'>{{#if this.promedio}}{{this.promedio}}{{else}}**{{/if}}</td>
+        </tr>
         {{/each}}
       </tbody>
     </table>
+
+    <!-- Tabla resumen de promedios -->
+    <table style='float: right; width: 250px; margin-top: 20px; border-collapse: collapse; font-size: 13px;'>
+      <tr>
+        <th style='border: 1px solid #000; padding: 6px; text-align: left; background-color: #838282; color: #fff; font-weight: bold;'>
+          PROMEDIO FINAL PARCIAL
+        </th>
+        <td style='border: 1px solid #000; padding: 6px; text-align: center;'>
+          {{#if promedioFinalParcial}}{{promedioFinalParcial}}{{else}}—{{/if}}
+        </td>
+      </tr>
+      <tr>
+        <th style='border: 1px solid #000; padding: 6px; text-align: left; background-color: #838282; color: #fff; font-weight: bold;'>
+          PROMEDIO FINAL
+        </th>
+        <td style='border: 1px solid #000; padding: 6px; text-align: center;'>—</td>
+      </tr>
+    </table>
   </div>
 
-  <div class="block">
-    <img class="firma" src="https://www.colegioandeschile.cl/img/firma.png" style="width: 15%;" alt="Andes Chile Colegio"/>
-    <img class="timbre" src="https://www.colegioandeschile.cl/img/timbre.png" style="width: 10%;" alt="Andes Chile Colegio"/>
-    <div class="line"></div>
-    <p style="font-size: medium;"><b>Alfredo Gallegos Ávila</b></p>
-    <p style="font-size: small;"><b>Director Académico</b></p>
-    <p style="font-size: small;"><b>Colegio Andes Chile</b></p>
+  <div class="firmas-superpuestas-container">
+  <!-- Firma 1 -->
+  <div class="firma-superpuesta">
+    <img src="https://www.colegioandeschile.cl/img/firmas_profesores/{{cursoId}}.png" class="firma" />
+    <div class="info">
+      <p><b>{{curso.profesorConnection.primer_nombre}} {{curso.profesorConnection.primer_apellido}} {{curso.profesorConnection.segundo_apellido}}</b></p>
+      <p><b>Profesor Jefe</b></p>
+      <p><b>Colegio Andes Chile</b></p>
+    </div>
   </div>
-  <!-- Pie de página fijo -->
-  <div class="pies">
-    
+
+  <!-- Firma 2 -->
+  <div class="firma-superpuesta">
+    <img src="https://www.colegioandeschile.cl/img/firma.png" class="firma" />
+    <img src="https://www.colegioandeschile.cl/img/timbre.png" class="timbre" />
+    <div class="info">
+      <p><b>Alfredo Gallegos Ávila</b></p>
+      <p><b>Director Académico</b></p>
+      <p><b>Colegio Andes Chile</b></p>
+    </div>
+  </div>
+
+  <!-- Firma 3 -->
+  <div class="firma-superpuesta">
+    <img src="https://www.colegioandeschile.cl/img/firmas_profesores/6.png" class="firma" />
+    <div class="info">
+      <p><b>Marlenne Rodriguez Banda</b></p>
+      <p><b>UTP</b></p>
+      <p><b>Colegio Andes Chile</b></p>
+    </div>
+  </div>
+</div>
+
+
+  <!-- Pie de página -->
+  <div class='pies'>
     <hr />
-    <p>
-      Colegio Andes Chile – Rodríguez 1064, Los Andes – Tel.: 342402858 – Mail: colegioandeschile@gmail.com
-    </p>
+    <p>Colegio Andes Chile – Rodríguez 1064, Los Andes – Tel.: 342402858 – Mail: colegioandeschile@gmail.com</p>
     <p>www.colegioandeschile.cl</p>
   </div>
 
-  <!-- Script para mostrar la fecha actual -->
+  <!-- Script para fecha -->
   <script>
     document.addEventListener('DOMContentLoaded', function () {
       const fechaSpan = document.getElementById('fecha-informe');
