@@ -313,10 +313,11 @@ export class PdfService {
     const semestre = data.semestreId;
     const cursoId = data.cursoId;
 
-    const asignaturas =
+    const asignaturas = (
       data.cursoId === 1 || data.cursoId === 2
         ? await this.asignaturaService.getAllAsignaturasPreBasica()
-        : await this.asignaturaService.getAllAsignaturasBasica();
+        : await this.asignaturaService.getAllAsignaturasBasica()
+    ) as any[];
 
     const notas = await this.notasService.getTodasNotasPorEstudianteSemestre(
       data.estudianteId,
