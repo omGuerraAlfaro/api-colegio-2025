@@ -305,7 +305,6 @@ export class PdfService {
     }
   }
 
-
   async generatePdfAlumnoNotas(
     templateName: string,
     data: findNotasAlumnoDto
@@ -355,7 +354,11 @@ export class PdfService {
 
     const asignaturasConValores = asignaturas.map((a) => {
       const nombreAsignatura = a.nombre_asignatura?.toLowerCase().trim();
-      const esCualitativa = nombreAsignatura === 'religión' || nombreAsignatura === 'religion' || nombreAsignatura === 'orientación' || nombreAsignatura === 'orientacion';
+      const esCualitativa =
+        nombreAsignatura === 'religión' ||
+        nombreAsignatura === 'religion' ||
+        nombreAsignatura === 'orientación' ||
+        nombreAsignatura === 'orientacion';
 
       const arregloNotas = notasMap[a.id] ?? [];
       const arregloFinales = finalesMap[a.id] ?? [];
@@ -383,10 +386,14 @@ export class PdfService {
 
     for (const [asignaturaId, finales] of Object.entries(finalesMap)) {
       const asignatura = asignaturas.find((a) => a.id === Number(asignaturaId));
-
       const nombreAsignatura = asignatura?.nombre_asignatura?.toLowerCase().trim();
 
-      if (nombreAsignatura === 'religión' || nombreAsignatura === 'religion' || nombreAsignatura === 'orientación' || nombreAsignatura === 'orientacion') {
+      if (
+        nombreAsignatura === 'religión' ||
+        nombreAsignatura === 'religion' ||
+        nombreAsignatura === 'orientación' ||
+        nombreAsignatura === 'orientacion'
+      ) {
         continue;
       }
 
@@ -410,6 +417,7 @@ export class PdfService {
       'templates',
       `${templateName}.hbs`
     );
+
     if (!fs.existsSync(templatePath)) {
       throw new Error('Template file does not exist.');
     }
@@ -447,23 +455,23 @@ export class PdfService {
 
     handlebars.registerHelper('getCursoNameType', (cursoId) => {
       const id = parseInt(cursoId, 10);
-      return id <= 2 ? "Educación Parvularia" : "Educación Básica";
+      return id <= 2 ? 'Educación Parvularia' : 'Educación Básica';
     });
 
     handlebars.registerHelper('getCursoName', (cursoId) => {
       const id = parseInt(cursoId, 10);
       switch (id) {
-        case 1: return "Pre-Kinder";
-        case 2: return "Kinder";
-        case 3: return "Primer Año";
-        case 4: return "Segundo Año";
-        case 5: return "Tercero Año";
-        case 6: return "Cuarto Año";
-        case 7: return "Quinto Año";
-        case 8: return "Sexto Año";
-        case 9: return "Séptimo Año";
-        case 10: return "Octavo Año";
-        default: return "Curso Desconocido";
+        case 1: return 'Pre-Kinder';
+        case 2: return 'Kinder';
+        case 3: return 'Primer Año';
+        case 4: return 'Segundo Año';
+        case 5: return 'Tercero Año';
+        case 6: return 'Cuarto Año';
+        case 7: return 'Quinto Año';
+        case 8: return 'Sexto Año';
+        case 9: return 'Séptimo Año';
+        case 10: return 'Octavo Año';
+        default: return 'Curso Desconocido';
       }
     });
 
@@ -500,30 +508,31 @@ export class PdfService {
       }
     );
 
-    const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
-    const template = handlebars.compile(htmlTemplate);
-    asignaturasConValores.pop(); // Eliminar última si es vacía (opcional)
-
-    const context = {
-      asignaturasConValores,
-      estudiante,
-      curso,
-      semestre,
-      maxNotas,
-      promedioFinalParcial,
-      cursoId
-    };
-
-    const html = template(context);
-
     let browser: puppeteer.Browser | null = null;
     let page: puppeteer.Page | null = null;
 
     try {
+      const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+      const template = handlebars.compile(htmlTemplate);
+      asignaturasConValores.pop(); // opcional
+
+      const context = {
+        asignaturasConValores,
+        estudiante,
+        curso,
+        semestre,
+        maxNotas,
+        promedioFinalParcial,
+        cursoId
+      };
+
+      const html = template(context);
+
       browser = await puppeteer.launch({
         headless: true,
         args: ['--no-sandbox', '--disable-setuid-sandbox'],
       });
+
       page = await browser.newPage();
       await page.setContent(html);
 
@@ -562,5 +571,6 @@ export class PdfService {
       }
     }
   }
+
 
 }
