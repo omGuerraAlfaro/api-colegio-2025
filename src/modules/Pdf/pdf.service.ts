@@ -1,4 +1,4 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { BadRequestException, Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as puppeteer from 'puppeteer';
 import * as handlebars from 'handlebars';
 import * as fs from 'fs';
@@ -324,6 +324,12 @@ export class PdfService {
       data.semestreId,
       data.cursoId
     );
+
+    if (!notas || notas.length === 0) {
+      throw new BadRequestException(
+        'El estudiante no tiene notas registradas para el semestre seleccionado.'
+      );
+    }
 
     const estudiante = await this.estudianteService.findById(data.estudianteId);
     const curso = await this.cursoService.findOneWithCurse(data.cursoId);
