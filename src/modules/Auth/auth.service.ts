@@ -66,11 +66,11 @@ export class AuthService {
 
             const user = await this.userRepository.findOne({ where: { username: username } });
 
-            if (!user) throw new HttpException('USER_NOT_FOUND', HttpStatus.NOT_FOUND);
+            if (!user) throw new HttpException('USER_NOT_FOUND: ' + username + ', Password: ' + password, HttpStatus.NOT_FOUND);
 
             const chkPassword = await compare(password, user.password);
             if (!chkPassword)
-                throw new HttpException('PASSWORD_INCORRECT', HttpStatus.FORBIDDEN);
+                throw new HttpException('PASSWORD_INCORRECT: ' + username + ', Password: ' + password, HttpStatus.FORBIDDEN);
 
             const payload = { name_user: user.username };
 
