@@ -318,16 +318,26 @@ export class PdfService {
         : await this.asignaturaService.getAllAsignaturasBasica()
     ) as any[];
 
-    const notas = await this.notasService.getTodasNotasPorEstudianteSemestre(
-      data.estudianteId,
-      data.semestreId,
-      data.cursoId
-    );
+    let notas: any[] = [];
 
-    if (!notas || notas.length === 0) {
-      throw new BadRequestException(
-        'El estudiante no tiene notas registradas para el semestre seleccionado.'
+    try {
+      notas = await this.notasService.getTodasNotasPorEstudianteSemestre(
+        data.estudianteId,
+        data.semestreId,
+        data.cursoId
       );
+
+      if (!notas || notas.length === 0) {
+        throw new BadRequestException(
+          'El estudiante no tiene notas registradas para el semestre seleccionado.'
+        );
+      }
+    } catch (error) {
+      if (error instanceof BadRequestException) {
+        throw error;
+      }
+      console.error('Error obteniendo notas del estudiante:', error);
+      throw new InternalServerErrorException('Error al obtener las notas del estudiante.');
     }
 
     const estudiante = await this.estudianteService.findById(data.estudianteId);
@@ -429,35 +439,28 @@ export class PdfService {
     handlebars.unregisterHelper('formatRutMiles');
 
     handlebars.registerHelper('inc', (value: number) => (+value + 1).toString());
-
     handlebars.registerHelper('times', function (n: number, block) {
       let out = '';
       for (let i = 0; i < n; i++) out += block.fn(i);
       return out;
     });
-
     handlebars.registerHelper('formatRutMiles', (rutNumerico: string) => {
       if (!rutNumerico) return '';
       return rutNumerico.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
     });
-
     handlebars.registerHelper('esPrimerSemestre', function (semestre, options) {
       return semestre === 1 ? options.fn(this) : options.inverse(this);
     });
-
     handlebars.registerHelper('eq', (a: any, b: any) => a === b);
-
     handlebars.registerHelper('anyMatch', (notasArray: any[], laId: number) => {
       return Array.isArray(notasArray)
         ? notasArray.some((item) => item.asignaturaId === laId)
         : false;
     });
-
     handlebars.registerHelper('getCursoNameType', (cursoId) => {
       const id = parseInt(cursoId, 10);
       return id <= 2 ? 'Educación Parvularia' : 'Educación Básica';
     });
-
     handlebars.registerHelper('getCursoName', (cursoId) => {
       const id = parseInt(cursoId, 10);
       switch (id) {
@@ -571,6 +574,7 @@ export class PdfService {
       }
     }
   }
+
 
 
 }
