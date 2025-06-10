@@ -71,21 +71,16 @@ export class PdfController {
 
   @Post('generate/alumno-notas')
   async generatePdfAlumnoNotas(@Res() res: Response, @Body() datosNotas: findNotasAlumnoDto) {
-    try {
-      // Llama al servicio para generar el PDF
-      const pdf = await this.pdfService.generatePdfAlumnoNotas('pdf-alumno-notas', datosNotas);
 
-      // Establece la cabecera y envía el PDF
-      res.set({
-        'Content-Type': 'application/pdf',
-        'Content-Disposition': 'attachment; filename=example.pdf',
-      });
+    const pdf = await this.pdfService.generatePdfAlumnoNotas('pdf-alumno-notas', datosNotas);
 
-      return res.send(pdf);
-    } catch (error) {
-      console.error('Error in controller:', error);
-      throw new InternalServerErrorException('Failed to generate PDF.');
-    }
+    // Establece la cabecera y envía el PDF
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': 'attachment; filename=example.pdf',
+    });
+
+    return res.send(pdf);
   }
 
 
