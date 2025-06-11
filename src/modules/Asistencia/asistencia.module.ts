@@ -13,6 +13,6 @@ import { CalendarioAsistencia } from 'src/models/CalendarioAsistencia';
   ],
   controllers: [AsistenciaController],
   providers: [AsistenciaService],
-  exports: [TypeOrmModule],
+  exports: [TypeOrmModule, AsistenciaService],
 })
 export class AsistenciaModule {}

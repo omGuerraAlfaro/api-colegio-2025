@@ -6,9 +6,10 @@ import { NotasModule } from '../Notas/notas.module';
 import { EstudianteModule } from '../Estudiante/estudiante.module';
 import { CursoModule } from '../Curso/curso.module';
 import { AsignaturaModule } from '../Asignatura/asignatura.module';
+import { AsistenciaModule } from '../Asistencia/asistencia.module';
 
 @Module({
-  imports: [PdfValidadorModule, NotasModule, EstudianteModule, CursoModule, AsignaturaModule],
+  imports: [PdfValidadorModule, NotasModule, EstudianteModule, CursoModule, AsignaturaModule, AsistenciaModule],
   controllers: [PdfController],
   providers: [PdfService],
 })

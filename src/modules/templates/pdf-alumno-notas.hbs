@@ -185,11 +185,23 @@
             {{#if this}}{{evaluacionNotaIndividual ../this.nombre this}}{{else}}<span class='sin-notas'>–</span>{{/if}}
           </td>
           {{/each}}
-          <td style='text-align: center; font-weight: bold;'>{{#if this.promedio}}{{this.promedio}}{{else}}**{{/if}}</td>
+          <td style='text-align: center; font-weight: bold;'>
+            {{#if this.promedio}}
+              {{this.promedio}}
+              {{#if (and (eq this.nombre "Ingles") (includes ../excluidasDelPromedio "ingles"))}}**{{/if}}
+            {{else}}-{{/if}}
+          </td>
+
         </tr>
         {{/each}}
       </tbody>
     </table>
+
+    {{#if (includes excluidasDelPromedio "ingles")}}
+      <p style="font-size: 10px; margin-top: 10px;">
+        <strong>**</strong> La nota de Inglés no ha sido incluida en el cálculo del promedio final parcial.
+      </p>
+    {{/if}}
 
     <!-- Tabla resumen de promedios -->
     <table style='float: right; width: 250px; margin-top: 20px; border-collapse: collapse; font-size: 13px;'>
@@ -206,6 +218,12 @@
           PROMEDIO FINAL
         </th>
         <td style='border: 1px solid #000; padding: 6px; text-align: center;'>—</td>
+      </tr>
+      <tr>
+        <th style='border: 1px solid #000; padding: 6px; text-align: left; background-color: #838282; color: #fff; font-weight: bold;'>
+          PORCENTAJE DE ASISTENCIA
+        </th>
+        <td style='border: 1px solid #000; padding: 6px; text-align: center;'>{{#if porcentajeAsistencia}}{{porcentajeAsistencia}}%{{else}}—{{/if}}</td>
       </tr>
     </table>
   </div>
@@ -232,15 +250,27 @@
     </div>
   </div>
 
-  <!-- Firma 3 -->
-  <div class="firma-superpuesta">
-    <img src="https://www.colegioandeschile.cl/img/firmas_profesores/6.png" class="firma" />
-    <div class="info">
-      <p><b>Marlenne Rodriguez Banda</b></p>
-      <p><b>UTP</b></p>
-      <p><b>Colegio Andes Chile</b></p>
+  <!-- Firma 3 (UTP) -->
+  {{#if (lte cursoId 5)}}
+    <div class="firma-superpuesta">
+      <img src="https://www.colegioandeschile.cl/img/firmas_profesores/4.png" class="firma" />
+      <div class="info">
+        <p><b>Diana Guerrero Arellano</b></p>
+        <p><b>Jefa UTP</b></p>
+        <p><b>Colegio Andes Chile</b></p>
+      </div>
     </div>
-  </div>
+  {{else}}
+    <div class="firma-superpuesta">
+      <img src="https://www.colegioandeschile.cl/img/firmas_profesores/6.png" class="firma" />
+      <div class="info">
+        <p><b>Marlenne Rodriguez Banda</b></p>
+        <p><b>Jefa UTP</b></p>
+        <p><b>Colegio Andes Chile</b></p>
+      </div>
+    </div>
+  {{/if}}
+
 </div>
 
 

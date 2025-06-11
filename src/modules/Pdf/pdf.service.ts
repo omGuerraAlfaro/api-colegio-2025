@@ -19,12 +19,14 @@ import { EstudianteService } from '../Estudiante/estudiante.service';
 import { CursoService } from '../Curso/curso.service';
 import { AsignaturaService } from '../Asignatura/asignatura.service';
 import { Semestre } from 'src/models/Semestre.entity';
+import { AsistenciaService } from '../Asistencia/asistencia.service';
 
 @Injectable()
 export class PdfService {
   constructor(
     private readonly pdfValidadorService: PdfValidadorService,
     private readonly notasService: NotasService,
+    private readonly asistenciaService: AsistenciaService,
     private readonly estudianteService: EstudianteService,
     private readonly cursoService: CursoService,
     private readonly asignaturaService: AsignaturaService,
@@ -333,25 +335,20 @@ export class PdfService {
         );
       }
     } catch (error) {
-      if (error instanceof BadRequestException) {
-        throw error;
-      }
+      if (error instanceof BadRequestException) throw error;
       console.error('Error obteniendo notas del estudiante:', error);
       throw new InternalServerErrorException('Error al obtener las notas del estudiante.');
     }
 
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
     const estudiante = await this.estudianteService.findById(data.estudianteId);
     const curso = await this.cursoService.findOneWithCurse(data.cursoId);
-
-    const notasMap: Record<number, any[]> = {};
-    const finalesMap: Record<number, any[]> = {};
-
-    notas.forEach((n) => {
-      notasMap[n.asignaturaId] = n.notas;
-      finalesMap[n.asignaturaId] = n.finales ?? [];
-    });
-
-    const maxNotas = Math.max(...notas.map((n) => n.notas.length));
+    const asistencia = await this.asistenciaService.getAsistenciasResumenPorAlumnoToday(
+      data.semestreId,
+      data.estudianteId,
+      todayStr
+    );
+    const porcentajeAsistencia = Math.round(asistencia.porcentajeAsistencia);
 
     function convertToLetra(notaStr: string | undefined): string | null {
       const nota = parseFloat(notaStr ?? '');
@@ -362,14 +359,18 @@ export class PdfService {
       return 'I';
     }
 
+    const notasMap: Record<number, any[]> = {};
+    const finalesMap: Record<number, any[]> = {};
+    notas.forEach((n) => {
+      notasMap[n.asignaturaId] = n.notas;
+      finalesMap[n.asignaturaId] = n.finales ?? [];
+    });
+
+    const maxNotas = Math.max(...notas.map((n) => n.notas.length));
+
     const asignaturasConValores = asignaturas.map((a) => {
       const nombreAsignatura = a.nombre_asignatura?.toLowerCase().trim();
-      const esCualitativa =
-        nombreAsignatura === 'religión' ||
-        nombreAsignatura === 'religion' ||
-        nombreAsignatura === 'orientación' ||
-        nombreAsignatura === 'orientacion';
-
+      const esCualitativa = ['religión', 'religion', 'orientación', 'orientacion'].includes(nombreAsignatura);
       const arregloNotas = notasMap[a.id] ?? [];
       const arregloFinales = finalesMap[a.id] ?? [];
 
@@ -391,46 +392,39 @@ export class PdfService {
       };
     });
 
+    // ✅ Cálculo del promedio, excluyendo inglés si cursoId <= 5
     let suma = 0;
     let cantidad = 0;
+    const excluidasDelPromedio: string[] = [];
 
     for (const [asignaturaId, finales] of Object.entries(finalesMap)) {
       const asignatura = asignaturas.find((a) => a.id === Number(asignaturaId));
-      const nombreAsignatura = asignatura?.nombre_asignatura?.toLowerCase().trim();
+      const nombre = asignatura?.nombre_asignatura?.toLowerCase().trim();
+      if (!nombre) continue;
 
-      if (
-        nombreAsignatura === 'religión' ||
-        nombreAsignatura === 'religion' ||
-        nombreAsignatura === 'orientación' ||
-        nombreAsignatura === 'orientacion'
-      ) {
-        continue;
-      }
+      const esCualitativa = ['religión', 'religion', 'orientación', 'orientacion'].includes(nombre);
+      const esIngles = nombre === 'inglés' || nombre === 'ingles';
 
       const notaFinal = finales.find(
         (f) => f.nombreEvaluacion?.toLowerCase().trim() === 'final'
       );
 
       const valor = parseFloat(notaFinal?.nota ?? '');
-      if (!isNaN(valor)) {
-        suma += valor;
-        cantidad++;
+      if (isNaN(valor) || esCualitativa) continue;
+
+      if (cursoId <= 5 && esIngles) {
+        excluidasDelPromedio.push('ingles');
+        continue;
       }
+
+      suma += valor;
+      cantidad++;
     }
 
     const promedioFinalParcial = cantidad > 0 ? (suma / cantidad).toFixed(1) : null;
 
-    const templatePath = path.join(
-      process.cwd(),
-      'src',
-      'modules',
-      'templates',
-      `${templateName}.hbs`
-    );
-
-    if (!fs.existsSync(templatePath)) {
-      throw new Error('Template file does not exist.');
-    }
+    const templatePath = path.join(process.cwd(), 'src', 'modules', 'templates', `${templateName}.hbs`);
+    if (!fs.existsSync(templatePath)) throw new Error('Template file does not exist.');
 
     handlebars.unregisterHelper('eq');
     handlebars.unregisterHelper('anyMatch');
@@ -438,78 +432,52 @@ export class PdfService {
     handlebars.unregisterHelper('inc');
     handlebars.unregisterHelper('formatRutMiles');
 
+    handlebars.registerHelper('lte', function (a: number, b: number) {
+      return a <= b;
+    });
+
     handlebars.registerHelper('inc', (value: number) => (+value + 1).toString());
     handlebars.registerHelper('times', function (n: number, block) {
       let out = '';
       for (let i = 0; i < n; i++) out += block.fn(i);
       return out;
     });
-    handlebars.registerHelper('formatRutMiles', (rutNumerico: string) => {
-      if (!rutNumerico) return '';
-      return rutNumerico.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
-    });
-    handlebars.registerHelper('esPrimerSemestre', function (semestre, options) {
-      return semestre === 1 ? options.fn(this) : options.inverse(this);
-    });
+    handlebars.registerHelper('formatRutMiles', (rut: string) => rut.replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
+    handlebars.registerHelper('esPrimerSemestre', (semestre, options) => semestre === 1 ? options.fn(this) : options.inverse(this));
     handlebars.registerHelper('eq', (a: any, b: any) => a === b);
-    handlebars.registerHelper('anyMatch', (notasArray: any[], laId: number) => {
-      return Array.isArray(notasArray)
-        ? notasArray.some((item) => item.asignaturaId === laId)
-        : false;
-    });
-    handlebars.registerHelper('getCursoNameType', (cursoId) => {
-      const id = parseInt(cursoId, 10);
-      return id <= 2 ? 'Educación Parvularia' : 'Educación Básica';
-    });
+    handlebars.registerHelper('anyMatch', (arr: any[], id: number) => arr?.some((x) => x.asignaturaId === id));
+    handlebars.registerHelper('getCursoNameType', (cursoId) => parseInt(cursoId) <= 2 ? 'Educación Parvularia' : 'Educación Básica');
     handlebars.registerHelper('getCursoName', (cursoId) => {
-      const id = parseInt(cursoId, 10);
-      switch (id) {
-        case 1: return 'Pre-Kinder';
-        case 2: return 'Kinder';
-        case 3: return 'Primer Año';
-        case 4: return 'Segundo Año';
-        case 5: return 'Tercero Año';
-        case 6: return 'Cuarto Año';
-        case 7: return 'Quinto Año';
-        case 8: return 'Sexto Año';
-        case 9: return 'Séptimo Año';
-        case 10: return 'Octavo Año';
-        default: return 'Curso Desconocido';
-      }
+      const id = parseInt(cursoId);
+      return ['Pre-Kinder', 'Kinder', 'Primer Año', 'Segundo Año', 'Tercero Año', 'Cuarto Año', 'Quinto Año', 'Sexto Año', 'Séptimo Año', 'Octavo Año'][id - 1] || 'Curso Desconocido';
     });
 
-    handlebars.registerHelper(
-      'evaluacionNotaIndividual',
-      (nombreAsignatura: string, notaStr: string | null) => {
-        const nombre = nombreAsignatura.toLowerCase();
-        const nota = parseFloat(notaStr || '');
-        const esCualitativa =
-          nombre === 'religión' ||
-          nombre === 'religion' ||
-          nombre === 'orientación' ||
-          nombre === 'orientacion';
+    handlebars.registerHelper('includes', (arr: any[], value: any) => Array.isArray(arr) && arr.includes(value));
+    handlebars.registerHelper('and', (a, b) => a && b);
 
-        if (esCualitativa && !isNaN(nota)) {
-          if (nota >= 6) return 'MB';
-          if (nota >= 5) return 'B';
-          if (nota >= 4) return 'S';
-          return 'I';
-        }
+    handlebars.registerHelper('evaluacionNotaIndividual', (nombreAsignatura: string, notaStr: string | null) => {
+      const nombre = nombreAsignatura.toLowerCase();
+      const nota = parseFloat(notaStr || '');
+      const esCualitativa = ['religión', 'religion', 'orientación', 'orientacion'].includes(nombre);
 
-        if (!isNaN(nota)) {
-          const notaFormateada = nota.toFixed(1);
-          if (nota <= 3.9) {
-            return new handlebars.SafeString(
-              `<span style="color: red; font-weight: bold;">${notaFormateada}</span>`
-            );
-          } else {
-            return notaFormateada;
-          }
-        }
-
-        return new handlebars.SafeString('<span class="sin-notas">–</span>');
+      if (esCualitativa && !isNaN(nota)) {
+        if (nota >= 6) return 'MB';
+        if (nota >= 5) return 'B';
+        if (nota >= 4) return 'S';
+        return 'I';
       }
-    );
+
+      if (!isNaN(nota)) {
+        const notaFormateada = nota.toFixed(1);
+        if (nota <= 3.9) {
+          return new handlebars.SafeString(`<span style="color: red; font-weight: bold;">${notaFormateada}</span>`);
+        } else {
+          return notaFormateada;
+        }
+      }
+
+      return new handlebars.SafeString('<span class="sin-notas">–</span>');
+    });
 
     let browser: puppeteer.Browser | null = null;
     let page: puppeteer.Page | null = null;
@@ -526,40 +494,27 @@ export class PdfService {
         semestre,
         maxNotas,
         promedioFinalParcial,
-        cursoId
+        cursoId,
+        porcentajeAsistencia,
+        excluidasDelPromedio, // ✅ Para mostrar leyenda en plantilla
       };
 
       const html = template(context);
 
-      browser = await puppeteer.launch({
-        headless: true,
-        args: ['--no-sandbox', '--disable-setuid-sandbox'],
-      });
-
+      browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
       page = await browser.newPage();
       await page.setContent(html);
 
-      const pdfBuffer = Buffer.from(
-        await page.pdf({
-          width: '21.5cm',
-          height: '33cm',
-          landscape: true,
-          printBackground: true,
-          margin: {
-            top: '20px',
-            bottom: '20px',
-            left: '20mm',
-            right: '20mm',
-          },
-          displayHeaderFooter: true,
-          headerTemplate: `<p></p>`,
-          footerTemplate: `
-          <div style="font-size:10px; width:100%; text-align:center;">
-            Página <span class="pageNumber"></span> de <span class="totalPages"></span>
-          </div>
-        `,
-        })
-      );
+      const pdfBuffer = Buffer.from(await page.pdf({
+        width: '21.5cm',
+        height: '33cm',
+        landscape: true,
+        printBackground: true,
+        margin: { top: '20px', bottom: '20px', left: '20mm', right: '20mm' },
+        displayHeaderFooter: true,
+        headerTemplate: `<p></p>`,
+        footerTemplate: `<div style="font-size:10px; width:100%; text-align:center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
+      }));
 
       return pdfBuffer;
     } catch (error) {
@@ -574,7 +529,5 @@ export class PdfService {
       }
     }
   }
-
-
 
 }
