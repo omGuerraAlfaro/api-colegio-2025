@@ -20,6 +20,7 @@ import { NotasModule } from "./Notas/notas.module";
 import { EvaluacionModule } from "./Evaluaciones/evaluaciones.module";
 import { PdfValidadorModule } from "./Pdf-Validador/pdf-validador.module";
 import { SemestreModule } from "./Semestre/semestre.module";
+import { CierreSemestreModule } from "./CierreSemestre/cierreSemestre.module";
 
 export {
      ApoderadoModule,
@@ -43,5 +44,6 @@ export {
      NotasModule,
      EvaluacionModule,
      PdfValidadorModule,
-     SemestreModule
+     SemestreModule,
+     CierreSemestreModule
 };

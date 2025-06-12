@@ -18,6 +18,9 @@ export class Semestre {
     @Column({ type: 'date' })
     fecha_fin: Date;
 
+    @Column({ type: 'boolean', default: false })
+    semestreCerrado: boolean;
+
     @OneToMany(() => Asistencia, (asistencia) => asistencia.semestre)
     asistencias: Asistencia[];
 

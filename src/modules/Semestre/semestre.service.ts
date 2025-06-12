@@ -25,4 +25,20 @@ export class SemestreService {
 
     return semestre.id_semestre;
   }
+
+  async obtenerEstadosDeSemestres(): Promise<
+    { id: number; nombre: string; cerrado: boolean }[]
+  > {
+    const semestres = await this.semestreRepository.find({
+      select: ['id_semestre', 'nombre', 'semestreCerrado'],
+      order: { id_semestre: 'ASC' },
+    });
+
+    return semestres.map((s) => ({
+      id: s.id_semestre,
+      nombre: s.nombre,
+      cerrado: s.semestreCerrado,
+    }));
+  }
+
 }

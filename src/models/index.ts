@@ -34,6 +34,7 @@ import { EvaluacionPreBasica } from './EvaluacionPreBasica.entity';
 import { NotaPreBasica } from './NotasPreBasica.entity';
 import { AsignaturaPreBasica } from './AsignaturaPreBasica.entity';
 import { TipoEvaluacionPreBasica } from './TipoEvaluacionPreBasica.entity';
+import { CierreSemestre } from './CierreSemestre.entity';
 
 
 export const entities = [
@@ -64,6 +65,7 @@ export const entities = [
     Nota,
     NotaPreBasica,
     Semestre,
+    CierreSemestre,
   
     // Asistencia
     Asistencia,

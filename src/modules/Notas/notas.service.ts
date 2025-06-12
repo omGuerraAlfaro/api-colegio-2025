@@ -770,7 +770,99 @@ export class NotasService {
     }
   }
 
+  async getPromedioFinalPorEstudianteYCurso(
+    semestreId: number
+  ): Promise<
+    Array<{
+      cursoId: number;
+      estudianteId: number;
+      promedioFinal: number | null;
+      conceptoFinal: string | null;
+    }>
+  > {
+    try {
+      const cursos = await this.cursoRepository.find();
+      const resultadosTotales = [];
 
+      for (const curso of cursos) {
+        const cursoId = curso.id;
+        const esPreBasica = cursoId === 1 || cursoId === 2;
+
+        const notasTable = esPreBasica ? 'notas_prebasica' : 'notas';
+        const evaluacionesTable = esPreBasica ? 'evaluaciones_prebasica' : 'evaluaciones';
+        const asignaturasTable = esPreBasica ? 'asignatura_prebasica' : 'asignatura';
+        const tipoFinal = esPreBasica ? 6 : 5;
+
+        const query = this.dataSource
+          .createQueryBuilder()
+          .select([
+            'n.id_estudiante AS estudianteId',
+            `${cursoId} AS cursoId`,
+            'a.id AS asignaturaId',
+            'n.nota AS notaFinal',
+          ])
+          .from(evaluacionesTable, 'e')
+          .innerJoin(notasTable, 'n', 'n.id_evaluacion = e.id_evaluacion')
+          .innerJoin(asignaturasTable, 'a', 'e.id_asignatura = a.id')
+          .where('e.id_curso = :cursoId', { cursoId })
+          .andWhere('e.id_semestre = :semestreId', { semestreId })
+          .andWhere('e.id_tipo_evaluacion = :tipoFinal', { tipoFinal });
+
+        if (!esPreBasica) {
+          query.andWhere('a.id NOT IN (:...excluirIds)', { excluirIds: [11, 12] });
+          if (cursoId <= 3) {
+            query.andWhere('a.id != :inglesId', { inglesId: 3 });
+          }
+        }
+
+        const rawData = await query.getRawMany();
+
+        const agrupado = new Map<number, number[]>();
+
+        for (const row of rawData) {
+          const estudianteId = row.estudianteId;
+          if (!agrupado.has(estudianteId)) {
+            agrupado.set(estudianteId, []);
+          }
+          if (row.notaFinal !== null) {
+            agrupado.get(estudianteId).push(parseFloat(row.notaFinal));
+          }
+        }
+
+        for (const [estudianteId, notas] of agrupado.entries()) {
+          if (notas.length === 0) continue;
+
+          const promedio = notas.reduce((a, b) => a + b, 0) / notas.length;
+          const promedioRedondeado = parseFloat(promedio.toFixed(1));
+
+          if (esPreBasica) {
+            let conceptoFinal: string = 'PL';
+            if (promedioRedondeado >= 6.0) conceptoFinal = 'L';
+            else if (promedioRedondeado >= 4.0) conceptoFinal = 'ML';
+
+            resultadosTotales.push({
+              cursoId,
+              estudianteId,
+              promedioFinal: null,
+              conceptoFinal,
+            });
+          } else {
+            resultadosTotales.push({
+              cursoId,
+              estudianteId,
+              promedioFinal: promedioRedondeado,
+              conceptoFinal: null,
+            });
+          }
+        }
+      }
+
+      return resultadosTotales;
+    } catch (error) {
+      console.error('Error al calcular promedio final por estudiante:', error);
+      throw new InternalServerErrorException('Error al calcular promedio final.');
+    }
+  }
 
 
 

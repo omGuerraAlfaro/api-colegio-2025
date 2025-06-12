@@ -25,7 +25,8 @@ import {
   PdfValidadorModule,
   EvaluacionModule,
   SemestreModule,
-  InscripcionTallerModule
+  InscripcionTallerModule,
+  CierreSemestreModule
 } from './modules';
 import { ScheduleModule } from '@nestjs/schedule';
 import { CronTasksService } from './jobs/cron.jobs.service';
@@ -56,6 +57,7 @@ import { CronTasksService } from './jobs/cron.jobs.service';
     EvaluacionModule,
     PdfValidadorModule,
     SemestreModule,
+    CierreSemestreModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
       host: '44.207.168.60',
