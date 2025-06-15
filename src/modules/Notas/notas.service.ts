@@ -810,9 +810,13 @@ export class NotasService {
 
         if (!esPreBasica) {
           query.andWhere('a.id NOT IN (:...excluirIds)', { excluirIds: [11, 12] });
-          if (cursoId <= 3) {
+          if (cursoId <= 5) {
+            //excluir ingles para los cursos desde 1ero a 3ero
             query.andWhere('a.id != :inglesId', { inglesId: 3 });
           }
+        } else {
+          //excluir ingles / no aplica
+          query.andWhere('a.id NOT IN (:...excluirIds)', { excluirIds: [10, 12] });
         }
 
         const rawData = await query.getRawMany();

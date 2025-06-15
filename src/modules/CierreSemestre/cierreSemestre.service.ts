@@ -7,6 +7,7 @@ import { Repository } from "typeorm";
 import { NotasService } from "../Notas/notas.service";
 import { Curso } from "src/models/Curso.entity";
 import { Semestre } from "src/models/Semestre.entity";
+import { AsistenciaService } from "../Asistencia/asistencia.service";
 
 @Injectable()
 export class CierreSemestreService {
@@ -20,6 +21,7 @@ export class CierreSemestreService {
         @InjectRepository(Semestre)
         private semestreRepo: Repository<Semestre>,
         private readonly notasService: NotasService,
+        private readonly asistenciaService: AsistenciaService,
     ) { }
 
     async crear(semestreId: number): Promise<void> {
@@ -32,6 +34,10 @@ export class CierreSemestreService {
 
             const estudiante = await this.estudianteRepo.findOneBy({ id: estudianteId });
             const curso = await this.cursoRepo.findOneBy({ id: cursoId });
+            const asistenciaResumen = await this.asistenciaService.getAsistenciasResumenPorSemestre(semestreId);
+            const asistenciaFinal = asistenciaResumen.find((item: any) => item.estudianteId === estudianteId);
+
+            console.log('Asistencia final:', asistenciaFinal);
 
             if (!estudiante || !curso) {
                 console.warn(`Estudiante o curso no encontrado: estudiante ${estudianteId}, curso ${cursoId}`);
@@ -43,7 +49,7 @@ export class CierreSemestreService {
                 semestre: semestreId,
                 nota_final: promedioFinal,
                 concepto_final: conceptoFinal,
-                asistencia_final: 100,
+                asistencia_final: Math.round(asistenciaFinal?.porcentajeAsistencia) ?? 0,
                 estudiante,
                 curso,
             });
@@ -57,10 +63,11 @@ export class CierreSemestreService {
         console.log(`Semestre ${semestreId} marcado como cerrado.`);
     }
 
-
-
-
     async obtenerPorEstudiante(estudianteId: number): Promise<CierreSemestre[]> {
         return this.cierreRepo.find({ where: { estudiante: { id: estudianteId } } });
+    }
+
+    async obtenerPorEstudianteySemestre(estudianteId: number, semestreId: number): Promise<CierreSemestre[]> {
+        return this.cierreRepo.find({ where: { estudiante: { id: estudianteId }, semestre: semestreId } });
     }
 }

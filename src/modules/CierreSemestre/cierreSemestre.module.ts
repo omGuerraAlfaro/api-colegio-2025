@@ -7,13 +7,16 @@ import { CierreSemestreService } from './cierreSemestre.service';
 import { NotasModule } from '../Notas/notas.module';
 import { Curso } from 'src/models/Curso.entity';
 import { Semestre } from 'src/models/Semestre.entity';
+import { AsistenciaModule } from '../Asistencia/asistencia.module';
 
 @Module({
   imports: [
     NotasModule,
+    AsistenciaModule,
     TypeOrmModule.forFeature([CierreSemestre, Estudiante, Curso, Semestre])
   ],
   controllers: [CierreSemestreController],
   providers: [CierreSemestreService],
+  exports: [CierreSemestreService]
 })
 export class CierreSemestreModule { }

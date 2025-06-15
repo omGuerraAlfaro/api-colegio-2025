@@ -20,6 +20,9 @@ import { CursoService } from '../Curso/curso.service';
 import { AsignaturaService } from '../Asignatura/asignatura.service';
 import { Semestre } from 'src/models/Semestre.entity';
 import { AsistenciaService } from '../Asistencia/asistencia.service';
+import { CierreSemestreService } from '../CierreSemestre/cierreSemestre.service';
+import * as archiver from 'archiver';
+import * as stream from 'stream';
 
 @Injectable()
 export class PdfService {
@@ -30,6 +33,7 @@ export class PdfService {
     private readonly estudianteService: EstudianteService,
     private readonly cursoService: CursoService,
     private readonly asignaturaService: AsignaturaService,
+    private readonly cierreSemestreService: CierreSemestreService,
   ) { }
 
   async generatePdfContratoMatricula(templateName: string, data: MatriculaDto): Promise<Buffer> {
@@ -309,7 +313,8 @@ export class PdfService {
 
   async generatePdfAlumnoNotas(
     templateName: string,
-    data: findNotasAlumnoDto
+    data: findNotasAlumnoDto,
+    tipo: string
   ): Promise<Buffer> {
     const semestre = data.semestreId;
     const cursoId = data.cursoId;
@@ -421,7 +426,17 @@ export class PdfService {
       cantidad++;
     }
 
-    const promedioFinalParcial = cantidad > 0 ? (suma / cantidad).toFixed(1) : null;
+    let promedioParcial: any;
+    let promedioFinal: any;
+    if (tipo === 'final') {
+      const auxPromedioFinal = await this.cierreSemestreService.obtenerPorEstudianteySemestre(data.estudianteId, semestre);
+
+      promedioFinal = auxPromedioFinal[0].nota_final;
+
+    } else {
+      promedioParcial = cantidad > 0 ? (suma / cantidad).toFixed(1) : null;
+    }
+
 
     const templatePath = path.join(process.cwd(), 'src', 'modules', 'templates', `${templateName}.hbs`);
     if (!fs.existsSync(templatePath)) throw new Error('Template file does not exist.');
@@ -493,7 +508,8 @@ export class PdfService {
         curso,
         semestre,
         maxNotas,
-        promedioFinalParcial,
+        promedioFinal,
+        promedioParcial,
         cursoId,
         porcentajeAsistencia,
         excluidasDelPromedio, // ✅ Para mostrar leyenda en plantilla
@@ -529,5 +545,95 @@ export class PdfService {
       }
     }
   }
+
+
+  async exportCursoNotasZip(
+    cursoId: number,
+    semestreId: number,
+    tipo: string
+  ): Promise<Buffer> {
+    const pdfs = await this.generatePdfCursoNotas(cursoId, semestreId, tipo);
+
+    if (!pdfs || pdfs.length === 0) {
+      console.error('✖ No se pudo generar ningún PDF. ZIP abortado.');
+      throw new InternalServerErrorException('No se pudo generar ningún certificado para este curso.');
+    }
+
+    return new Promise<Buffer>((resolve, reject) => {
+      const archive = archiver('zip', { zlib: { level: 9 } });
+      const zipStream = new stream.PassThrough();
+      const chunks: Buffer[] = [];
+
+      zipStream.on('data', (chunk) => chunks.push(chunk));
+      zipStream.on('end', () => {
+        const finalBuffer = Buffer.concat(chunks);
+        console.log('✔ ZIP finalizado. Tamaño:', finalBuffer.length);
+        resolve(finalBuffer);
+      });
+
+      zipStream.on('error', (err) => {
+        console.error('✖ Error en stream del zip:', err);
+        reject(err);
+      });
+
+      archive.pipe(zipStream);
+
+      for (const { nombre, pdf } of pdfs) {
+        const safeName = nombre.replace(/[^a-zA-Z0-9]/g, '_');
+        console.log(`➕ Agregando PDF para ${nombre} al ZIP`);
+        archive.append(pdf, { name: `${safeName}.pdf` });
+      }
+
+      archive.finalize().catch((err) => {
+        console.error('✖ Error al finalizar el zip:', err);
+        reject(err);
+      });
+    });
+  }
+
+
+  async generatePdfCursoNotas(
+    cursoId: number,
+    semestreId: number,
+    tipo: string
+  ): Promise<{ estudianteId: number; nombre: string; pdf: Buffer }[]> {
+    const cursoConEstudiantes = await this.cursoService.findStudentsWithCursoId(cursoId);
+    const estudiantes = cursoConEstudiantes.estudiantes;
+
+    if (!estudiantes || estudiantes.length === 0) {
+      throw new BadRequestException('No hay estudiantes registrados en el curso seleccionado.');
+    }
+
+    const resultados = await Promise.allSettled(
+      estudiantes.map(async (estudiante) => {
+        const data = {
+          estudianteId: estudiante.id,
+          cursoId,
+          semestreId
+        };
+
+        const pdf = await this.generatePdfAlumnoNotas('pdf-alumno-notas', data, tipo);
+        return {
+          estudianteId: estudiante.id,
+          nombre: `${estudiante.primer_nombre_alumno} ${estudiante.primer_apellido_alumno || ''} ${estudiante.segundo_apellido_alumno || ''}`.trim(),
+          pdf
+        };
+      })
+    );
+
+    const pdfs = resultados
+      .filter((r): r is PromiseFulfilledResult<{ estudianteId: number; nombre: string; pdf: Buffer }> => r.status === 'fulfilled')
+      .map((r) => r.value);
+
+    resultados
+      .filter((r): r is PromiseRejectedResult => r.status === 'rejected')
+      .forEach((r, idx) => console.warn(`⚠️ Error generando PDF para estudiante ${estudiantes[idx]?.id}:`, r.reason?.message || r.reason));
+
+    console.log(`✔ PDFs generados: ${pdfs.length} / ${estudiantes.length}`);
+    return pdfs;
+  }
+
+
+
 
 }

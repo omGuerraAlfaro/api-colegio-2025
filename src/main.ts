@@ -44,6 +44,7 @@ async function bootstrap() {
       'Tbk-Api-Key-Secret',
     ],
     credentials: false,
+    exposedHeaders: ['Content-Disposition']
   });
 
   // Configuración de Swagger
