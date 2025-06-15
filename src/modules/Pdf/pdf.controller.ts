@@ -93,31 +93,40 @@ export class PdfController {
     @Query('semestreId') semestreId: string,
     @Res() res: Response
   ) {
-    const cursoIdNum = parseInt(cursoId, 10);
-    const semestreIdNum = parseInt(semestreId, 10);
+    try {
+      const cursoIdNum = parseInt(cursoId, 10);
+      const semestreIdNum = parseInt(semestreId, 10);
 
-    if (isNaN(cursoIdNum) || isNaN(semestreIdNum)) {
-      throw new BadRequestException('Parámetros cursoId y semestreId inválidos');
+      if (isNaN(cursoIdNum) || isNaN(semestreIdNum)) {
+        throw new BadRequestException('Parámetros cursoId y semestreId inválidos');
+      }
+
+      console.log('→ Solicitando ZIP Final:', { cursoIdNum, semestreIdNum });
+
+      const zipBuffer = await this.pdfService.exportCursoNotasZip(
+        cursoIdNum,
+        semestreIdNum,
+        'parcial'
+      );
+
+      if (!zipBuffer || zipBuffer.length === 0) {
+        console.error('✖ ZIP generado vacío o nulo');
+        throw new InternalServerErrorException('Error al generar el ZIP de notas del curso');
+      }
+
+      res.set({
+        'Content-Type': 'application/zip',
+        'Content-Disposition': `attachment; filename="notas_curso_${cursoIdNum}.zip"`,
+        'Content-Length': zipBuffer.length,
+      });
+
+      console.log('✔ ZIP generado correctamente:', zipBuffer.length, 'bytes');
+      res.end(zipBuffer); // usa .end en vez de .send para binarios
+
+    } catch (error) {
+      console.error('✖ Error en generación de ZIP:', error);
+      res.status(500).send('Error al generar ZIP');
     }
-
-    const zipBuffer = await this.pdfService.exportCursoNotasZip(
-      cursoIdNum,
-      semestreIdNum,
-      'parcial'
-    );
-
-    console.log('Tamaño del ZIP:', zipBuffer.length);
-    if (!zipBuffer || zipBuffer.length === 0) {
-      throw new InternalServerErrorException('Error al generar el ZIP de notas del curso');
-    }
-    res.set({
-      'Content-Type': 'application/zip',
-      'Content-Disposition': `attachment; filename="notas_curso_${cursoIdNum}.zip"`,
-      'Content-Length': zipBuffer.length,
-    });
-
-    console.log('Tamaño del ZIP:', zipBuffer.length);
-    res.send(zipBuffer);
   }
 
   @Post('generate/alumno-notas-final')
