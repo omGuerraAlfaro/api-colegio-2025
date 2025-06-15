@@ -23,6 +23,8 @@ import { AsistenciaService } from '../Asistencia/asistencia.service';
 import { CierreSemestreService } from '../CierreSemestre/cierreSemestre.service';
 import * as archiver from 'archiver';
 import * as stream from 'stream';
+import { timeout } from 'promise-timeout';
+
 
 @Injectable()
 export class PdfService {
@@ -362,8 +364,8 @@ export class PdfService {
         porcentajeAsistencia = Math.round(asistencia.porcentajeAsistencia);
       }
     } catch (err) {
-      console.warn(`No se pudo obtener asistencia del alumno ${data.estudianteId} en semestre ${data.semestreId}:`, err.message);
-      porcentajeAsistencia = null
+      console.warn(`⚠️ No se pudo obtener asistencia del alumno ${estudiante.primer_nombre_alumno} ${estudiante.primer_apellido_alumno} (ID: ${data.estudianteId}) en semestre ${data.semestreId}:`, err.message);
+      porcentajeAsistencia = null;
     }
 
     function convertToLetra(notaStr: string | undefined): string | null {
@@ -405,7 +407,6 @@ export class PdfService {
           ? convertToLetra(notaFinal?.nota)
           : notaFinal?.nota?.toString() ?? null;
       } else {
-        // tipo === 'parcial'
         const notasNumericas = arregloNotas
           .map(n => parseFloat(n.nota))
           .filter(n => !isNaN(n));
@@ -428,8 +429,6 @@ export class PdfService {
       };
     });
 
-
-    // ✅ Cálculo del promedio, excluyendo inglés si cursoId <= 5
     let suma = 0;
     let cantidad = 0;
     const excluidasDelPromedio: string[] = [];
@@ -486,83 +485,38 @@ export class PdfService {
     const templatePath = path.join(process.cwd(), 'src', 'modules', 'templates', `${templateName}.hbs`);
     if (!fs.existsSync(templatePath)) throw new Error('Template file does not exist.');
 
-    handlebars.unregisterHelper('eq');
-    handlebars.unregisterHelper('anyMatch');
-    handlebars.unregisterHelper('times');
-    handlebars.unregisterHelper('inc');
-    handlebars.unregisterHelper('formatRutMiles');
+    const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+    const template = handlebars.compile(htmlTemplate);
 
-    handlebars.registerHelper('lte', function (a: number, b: number) {
-      return a <= b;
-    });
+    const context = {
+      asignaturasConValores,
+      estudiante,
+      curso,
+      semestre,
+      maxNotas,
+      promedioFinal,
+      promedioParcial,
+      cursoId,
+      porcentajeAsistencia,
+      excluidasDelPromedio,
+    };
 
-    handlebars.registerHelper('inc', (value: number) => (+value + 1).toString());
-    handlebars.registerHelper('times', function (n: number, block) {
-      let out = '';
-      for (let i = 0; i < n; i++) out += block.fn(i);
-      return out;
-    });
-    handlebars.registerHelper('formatRutMiles', (rut: string) => rut.replace(/\B(?=(\d{3})+(?!\d))/g, '.'));
-    handlebars.registerHelper('esPrimerSemestre', (semestre, options) => semestre === 1 ? options.fn(this) : options.inverse(this));
-    handlebars.registerHelper('eq', (a: any, b: any) => a === b);
-    handlebars.registerHelper('anyMatch', (arr: any[], id: number) => arr?.some((x) => x.asignaturaId === id));
-    handlebars.registerHelper('getCursoNameType', (cursoId) => parseInt(cursoId) <= 2 ? 'Educación Parvularia' : 'Educación Básica');
-    handlebars.registerHelper('getCursoName', (cursoId) => {
-      const id = parseInt(cursoId);
-      return ['Pre-Kinder', 'Kinder', 'Primer Año', 'Segundo Año', 'Tercero Año', 'Cuarto Año', 'Quinto Año', 'Sexto Año', 'Séptimo Año', 'Octavo Año'][id - 1] || 'Curso Desconocido';
-    });
-
-    handlebars.registerHelper('includes', (arr: any[], value: any) => Array.isArray(arr) && arr.includes(value));
-    handlebars.registerHelper('and', (a, b) => a && b);
-
-    handlebars.registerHelper('evaluacionNotaIndividual', (nombreAsignatura: string, notaStr: string | null) => {
-      const nombre = nombreAsignatura.toLowerCase();
-      const nota = parseFloat(notaStr || '');
-      const esCualitativa = ['religión', 'religion', 'orientación', 'orientacion'].includes(nombre);
-
-      if (esCualitativa && !isNaN(nota)) {
-        if (nota >= 6) return 'MB';
-        if (nota >= 5) return 'B';
-        if (nota >= 4) return 'S';
-        return 'I';
-      }
-
-      if (!isNaN(nota)) {
-        const notaFormateada = nota.toFixed(1);
-        if (nota <= 3.9) {
-          return new handlebars.SafeString(`<span style="color: red; font-weight: bold;">${notaFormateada}</span>`);
-        } else {
-          return notaFormateada;
-        }
-      }
-
-      return new handlebars.SafeString('<span class="sin-notas">–</span>');
-    });
+    const html = template(context);
 
     let browser: puppeteer.Browser | null = null;
     let page: puppeteer.Page | null = null;
 
     try {
-      const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
-      const template = handlebars.compile(htmlTemplate);
-      asignaturasConValores.pop(); // opcional
+      browser = await timeout(
+        puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] }),
+        15000 // ⏱ Máximo 15 segundos
+      );
+    } catch (err) {
+      console.error('❌ Puppeteer no pudo iniciarse dentro del tiempo límite:', err.message);
+      throw new InternalServerErrorException('Error generando PDF. Timeout al iniciar navegador.');
+    }
 
-      const context = {
-        asignaturasConValores,
-        estudiante,
-        curso,
-        semestre,
-        maxNotas,
-        promedioFinal,
-        promedioParcial,
-        cursoId,
-        porcentajeAsistencia,
-        excluidasDelPromedio, // ✅ Para mostrar leyenda en plantilla
-      };
-
-      const html = template(context);
-
-      browser = await puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] });
+    try {
       page = await browser.newPage();
       await page.setContent(html);
 
@@ -579,14 +533,14 @@ export class PdfService {
 
       return pdfBuffer;
     } catch (error) {
-      console.error('Error generating PDF:', error);
-      throw new InternalServerErrorException('Failed to generate PDF.');
+      console.error('❌ Error al generar página PDF:', error.message);
+      throw new InternalServerErrorException('Error generando contenido del PDF.');
     } finally {
       try {
         if (page) await page.close();
         if (browser) await browser.close();
       } catch (closeErr) {
-        console.error('Error closing Puppeteer:', closeErr);
+        console.error('Error cerrando Puppeteer:', closeErr);
       }
     }
   }
