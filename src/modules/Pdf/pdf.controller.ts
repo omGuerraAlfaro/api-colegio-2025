@@ -77,56 +77,12 @@ export class PdfController {
 
     const pdf = await this.pdfService.generatePdfAlumnoNotas('pdf-alumno-notas', datosNotas, 'parcial');
 
-    // Establece la cabecera y envía el PDF
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename=example.pdf',
     });
 
     return res.send(pdf);
-  }
-
-
-  @Get('curso-notas-parcial/pdf-zip')
-  async descargarZipPorCurso(
-    @Query('cursoId') cursoId: string,
-    @Query('semestreId') semestreId: string,
-    @Res() res: Response
-  ) {
-    try {
-      const cursoIdNum = parseInt(cursoId, 10);
-      const semestreIdNum = parseInt(semestreId, 10);
-
-      if (isNaN(cursoIdNum) || isNaN(semestreIdNum)) {
-        throw new BadRequestException('Parámetros cursoId y semestreId inválidos');
-      }
-
-      console.log('→ Solicitando ZIP Final:', { cursoIdNum, semestreIdNum });
-
-      const zipBuffer = await this.pdfService.exportCursoNotasZip(
-        cursoIdNum,
-        semestreIdNum,
-        'parcial'
-      );
-
-      if (!zipBuffer || zipBuffer.length === 0) {
-        console.error('✖ ZIP generado vacío o nulo');
-        throw new InternalServerErrorException('Error al generar el ZIP de notas del curso');
-      }
-
-      res.set({
-        'Content-Type': 'application/zip',
-        'Content-Disposition': `attachment; filename="notas_curso_${cursoIdNum}.zip"`,
-        'Content-Length': zipBuffer.length,
-      });
-
-      console.log('✔ ZIP generado correctamente:', zipBuffer.length, 'bytes');
-      res.end(zipBuffer); // usa .end en vez de .send para binarios
-
-    } catch (error) {
-      console.error('✖ Error en generación de ZIP:', error);
-      res.status(500).send('Error al generar ZIP');
-    }
   }
 
   @Post('generate/alumno-notas-final')
@@ -134,7 +90,6 @@ export class PdfController {
 
     const pdf = await this.pdfService.generatePdfAlumnoNotas('pdf-alumno-notas', datosNotas, 'final');
 
-    // Establece la cabecera y envía el PDF
     res.set({
       'Content-Type': 'application/pdf',
       'Content-Disposition': 'attachment; filename=example.pdf',
@@ -143,48 +98,28 @@ export class PdfController {
     return res.send(pdf);
   }
 
+  @Post('generate/curso-notas-parcial')
+  async generatePdfCursoNotasParcial(@Res() res: Response, @Query('cursoId') cursoId: number, @Query('semestreId') semestreId: number) {
+    const buffer = await this.pdfService.generatePdfCursoNotas('pdf-alumno-notas', cursoId, semestreId, 'parcial');
 
-  @Get('curso-notas-final/pdf-zip')
-  async descargarZipPorCursoFinal(
-    @Query('cursoId') cursoId: string,
-    @Query('semestreId') semestreId: string,
-    @Res() res: Response
-  ) {
-    try {
-      const cursoIdNum = parseInt(cursoId, 10);
-      const semestreIdNum = parseInt(semestreId, 10);
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename=curso-${cursoId}-semestre-${semestreId}.pdf`,
+    });
 
-      if (isNaN(cursoIdNum) || isNaN(semestreIdNum)) {
-        throw new BadRequestException('Parámetros cursoId y semestreId inválidos');
-      }
-
-      console.log('→ Solicitando ZIP Final:', { cursoIdNum, semestreIdNum });
-
-      const zipBuffer = await this.pdfService.exportCursoNotasZip(
-        cursoIdNum,
-        semestreIdNum,
-        'final'
-      );
-
-      if (!zipBuffer || zipBuffer.length === 0) {
-        console.error('✖ ZIP generado vacío o nulo');
-        throw new InternalServerErrorException('Error al generar el ZIP de notas del curso');
-      }
-
-      res.set({
-        'Content-Type': 'application/zip',
-        'Content-Disposition': `attachment; filename="notas_curso_${cursoIdNum}.zip"`,
-        'Content-Length': zipBuffer.length,
-      });
-
-      console.log('✔ ZIP generado correctamente:', zipBuffer.length, 'bytes');
-      res.end(zipBuffer); // usa .end en vez de .send para binarios
-
-    } catch (error) {
-      console.error('✖ Error en generación de ZIP:', error);
-      res.status(500).send('Error al generar ZIP');
-    }
+    return res.send(buffer);
   }
 
+  @Post('generate/curso-notas-final')
+  async generatePdfCursoNotasFinal(@Res() res: Response, @Query('cursoId') cursoId: number, @Query('semestreId') semestreId: number) {
+    const buffer = await this.pdfService.generatePdfCursoNotas('pdf-alumno-notas', cursoId, semestreId, 'final');
+
+    res.set({
+      'Content-Type': 'application/pdf',
+      'Content-Disposition': `attachment; filename=curso-${cursoId}-semestre-${semestreId}.pdf`,
+    });
+
+    return res.send(buffer);
+  }
 
 }

@@ -24,6 +24,24 @@ export class EstudianteService {
     return estudiante;
   }
 
+  async findByCursoId(cursoId: number): Promise<Estudiante[]> {
+    return this.estudianteRepository.find({
+      where: {
+        estado_estudiante: true,
+        cursoConnection: {
+          curso: {
+            id: cursoId,
+          },
+        },
+      },
+      relations: ['cursoConnection', 'cursoConnection.curso', 'cursoConnection.curso.profesorConnection'],
+      order: {
+        primer_apellido_alumno: 'ASC',
+        primer_nombre_alumno: 'ASC',
+      },
+    });
+  }
+
   async findAll() {
     const estudiantes = await this.estudianteRepository
       .createQueryBuilder("estudiante")
@@ -65,10 +83,10 @@ export class EstudianteService {
       where: { rut: rut },
       relations: ['cursoConnection', 'cursoConnection.curso', 'cursoConnection.curso.profesorConnection'],
     });
-  
+
     if (estudiante) {
       const { cursoConnection, ...rest } = estudiante;
-  
+
       const cursosConProfesor = cursoConnection.map(conn => {
         return {
           ...conn.curso,
@@ -76,16 +94,16 @@ export class EstudianteService {
           profesorConnection: undefined,
         };
       });
-  
+
       return {
         ...rest,
         curso: cursosConProfesor,
       };
     }
-  
+
     return null;
   }
-  
+
 
   async getCountByGender(): Promise<{ masculinoCount: number; femeninoCount: number; out: number; masculinoCountOut: number; femeninoCountOut: number }> {
     const maleCount = await this.estudianteRepository.count({

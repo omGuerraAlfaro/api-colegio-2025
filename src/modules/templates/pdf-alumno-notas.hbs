@@ -94,7 +94,7 @@
   font-size: xx-small;
   font-weight: bolder;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
     @media print {
@@ -131,6 +131,7 @@
       }
     }
   </style>
+  
 </head>
 
 <body>
@@ -245,54 +246,53 @@
   </div>
 
   <div class="firmas-superpuestas-container">
-  <!-- Firma 1 -->
-  <div class="firma-superpuesta">
-    <img src="https://www.colegioandeschile.cl/img/firmas_profesores/{{cursoId}}.png" class="firma" />
-    <div class="info">
-      <p><b>{{curso.profesorConnection.primer_nombre}} {{curso.profesorConnection.primer_apellido}} {{curso.profesorConnection.segundo_apellido}}</b></p>
-      <p><b>Profesor Jefe</b></p>
-      <p><b>Colegio Andes Chile</b></p>
-    </div>
-  </div>
-
-  <!-- Firma 2 -->
-  <div class="firma-superpuesta">
-    <img src="https://www.colegioandeschile.cl/img/firma.png" class="firma" />
-    <img src="https://www.colegioandeschile.cl/img/timbre.png" class="timbre" />
-    <div class="info">
-      <p><b>Alfredo Gallegos Ávila</b></p>
-      <p><b>Director Académico</b></p>
-      <p><b>Colegio Andes Chile</b></p>
-    </div>
-  </div>
-
-  <!-- Firma 3 (UTP) -->
-  {{#if (lte cursoId 5)}}
+    <!-- Firma 1 -->
     <div class="firma-superpuesta">
-      <img src="https://www.colegioandeschile.cl/img/firmas_profesores/4.png" class="firma" />
+      <img src="https://www.colegioandeschile.cl/img/firmas_profesores/{{cursoId}}.png" class="firma" />
       <div class="info">
-        <p><b>Diana Guerrero Arellano</b></p>
-        <p><b>Jefa UTP</b></p>
+        <p><b>{{curso.profesorConnection.primer_nombre}} {{curso.profesorConnection.primer_apellido}} {{curso.profesorConnection.segundo_apellido}}</b></p>
+        <p><b>Profesor Jefe</b></p>
         <p><b>Colegio Andes Chile</b></p>
       </div>
     </div>
-  {{else}}
+
+    <!-- Firma 2 -->
     <div class="firma-superpuesta">
-      <img src="https://www.colegioandeschile.cl/img/firmas_profesores/6.png" class="firma" />
+      <img src="https://www.colegioandeschile.cl/img/firma.png" class="firma" />
+      <img src="https://www.colegioandeschile.cl/img/timbre.png" class="timbre" />
       <div class="info">
-        <p><b>Marlenne Rodriguez Banda</b></p>
-        <p><b>Jefa UTP</b></p>
+        <p><b>Alfredo Gallegos Ávila</b></p>
+        <p><b>Director Académico</b></p>
         <p><b>Colegio Andes Chile</b></p>
       </div>
     </div>
-  {{/if}}
 
-</div>
+    <!-- Firma 3 (UTP) -->
+    {{#if (lte cursoId 5)}}
+      <div class="firma-superpuesta">
+        <img src="https://www.colegioandeschile.cl/img/firmas_profesores/4.png" class="firma" />
+        <div class="info">
+          <p><b>Diana Guerrero Arellano</b></p>
+          <p><b>Jefa UTP</b></p>
+          <p><b>Colegio Andes Chile</b></p>
+        </div>
+      </div>
+    {{else}}
+      <div class="firma-superpuesta">
+        <img src="https://www.colegioandeschile.cl/img/firmas_profesores/6.png" class="firma" />
+        <div class="info">
+          <p><b>Marlenne Rodriguez Banda</b></p>
+          <p><b>Jefa UTP</b></p>
+          <p><b>Colegio Andes Chile</b></p>
+        </div>
+      </div>
+    {{/if}}
+
+  </div>
 
 
   <!-- Pie de página -->
   <div class='pies'>
-    <hr />
     <p>Colegio Andes Chile – Rodríguez 1064, Los Andes – Tel.: 342402858 – Mail: colegioandeschile@gmail.com</p>
     <p>www.colegioandeschile.cl</p>
   </div>
