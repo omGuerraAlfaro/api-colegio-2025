@@ -348,12 +348,23 @@ export class PdfService {
     const todayStr = format(new Date(), 'yyyy-MM-dd');
     const estudiante = await this.estudianteService.findById(data.estudianteId);
     const curso = await this.cursoService.findOneWithCurse(data.cursoId);
-    const asistencia = await this.asistenciaService.getAsistenciasResumenPorAlumnoToday(
-      data.semestreId,
-      data.estudianteId,
-      todayStr
-    );
-    const porcentajeAsistencia = Math.round(asistencia.porcentajeAsistencia);
+
+    let porcentajeAsistencia: number | null = null;
+
+    try {
+      const asistencia = await this.asistenciaService.getAsistenciasResumenPorAlumnoToday(
+        data.semestreId,
+        data.estudianteId,
+        todayStr
+      );
+
+      if (asistencia?.porcentajeAsistencia !== undefined) {
+        porcentajeAsistencia = Math.round(asistencia.porcentajeAsistencia);
+      }
+    } catch (err) {
+      console.warn(`No se pudo obtener asistencia del alumno ${data.estudianteId} en semestre ${data.semestreId}:`, err.message);
+      porcentajeAsistencia = null
+    }
 
     function convertToLetra(notaStr: string | undefined): string | null {
       const nota = parseFloat(notaStr ?? '');
@@ -408,7 +419,7 @@ export class PdfService {
             : promedioNumerico;
         }
       }
-      
+
       return {
         nombre: nombreAsignatura,
         nombreOriginal: a.nombre_asignatura,
@@ -499,11 +510,6 @@ export class PdfService {
     handlebars.registerHelper('getCursoName', (cursoId) => {
       const id = parseInt(cursoId);
       return ['Pre-Kinder', 'Kinder', 'Primer Año', 'Segundo Año', 'Tercero Año', 'Cuarto Año', 'Quinto Año', 'Sexto Año', 'Séptimo Año', 'Octavo Año'][id - 1] || 'Curso Desconocido';
-    });
-
-    handlebars.registerHelper('normalizeLower', (str: string) => {
-      if (!str) return '';
-      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); // elimina tildes
     });
 
     handlebars.registerHelper('includes', (arr: any[], value: any) => Array.isArray(arr) && arr.includes(value));
