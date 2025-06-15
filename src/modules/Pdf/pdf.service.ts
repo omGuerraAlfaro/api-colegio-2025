@@ -486,7 +486,6 @@ export class PdfService {
     if (!fs.existsSync(templatePath)) throw new Error('Template file does not exist.');
 
     const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
-
     const template = handlebars.compile(htmlTemplate);
 
     handlebars.unregisterHelper('eq');
@@ -494,12 +493,19 @@ export class PdfService {
     handlebars.unregisterHelper('times');
     handlebars.unregisterHelper('inc');
     handlebars.unregisterHelper('formatRutMiles');
+    handlebars.unregisterHelper('lte');
+    handlebars.unregisterHelper('esPrimerSemestre');
+    handlebars.unregisterHelper('getCursoName');
+    handlebars.unregisterHelper('getCursoNameType');
+    handlebars.unregisterHelper('includes');
+    handlebars.unregisterHelper('and');
+    handlebars.unregisterHelper('evaluacionNotaIndividual');
 
-    handlebars.registerHelper('lte', function (a: number, b: number) {
-      return a <= b;
+    handlebars.registerHelper('eq', (a: any, b: any) => a === b);
+
+    handlebars.registerHelper('anyMatch', (arr: any[], id: number) => {
+      return Array.isArray(arr) && arr.some((x) => x.asignaturaId === id);
     });
-
-    handlebars.registerHelper('inc', (value: number) => (+value + 1).toString());
 
     handlebars.registerHelper('times', function (n: number, block) {
       let out = '';
@@ -507,26 +513,39 @@ export class PdfService {
       return out;
     });
 
-    handlebars.registerHelper('formatRutMiles', (rut: string) =>
-      rut.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
-    );
+    handlebars.registerHelper('inc', (value: number) => (+value + 1).toString());
 
-    handlebars.registerHelper('esPrimerSemestre', (semestre, options) =>
-      semestre === 1 ? options.fn(this) : options.inverse(this)
-    );
+    handlebars.registerHelper('lte', function (a: number, b: number) {
+      return a <= b;
+    });
 
-    handlebars.registerHelper('eq', (a: any, b: any) => a === b);
+    handlebars.registerHelper('formatRutMiles', (rut: string) => {
+      return rut.replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    });
 
-    handlebars.registerHelper('anyMatch', (arr: any[], id: number) =>
-      arr?.some((x) => x.asignaturaId === id)
-    );
+    handlebars.registerHelper('esPrimerSemestre', function (semestre, options) {
+      return semestre === 1 ? options.fn(this) : options.inverse(this);
+    });
 
-    handlebars.registerHelper('includes', (arr: any[], value: any) =>
-      Array.isArray(arr) && arr.includes(value)
-    );
+    handlebars.registerHelper('getCursoName', (cursoId: number) => {
+      const id = parseInt(cursoId.toString());
+      return ['Pre-Kinder', 'Kinder', 'Primer Año', 'Segundo Año', 'Tercero Año', 'Cuarto Año', 'Quinto Año', 'Sexto Año', 'Séptimo Año', 'Octavo Año'][id - 1] || 'Curso Desconocido';
+    });
 
-    handlebars.registerHelper('and', (a, b) => a && b);
+    handlebars.registerHelper('getCursoNameType', (cursoId: number) => {
+      const id = parseInt(cursoId.toString());
+      return id <= 2 ? 'Educación Parvularia' : 'Educación Básica';
+    });
 
+    handlebars.registerHelper('includes', (arr: any[], value: any) => {
+      return Array.isArray(arr) && arr.includes(value);
+    });
+
+    handlebars.registerHelper('and', (a: any, b: any) => {
+      return !!a && !!b;
+    });
+
+    // Evaluación individual con formato HTML según tipo
     handlebars.registerHelper('evaluacionNotaIndividual', (nombreAsignatura: string, notaStr: string | null) => {
       const nombre = nombreAsignatura.toLowerCase();
       const nota = parseFloat(notaStr || '');
