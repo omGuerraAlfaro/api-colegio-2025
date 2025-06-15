@@ -384,18 +384,38 @@ export class PdfService {
         if (idx < maxNotas) valores[idx] = objNota.nota;
       });
 
-      const notaFinal = arregloFinales.find(
-        (f) => f.nombreEvaluacion?.toLowerCase().trim() === 'final'
-      );
+      let promedio: string | null = null;
+
+      if (tipo === 'final') {
+        const notaFinal = arregloFinales.find(
+          (f) => f.nombreEvaluacion?.toLowerCase().trim() === 'final'
+        );
+        promedio = esCualitativa
+          ? convertToLetra(notaFinal?.nota)
+          : notaFinal?.nota?.toString() ?? null;
+      } else {
+        // tipo === 'parcial'
+        const notasNumericas = arregloNotas
+          .map(n => parseFloat(n.nota))
+          .filter(n => !isNaN(n));
+
+        if (notasNumericas.length > 0) {
+          const sumaNotas = notasNumericas.reduce((sum, n) => sum + n, 0);
+          const promedioNumerico = (sumaNotas / notasNumericas.length).toFixed(1);
+
+          promedio = esCualitativa
+            ? convertToLetra(promedioNumerico)
+            : promedioNumerico;
+        }
+      }
 
       return {
         nombre: a.nombre_asignatura,
         valores,
-        promedio: esCualitativa
-          ? convertToLetra(notaFinal?.nota)
-          : notaFinal?.nota?.toString() ?? null,
+        promedio,
       };
     });
+
 
     // ✅ Cálculo del promedio, excluyendo inglés si cursoId <= 5
     let suma = 0;
