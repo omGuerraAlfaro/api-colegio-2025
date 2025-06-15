@@ -486,7 +486,70 @@ export class PdfService {
     if (!fs.existsSync(templatePath)) throw new Error('Template file does not exist.');
 
     const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+
     const template = handlebars.compile(htmlTemplate);
+
+    handlebars.unregisterHelper('eq');
+    handlebars.unregisterHelper('anyMatch');
+    handlebars.unregisterHelper('times');
+    handlebars.unregisterHelper('inc');
+    handlebars.unregisterHelper('formatRutMiles');
+
+    handlebars.registerHelper('lte', function (a: number, b: number) {
+      return a <= b;
+    });
+
+    handlebars.registerHelper('inc', (value: number) => (+value + 1).toString());
+
+    handlebars.registerHelper('times', function (n: number, block) {
+      let out = '';
+      for (let i = 0; i < n; i++) out += block.fn(i);
+      return out;
+    });
+
+    handlebars.registerHelper('formatRutMiles', (rut: string) =>
+      rut.replace(/\B(?=(\d{3})+(?!\d))/g, '.')
+    );
+
+    handlebars.registerHelper('esPrimerSemestre', (semestre, options) =>
+      semestre === 1 ? options.fn(this) : options.inverse(this)
+    );
+
+    handlebars.registerHelper('eq', (a: any, b: any) => a === b);
+
+    handlebars.registerHelper('anyMatch', (arr: any[], id: number) =>
+      arr?.some((x) => x.asignaturaId === id)
+    );
+
+    handlebars.registerHelper('includes', (arr: any[], value: any) =>
+      Array.isArray(arr) && arr.includes(value)
+    );
+
+    handlebars.registerHelper('and', (a, b) => a && b);
+
+    handlebars.registerHelper('evaluacionNotaIndividual', (nombreAsignatura: string, notaStr: string | null) => {
+      const nombre = nombreAsignatura.toLowerCase();
+      const nota = parseFloat(notaStr || '');
+      const esCualitativa = ['religión', 'religion', 'orientación', 'orientacion'].includes(nombre);
+
+      if (esCualitativa && !isNaN(nota)) {
+        if (nota >= 6) return 'MB';
+        if (nota >= 5) return 'B';
+        if (nota >= 4) return 'S';
+        return 'I';
+      }
+
+      if (!isNaN(nota)) {
+        const notaFormateada = nota.toFixed(1);
+        if (nota <= 3.9) {
+          return new handlebars.SafeString(`<span style="color: red; font-weight: bold;">${notaFormateada}</span>`);
+        } else {
+          return notaFormateada;
+        }
+      }
+
+      return new handlebars.SafeString('<span class="sin-notas">–</span>');
+    });
 
     const context = {
       asignaturasConValores,
