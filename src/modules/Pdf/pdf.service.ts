@@ -408,9 +408,10 @@ export class PdfService {
             : promedioNumerico;
         }
       }
-
+      
       return {
-        nombre: a.nombre_asignatura,
+        nombre: nombreAsignatura,
+        nombreOriginal: a.nombre_asignatura,
         valores,
         promedio,
       };
@@ -446,17 +447,30 @@ export class PdfService {
       cantidad++;
     }
 
-    let promedioParcial: any;
-    let promedioFinal: any;
+    let promedioParcial: string | null = null;
+    let promedioFinal: string | null = null;
+
     if (tipo === 'final') {
       const auxPromedioFinal = await this.cierreSemestreService.obtenerPorEstudianteySemestre(data.estudianteId, semestre);
-
-      promedioFinal = auxPromedioFinal[0].nota_final;
-
+      promedioFinal = auxPromedioFinal[0]?.nota_final.toString() ?? null;
     } else {
-      promedioParcial = cantidad > 0 ? (suma / cantidad).toFixed(1) : null;
-    }
+      const promediosNumericos = asignaturasConValores
+        .filter(a => {
+          const nombre = a.nombre?.toLowerCase();
+          if (cursoId <= 5 && (nombre === 'inglés' || nombre === 'ingles')) {
+            excluidasDelPromedio.push('ingles');
+            return false;
+          }
+          return true;
+        })
+        .map(a => parseFloat(a.promedio))
+        .filter(n => !isNaN(n));
 
+      if (promediosNumericos.length > 0) {
+        const sumaPromedios = promediosNumericos.reduce((acc, val) => acc + val, 0);
+        promedioParcial = (sumaPromedios / promediosNumericos.length).toFixed(1);
+      }
+    }
 
     const templatePath = path.join(process.cwd(), 'src', 'modules', 'templates', `${templateName}.hbs`);
     if (!fs.existsSync(templatePath)) throw new Error('Template file does not exist.');
@@ -485,6 +499,11 @@ export class PdfService {
     handlebars.registerHelper('getCursoName', (cursoId) => {
       const id = parseInt(cursoId);
       return ['Pre-Kinder', 'Kinder', 'Primer Año', 'Segundo Año', 'Tercero Año', 'Cuarto Año', 'Quinto Año', 'Sexto Año', 'Séptimo Año', 'Octavo Año'][id - 1] || 'Curso Desconocido';
+    });
+
+    handlebars.registerHelper('normalizeLower', (str: string) => {
+      if (!str) return '';
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); // elimina tildes
     });
 
     handlebars.registerHelper('includes', (arr: any[], value: any) => Array.isArray(arr) && arr.includes(value));
