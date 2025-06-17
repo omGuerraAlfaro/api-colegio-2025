@@ -449,7 +449,7 @@ export class PdfService {
       const valor = parseFloat(notaFinal?.nota ?? '');
       if (isNaN(valor) || esCualitativa) continue;
 
-      if (cursoId <= 5 && esIngles) {
+      if (cursoId <= 6 && esIngles) {
         excluidasDelPromedio.push('ingles');
         continue;
       }
