@@ -468,7 +468,7 @@ export class PdfService {
       const promediosNumericos = asignaturasConValores
         .filter(a => {
           const nombre = a.nombre?.toLowerCase();
-          if (cursoId <= 5 && (nombre === 'inglés' || nombre === 'ingles')) {
+          if (cursoId <= 6 && (nombre === 'inglés' || nombre === 'ingles')) {
             excluidasDelPromedio.push('ingles');
             return false;
           }
@@ -758,7 +758,7 @@ export class PdfService {
       const promediosNumericos = asignaturasConValores
         .filter(a => {
           const nombre = a.nombre?.toLowerCase();
-          if (cursoId <= 5 && (nombre === 'inglés' || nombre === 'ingles')) {
+          if (cursoId <= 6 && (nombre === 'inglés' || nombre === 'ingles')) {
             excluidasDelPromedio.push('ingles');
             return false;
           }
