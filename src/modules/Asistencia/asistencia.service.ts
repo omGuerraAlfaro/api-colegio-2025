@@ -295,8 +295,6 @@ export class AsistenciaService {
         }
     }
 
-
-
     async getAsistenciasResumenPorAlumno(semestreId: number, alumnoId: number): Promise<any> {
         try {
             // Obtener el rango de fechas del semestre
@@ -306,7 +304,15 @@ export class AsistenciaService {
             );
 
             if (!semestre.length) {
-                throw new Error('Semestre no encontrado.');
+                return {
+                    message: 'El semestre especificado no existe.',
+                    estudianteId: alumnoId,
+                    asistencias: 0,
+                    inasistencias: 0,
+                    totalidad: 0,
+                    porcentajeAsistencia: 0,
+                    porcentajeInasistencia: 0,
+                };
             }
 
             const { fecha_inicio, fecha_fin } = semestre[0];
@@ -334,7 +340,15 @@ export class AsistenciaService {
                 .getRawOne();
 
             if (!resultado) {
-                throw new Error('No data found for the given alumno and semestre.');
+                return {
+                    message: 'No existen registros de asistencia para el alumno en este semestre.',
+                    estudianteId: alumnoId,
+                    asistencias: 0,
+                    inasistencias: 0,
+                    totalidad: 0,
+                    porcentajeAsistencia: 0,
+                    porcentajeInasistencia: 0,
+                };
             }
 
             return {
@@ -352,9 +366,19 @@ export class AsistenciaService {
             };
         } catch (error) {
             console.error('Error fetching asistencia resumen data for alumno:', error);
-            throw new Error('Unable to fetch asistencia resumen data for alumno. Please check the input parameters and try again.');
+
+            return {
+                message: 'Ocurrió un error al obtener los registros de asistencia.',
+                estudianteId: alumnoId,
+                asistencias: 0,
+                inasistencias: 0,
+                totalidad: 0,
+                porcentajeAsistencia: 0,
+                porcentajeInasistencia: 0,
+            };
         }
     }
+
 
     async getAsistenciasResumenPorAlumnoToday(
         semestreId: number,
