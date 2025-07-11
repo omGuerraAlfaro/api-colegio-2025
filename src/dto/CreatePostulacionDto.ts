@@ -23,7 +23,6 @@ class MotivosCambioDto {
 
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
   otroText?: string;
 }
 
@@ -36,7 +35,6 @@ class ExpectativasDto {
 
   @IsOptional()
   @IsString()
-  @IsNotEmpty()
   otroExpText?: string;
 }
 
