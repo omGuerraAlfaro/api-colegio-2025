@@ -13,6 +13,7 @@ import { Asistencia } from './Asistencia.entity';
 import { Nota } from './Notas.entity';
 import { Evaluacion } from './Evaluacion.entity';
 import { InscripcionTaller } from './InscripcionTaller.entity';
+import { CalendarioEscolar } from './CalendarioEscolar.entity';
 @Entity()
 export class Curso {
 
@@ -44,6 +45,9 @@ export class Curso {
 
     @OneToMany(() => InscripcionTaller, inscripcionTaller => inscripcionTaller.estudiante)
     inscripciones: InscripcionTaller[];
+
+    @OneToMany(() => CalendarioEscolar, (calendario) => calendario.curso)
+    calendario: CalendarioEscolar[];
 
     addStudent(student: Estudiante) {
         const connection = new EstudianteCurso();
