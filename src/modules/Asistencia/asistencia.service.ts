@@ -32,7 +32,7 @@ export class AsistenciaService {
                 .innerJoinAndSelect('asistencia.semestre', 'semestre')
                 .innerJoinAndSelect('asistencia.calendario', 'calendario')
                 .where('curso.id = :cursoId', { cursoId })
-                .andWhere('semestre.id_semestre = :semestreId', { semestreId })
+                // .andWhere('semestre.id_semestre = :semestreId', { semestreId })
                 .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
                 .select([
                     'estudiante.id AS estudianteId',
