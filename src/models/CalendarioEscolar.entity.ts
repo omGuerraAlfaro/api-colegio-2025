@@ -7,6 +7,7 @@ import {
     ManyToOne
 } from 'typeorm';
 import { Curso } from './Curso.entity';
+import { Asignatura } from './Asignatura.entity';
 
 @Entity('calendario_escolar')
 export class CalendarioEscolar {
@@ -25,4 +26,8 @@ export class CalendarioEscolar {
     @ManyToOne(() => Curso, (curso) => curso.calendario, { nullable: true })
     @JoinColumn({ name: 'id_curso' })
     curso: Curso;
+
+    @ManyToOne(() => Asignatura, (asignatura) => asignatura.calendario, { nullable: true })
+    @JoinColumn({ name: 'id_asignatura' })
+    asignatura: Asignatura;
 }

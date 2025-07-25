@@ -62,11 +62,13 @@ export class CalendarioEscolarService {
         }
     }
 
-    async getDatesForCourse(courseId: number): Promise<CalendarioEscolar[]> {
+    async getDatesForCourseAndSubject(courseId: number, subjectId: number): Promise<CalendarioEscolar[]> {
         try {
 
             const results = await this.calendarioRepository.createQueryBuilder('calendario')
                 .leftJoin('calendario.curso', 'curso')
+                .leftJoin('calendario.asignatura', 'asignatura')
+                .where('asignatura.id = :subjectId', { subjectId })
                 .andWhere('curso.id = :courseId', { courseId })
                 .orderBy('calendario.fecha', 'ASC')
                 .getMany();

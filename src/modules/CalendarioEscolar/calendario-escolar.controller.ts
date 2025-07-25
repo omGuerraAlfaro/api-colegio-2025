@@ -22,9 +22,9 @@ export class CalendarioEscolarController {
         return await this.calendarioService.getUpcomingDatesForCourse(id, 10);
     }
 
-    @Get('curso/:id')
-    async getFechasPorCurso(@Param('id') id: number): Promise<CalendarioEscolar[]> {
-        return await this.calendarioService.getDatesForCourse(id);
+    @Get('curso/:id/asignatura/:idAsignatura')
+    async getFechasPorCursoYAsignatura(@Param('id') id: number, @Param('idAsignatura') idAsignatura: number): Promise<CalendarioEscolar[]> {
+        return await this.calendarioService.getDatesForCourseAndSubject(id, idAsignatura);
     }
 
     @Get(':id')
