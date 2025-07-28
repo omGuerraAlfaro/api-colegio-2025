@@ -80,6 +80,23 @@ export class CalendarioEscolarService {
         }
     }
 
+    async getDatesForCourse(courseId: number): Promise<CalendarioEscolar[]> {
+        try {
+
+            const results = await this.calendarioRepository.createQueryBuilder('calendario')
+                .leftJoin('calendario.curso', 'curso')
+                .leftJoin('calendario.asignatura', 'asignatura')
+                .where('curso.id = :courseId', { courseId })
+                .orderBy('calendario.fecha', 'ASC')
+                .getMany();
+            return results;
+
+        } catch (error) {
+            console.error(`[getUpcomingDatesForCourse] Error para curso ${courseId}:`, error);
+            throw error;
+        }
+    }
+
     async getUpcomingDatesForCourse(courseId: number, daysAhead: number): Promise<CalendarioEscolar[]> {
         const today = new Date();
         today.setHours(0, 0, 0, 0);

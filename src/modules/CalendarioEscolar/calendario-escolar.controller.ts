@@ -27,6 +27,11 @@ export class CalendarioEscolarController {
         return await this.calendarioService.getDatesForCourseAndSubject(id, idAsignatura);
     }
 
+    @Get('curso/:id')
+    async getFechasPorCurso(@Param('id') id: number): Promise<CalendarioEscolar[]> {
+        return await this.calendarioService.getDatesForCourse(id);
+    }
+
     @Get(':id')
     async getById(@Param('id') id: number): Promise<CalendarioEscolar> {
         return await this.calendarioService.getById(id);
