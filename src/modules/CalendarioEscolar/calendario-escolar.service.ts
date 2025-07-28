@@ -85,7 +85,7 @@ export class CalendarioEscolarService {
 
             const results = await this.calendarioRepository.createQueryBuilder('calendario')
                 .leftJoin('calendario.curso', 'curso')
-                .leftJoin('calendario.asignatura', 'asignatura')
+                .leftJoinAndSelect('calendario.asignatura', 'asignatura')
                 .where('curso.id = :courseId', { courseId })
                 .orderBy('calendario.fecha', 'ASC')
                 .getMany();
