@@ -316,6 +316,8 @@ export class AsistenciaService {
             }
 
             const { fecha_inicio, fecha_fin } = semestre[0];
+            const hoy = new Date().toISOString().split('T')[0];
+            const fechaLimite = new Date(fecha_fin) < new Date(hoy) ? fecha_fin : hoy;
 
             const resultado = await this.asistenciaRepository
                 .createQueryBuilder('asistencia')
@@ -327,7 +329,7 @@ export class AsistenciaService {
                 .andWhere('calendario.es_clase = :esClase', { esClase: true })
                 .andWhere('calendario.fecha BETWEEN :fechaInicio AND :fechaFin', {
                     fechaInicio: fecha_inicio,
-                    fechaFin: fecha_fin,
+                    fechaFin: fechaLimite,
                 })
                 .select([
                     'estudiante.id AS estudianteId',
