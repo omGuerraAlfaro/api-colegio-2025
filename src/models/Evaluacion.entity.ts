@@ -10,7 +10,7 @@ export class Evaluacion {
     @PrimaryGeneratedColumn()
     id_evaluacion: number;
 
-    @Column({ type: 'varchar', length: 50 })
+    @Column({ type: 'varchar', length: 225 })
     nombre_evaluacion: string;
 
     @ManyToOne(() => Curso, (curso) => curso.evaluacion)
