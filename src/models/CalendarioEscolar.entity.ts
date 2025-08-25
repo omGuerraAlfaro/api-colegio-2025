@@ -8,6 +8,7 @@ import {
 } from 'typeorm';
 import { Curso } from './Curso.entity';
 import { Asignatura } from './Asignatura.entity';
+import { AsignaturaPreBasica } from './AsignaturaPreBasica.entity';
 
 @Entity('calendario_escolar')
 export class CalendarioEscolar {
@@ -30,4 +31,8 @@ export class CalendarioEscolar {
     @ManyToOne(() => Asignatura, (asignatura) => asignatura.calendario, { nullable: true })
     @JoinColumn({ name: 'id_asignatura' })
     asignatura: Asignatura;
+
+    @ManyToOne(() => AsignaturaPreBasica, (asignaturaPreBasica) => asignaturaPreBasica.calendario, { nullable: true })
+    @JoinColumn({ name: 'id_asignatura_pre_basica' })
+    asignaturaPreBasica: AsignaturaPreBasica;
 }

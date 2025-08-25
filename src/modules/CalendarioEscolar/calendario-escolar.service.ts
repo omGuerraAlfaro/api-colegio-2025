@@ -62,16 +62,27 @@ export class CalendarioEscolarService {
         }
     }
 
-    async getDatesForCourseAndSubject(courseId: number, subjectId: number): Promise<CalendarioEscolar[]> {
+    async getDatesForCourseAndSubject(
+        courseId: number,
+        subjectId: number
+    ): Promise<CalendarioEscolar[]> {
         try {
-
-            const results = await this.calendarioRepository.createQueryBuilder('calendario')
+            const query = this.calendarioRepository
+                .createQueryBuilder('calendario')
                 .leftJoin('calendario.curso', 'curso')
                 .leftJoin('calendario.asignatura', 'asignatura')
-                .where('asignatura.id = :subjectId', { subjectId })
-                .andWhere('curso.id = :courseId', { courseId })
-                .orderBy('calendario.fecha', 'ASC')
-                .getMany();
+                .leftJoin('calendario.asignaturaPreBasica', 'asignaturaPreBasica');
+
+            if (courseId <= 2) {
+                query.where('asignaturaPreBasica.id = :subjectId', { subjectId });
+            } else {
+                query.where('asignatura.id = :subjectId', { subjectId });
+            }
+
+            query.andWhere('curso.id = :courseId', { courseId })
+                .orderBy('calendario.fecha', 'ASC');
+
+            const results = await query.getMany();
             return results;
 
         } catch (error) {
@@ -80,17 +91,22 @@ export class CalendarioEscolarService {
         }
     }
 
+
     async getDatesForCourse(courseId: number): Promise<CalendarioEscolar[]> {
         try {
-
-            const results = await this.calendarioRepository.createQueryBuilder('calendario')
+            const query = this.calendarioRepository
+                .createQueryBuilder('calendario')
                 .leftJoin('calendario.curso', 'curso')
-                .leftJoinAndSelect('calendario.asignatura', 'asignatura')
                 .where('curso.id = :courseId', { courseId })
-                .orderBy('calendario.fecha', 'ASC')
-                .getMany();
-            return results;
+                .orderBy('calendario.fecha', 'ASC');
 
+            if (courseId <= 2) {
+                query.leftJoinAndSelect('calendario.asignaturaPreBasica', 'asignatura');
+            } else {
+                query.leftJoinAndSelect('calendario.asignatura', 'asignatura');
+            }
+
+            return await query.getMany();
         } catch (error) {
             console.error(`[getUpcomingDatesForCourse] Error para curso ${courseId}:`, error);
             throw error;
