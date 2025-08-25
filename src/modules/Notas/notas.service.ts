@@ -706,6 +706,7 @@ export class NotasService {
         )
         .innerJoin(asignaturasTable, 'a', 'e.id_asignatura = a.id')
         .where('e.id_semestre = :semestreId AND e.id_curso = :cursoId', { semestreId, cursoId })
+        .andWhere('e.id_tipo_evaluacion != :tipoEvaluacionId', { tipoEvaluacionId: 2 })
         .orderBy('a.nombre_asignatura', 'ASC')
         .addOrderBy('e.id_evaluacion', 'ASC')
         .getRawMany();
