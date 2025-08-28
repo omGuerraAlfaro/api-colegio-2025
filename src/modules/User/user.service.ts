@@ -153,25 +153,32 @@ export class UsuarioService {
     }
   }
 
-
   async createUsersForAllProfesores(): Promise<Usuarios[]> {
     try {
       const profesores = await this.profesorRepository.find();
       const createdUsers: Usuarios[] = [];
 
       for (const profesor of profesores) {
-        const username = this.generateUsername(profesor.primer_nombre, profesor.primer_apellido);
-        const plainPassword = profesor.rut;
-        const hashedPassword = await hash(plainPassword, 5);
+        const usernameBase = this.generateUsername(profesor.primer_nombre, profesor.primer_apellido);
+        const username = usernameBase + '.profesor';
 
-        const existingUser = await this.usuarioRepository.findOne({ where: { username } });
+        const existingUser = await this.usuarioRepository.findOne({
+          where: [
+            { username },
+            { rut: profesor.rut }
+          ]
+        });
+
         if (existingUser) {
-          // Si el usuario ya existe, puedes decidir saltarte este profesor o actualizar el usuario existente.
+          this.logger.warn(`Usuario ya existe para profesor ${profesor.rut}, se omite.`);
           continue;
         }
 
+        const plainPassword = profesor.rut;
+        const hashedPassword = await hash(plainPassword, 5);
+
         const usuario = new Usuarios();
-        usuario.username = username + '.profesor';
+        usuario.username = username;
         usuario.password = hashedPassword;
         usuario.correo_electronico = profesor.correo_electronico;
         usuario.profesor_id = profesor.id;
@@ -184,9 +191,9 @@ export class UsuarioService {
       return createdUsers;
 
     } catch (error) {
-      this.logger.error(`Error creating InscripcionMatricula: ${error.message}`, error.stack);
+      this.logger.error(`Error al crear usuarios para profesores: ${error.message}`, error.stack);
       throw new InternalServerErrorException({
-        message: 'Error creating the inscripcion matricula.',
+        message: 'Error al crear usuarios para profesores.',
         details: error.message,
         stack: error.stack,
       });
