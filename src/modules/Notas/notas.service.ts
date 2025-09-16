@@ -786,6 +786,7 @@ export class NotasService {
       const resultadosTotales = [];
 
       for (const curso of cursos) {
+        console.log("Procesando curso:", curso.id);
         const cursoId = curso.id;
         const esPreBasica = cursoId === 1 || cursoId === 2;
 
@@ -822,6 +823,7 @@ export class NotasService {
 
         const rawData = await query.getRawMany();
 
+        console.log(`Curso ${cursoId} - Notas encontradas:`, rawData.length);
         const agrupado = new Map<number, number[]>();
 
         for (const row of rawData) {
