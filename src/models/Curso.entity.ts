@@ -42,7 +42,8 @@ export class Curso {
     @OneToMany(() => Asistencia, asistencia => asistencia.curso)
     asistencias: Asistencia[];
 
-    @OneToMany(() => Evaluacion, (evaluacion) => evaluacion.notas)
+    @ManyToOne(() => Evaluacion, (evaluacion) => evaluacion.notas)
+    @JoinColumn({ name: 'id_evaluacion' })
     evaluacion: Evaluacion;
 
     @OneToMany(() => InscripcionTaller, inscripcionTaller => inscripcionTaller.estudiante)
