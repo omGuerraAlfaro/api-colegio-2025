@@ -19,7 +19,7 @@ import { CursoModule } from '../Curso/curso.module';
     CursoModule
   ],
   controllers: [InscripcionTallerController],
-  providers: [InscripcionTallerService, CursoService],
+  providers: [InscripcionTallerService],
   exports: [TypeOrmModule],
 })
 export class InscripcionTallerModule {}
