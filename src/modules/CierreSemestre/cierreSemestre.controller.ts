@@ -1,10 +1,11 @@
-import { Controller, Post, Get, Param } from '@nestjs/common';
+import { Controller, Post, Get, Param, Body } from '@nestjs/common';
 import { CierreSemestreService } from './cierreSemestre.service';
+import { CierreObservacionDto } from 'src/dto/cierreObsAlumnos.dto';
 
 @Controller('cierre-semestre')
 export class CierreSemestreController {
-  constructor(private readonly cierreService: CierreSemestreService) {}
-  
+  constructor(private readonly cierreService: CierreSemestreService) { }
+
   // Genera el cierre anual (semestreId = 3 por defecto)
   @Post('anual')
   crearCierreAnual() {
@@ -38,4 +39,23 @@ export class CierreSemestreController {
   obtenerCierreAnualPorEstudiante(@Param('estudianteId') estudianteId: number) {
     return this.cierreService.obtenerCierreAnualPorEstudiante(estudianteId);
   }
+
+  // Devuelve las observaciones de un estudiante
+  @Get('observaciones/:estudianteId')
+  obtenerObservacionesPorEstudiante(@Param('estudianteId') estudianteId: number) {
+    return this.cierreService.obtenerObservacionesPorEstudiante(estudianteId);
+  }
+
+  @Post('observaciones/multiple')
+  async crearCierreObservacionMultiple(
+    @Body() body: { cierres: CierreObservacionDto[] },
+  ) {
+    const cierres = (body?.cierres ?? []).map(c => ({
+      estudianteId: Number(c.estudianteId),
+      observacion: (c.observacion ?? '').trim().slice(0, 800),
+    }));
+    return this.cierreService.crearCierreObservacionMultiple(cierres);
+  }
+
+
 }

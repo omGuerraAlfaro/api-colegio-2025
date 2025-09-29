@@ -8,12 +8,13 @@ import { NotasModule } from '../Notas/notas.module';
 import { Curso } from 'src/models/Curso.entity';
 import { Semestre } from 'src/models/Semestre.entity';
 import { AsistenciaModule } from '../Asistencia/asistencia.module';
+import { CierreObservacionAlumno } from 'src/models/CierreObservacionAlumno';
 
 @Module({
   imports: [
     NotasModule,
     AsistenciaModule,
-    TypeOrmModule.forFeature([CierreSemestre, Estudiante, Curso, Semestre])
+    TypeOrmModule.forFeature([CierreSemestre, CierreObservacionAlumno, Estudiante, Curso, Semestre])
   ],
   controllers: [CierreSemestreController],
   providers: [CierreSemestreService],

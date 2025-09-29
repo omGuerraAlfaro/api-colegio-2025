@@ -29,6 +29,9 @@ export class Curso {
     @Column({ type: 'varchar', length: 50, nullable: true })
     nivel_grado: string;
 
+    @Column({ type: 'boolean', default: false })
+    observacionCerrada: boolean;
+
     @ManyToOne(() => Profesor, profesor => profesor.cursoConnection)
     @JoinColumn({ name: 'profesor_id' })
     profesorConnection: Profesor;
@@ -39,8 +42,7 @@ export class Curso {
     @OneToMany(() => Asistencia, asistencia => asistencia.curso)
     asistencias: Asistencia[];
 
-    @ManyToOne(() => Evaluacion, (evaluacion) => evaluacion.notas)
-    @JoinColumn({ name: 'id_evaluacion' })
+    @OneToMany(() => Evaluacion, (evaluacion) => evaluacion.notas)
     evaluacion: Evaluacion;
 
     @OneToMany(() => InscripcionTaller, inscripcionTaller => inscripcionTaller.estudiante)

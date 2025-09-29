@@ -360,7 +360,7 @@ export class NotasService {
     * - Genera las notas de cada estudiante para dichas evaluaciones.
     */
   async cierreSemestreBasica(dto: CierreSemestreDto): Promise<void> {
-    console.log(dto);
+    // console.log(dto);
     try {
       // 1. Verificar o crear las evaluaciones (tipoEvaluacionId = 3, 4 y 5)
       let finalParcialEval = await this.evaluacionRepository.findOne({
@@ -823,7 +823,7 @@ export class NotasService {
 
         const rawData = await query.getRawMany();
 
-        console.log(`Curso ${cursoId} - Notas encontradas:`, rawData.length);
+        // console.log(`Curso ${cursoId} - Notas encontradas:`, rawData.length);
         const agrupado = new Map<number, number[]>();
 
         for (const row of rawData) {

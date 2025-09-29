@@ -69,5 +69,16 @@ export class CursoController {
   async findCursoByRutEstudiante(@Param('rut') rut: string) {
     return await this.cursoService.findCursoByRutEstudiante(rut);
   }
+
+  @Patch('cerrar-observacion/:cursoId')
+  async cerrarObservacion(@Param('cursoId') cursoId: number) {
+    try {
+      await this.cursoService.cerrarObservacionCurso(cursoId);
+      return { message: `Observaciones del curso ${cursoId} cerradas.` };
+    } catch (error) {
+      console.error('Error al cerrar observaciones del curso:', error);
+      throw new InternalServerErrorException('Error al cerrar observaciones del curso');
+    }
+  }
   
 }

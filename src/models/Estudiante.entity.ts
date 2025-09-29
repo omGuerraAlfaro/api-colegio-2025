@@ -16,6 +16,7 @@ import { ApoderadoSuplenteEstudiante } from './ApoderadoSuplenteEstudiante.entit
 import { InscripcionTaller } from './InscripcionTaller.entity';
 import { NotaPreBasica } from './NotasPreBasica.entity';
 import { CierreSemestre } from './CierreSemestre.entity';
+import { CierreObservacionAlumno } from './CierreObservacionAlumno';
 
 @Entity()
 export class Estudiante {
@@ -111,5 +112,8 @@ export class Estudiante {
 
     @OneToMany(() => CierreSemestre, cierre => cierre.estudiante)
     cierresConnection: CierreSemestre[];
+
+    @OneToMany(() => CierreObservacionAlumno, cierre => cierre.estudiante)
+    cierresObsConnection: CierreObservacionAlumno[];
 
 }

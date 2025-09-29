@@ -2,13 +2,18 @@ import { Get, Injectable, Param } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Curso } from 'src/models/Curso.entity';
 import { LessThanOrEqual, MoreThan, Repository } from 'typeorm';
+import { CierreSemestreService } from '../CierreSemestre/cierreSemestre.service';
+import { Semestre } from 'src/models/Semestre.entity';
 
 @Injectable()
 export class CursoService {
 
   constructor(
     @InjectRepository(Curso)
-    private readonly cursoRepository: Repository<Curso>
+    private readonly cursoRepository: Repository<Curso>,
+    @InjectRepository(Semestre)
+    private readonly semestreRepository: Repository<Semestre>,
+
   ) { }
 
   async findOne(id: number) {
@@ -179,10 +184,18 @@ export class CursoService {
     return result?.id ?? null;
   }
 
+  async cerrarObservacionCurso(cursoId: number): Promise<void> {
+    await this.cursoRepository.update(cursoId, { observacionCerrada: true });
 
+    // Verificar si ya no queda ningún curso con observación abierta
+    const cursosAbiertos = await this.cursoRepository.count({
+      where: { observacionCerrada: false },
+    });
 
-
-
+    if (cursosAbiertos === 0) {
+      this.semestreRepository.update({ id_semestre: 3 }, { semestreCerrado: true });
+    }
+  }
 
 
 
