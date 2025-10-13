@@ -7,7 +7,7 @@ import { CalendarioAsistencia } from 'src/models/CalendarioAsistencia';
 import { Curso } from 'src/models/Curso.entity';
 import { Estudiante } from 'src/models/Estudiante.entity';
 import { Semestre } from 'src/models/Semestre.entity';
-import { Between, Repository } from 'typeorm';
+import { Between,DataSource, Repository } from 'typeorm';
 
 @Injectable()
 export class AsistenciaService {
@@ -16,6 +16,7 @@ export class AsistenciaService {
         private readonly asistenciaRepository: Repository<Asistencia>,
         @InjectRepository(CalendarioAsistencia)
         private readonly calendarioAsistenciaRepository: Repository<CalendarioAsistencia>,
+        private readonly dataSource: DataSource
     ) { }
 
     async getAllFechasCalendarioAsistencia(): Promise<CalendarioAsistencia[]> {
@@ -55,7 +56,64 @@ export class AsistenciaService {
         }
     }
 
+async getAsistenciaByCurso(cursoId: number, fechaInicio?: string, fechaFin?: string): Promise<any[]> {
+        try {
+            const hoy = new Date();
+            if (!fechaInicio) fechaInicio = new Date(hoy.getFullYear(), 0, 1).toISOString().split('T')[0];
+            if (!fechaFin) fechaFin = hoy.toISOString().split('T')[0];
+            const query =
+                `
+                    SELECT
+                        datos.estudianteId,
+                        datos.nombreCompleto,
+                        JSON_ARRAYAGG(
+                                JSON_OBJECT(
+                                        'idSemestre', datos.id_semestre,
+                                        'nombreSemestre', datos.nombreSemestre,
+                                        'totalClases', datos.totalClases,
+                                        'clasesAsistidas', datos.clasesAsistidas,
+                                        'clasesNoAsistidas', datos.clasesNoAsistidas,
+                                        'porcentajeAsistencia', datos.porcentajeAsistencia,
+                                        'totalDiasSemestre', datos.totalDiasSemestre
+                                )
+                        ) AS semestres
+                    FROM (
+                             SELECT
+                                 e.id AS estudianteId,
+                                 CONCAT(e.primer_nombre_alumno, ' ', e.primer_apellido_alumno, ' ', e.segundo_apellido_alumno) AS nombreCompleto,
+                                 s.id_semestre,
+                                 s.nombre AS nombreSemestre,
+                                 SUM(CASE WHEN ca.es_clase = true THEN 1 ELSE 0 END) AS totalClases,
+                                 SUM(CASE WHEN a.estado = true AND ca.es_clase = true THEN 1 ELSE 0 END) AS clasesAsistidas,
+                                 SUM(CASE WHEN a.estado = false AND ca.es_clase = true THEN 1 ELSE 0 END) AS clasesNoAsistidas,
+                                 ROUND(
+                                         SUM(CASE WHEN a.estado = true AND ca.es_clase = true THEN 1 ELSE 0 END) * 100.0 /
+                                         NULLIF(SUM(CASE WHEN ca.es_clase = true THEN 1 ELSE 0 END), 0),
+                                         2
+                                 ) AS porcentajeAsistencia,
+                                 COUNT(DISTINCT a.id_dia) AS totalDiasSemestre
+                             FROM asistencia a
+                                      INNER JOIN estudiante e ON a.id_estudiante = e.id
+                                      INNER JOIN curso c ON a.id_curso = c.id
+                                      INNER JOIN semestres s ON a.id_semestre = s.id_semestre
+                                      INNER JOIN calendario_asistencias ca ON ca.id_dia = a.id_dia
+                             WHERE c.id = ?
+                               AND e.estado_estudiante = true
+                               AND ca.fecha BETWEEN ? AND ?
+                             GROUP BY e.id, s.id_semestre
+                         ) AS datos
+                    GROUP BY datos.estudianteId, datos.nombreCompleto
+                    ORDER BY datos.nombreCompleto;
+            `;
 
+            const result = await this.dataSource.query(query, [cursoId,fechaInicio, fechaFin]);
+            return result;
+
+        } catch (error) {
+            console.error('Error fetching asistencia data:', error);
+            throw new Error('Unable to fetch asistencia data. Please check the input parameters and try again.');
+        }
+    }
     async getAsistenciaByCursoAndSemestreByAlumno(cursoId: number, alumnoId: number, semestreId: number): Promise<any[]> {
         try {
             const resultados = await this.asistenciaRepository
