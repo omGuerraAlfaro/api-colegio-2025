@@ -107,7 +107,11 @@ async getAsistenciaByCurso(cursoId: number, fechaInicio?: string, fechaFin?: str
             `;
 
             const result = await this.dataSource.query(query, [cursoId,fechaInicio, fechaFin]);
-            return result;
+            return result.map((resultado) => ({
+            estudianteId: resultado.estudianteId,
+            nombreCompleto: resultado.nombreCompleto,
+            semestres: JSON.parse(resultado.semestres), 
+            }));
 
         } catch (error) {
             console.error('Error fetching asistencia data:', error);
