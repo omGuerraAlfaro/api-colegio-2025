@@ -64,7 +64,7 @@ import { CronTasksService } from './jobs/cron.jobs.service';
       port: 3306,
       username: 'colegioa_omarignacio',
       password: 'tZk+2t]rxUG3',
-      database: 'colegioa_colegio2025',
+      database: 'colegioa_cach-qa',
       entities,
       synchronize: true
     }),
