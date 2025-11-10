@@ -10,9 +10,21 @@ import {
   IsString,
   Max,
   Min,
+  ValidateIf,
   ValidateNested
 } from 'class-validator';
 import { Type } from 'class-transformer';
+
+class NecesidadEducativaDto {
+  @IsBoolean()
+  necesita: boolean;
+
+  // Solo es obligatorio si "necesita" es true
+  @ValidateIf(o => o.necesita === true)
+  @IsString()
+  @IsNotEmpty()
+  detalle?: string;
+}
 
 class MotivosCambioDto {
   @IsBoolean() proyecto: boolean;
@@ -46,6 +58,7 @@ export class CreatePostulacionDto {
   @IsString() @IsNotEmpty() comuna: string;
   @IsString() @IsNotEmpty() telefono: string;
   @IsEmail() @IsNotEmpty() email: string;
+  @IsString() @IsNotEmpty() ocupacion: string;
 
   // Estudiante
   @IsString() @IsNotEmpty() pupilo: string;
@@ -56,6 +69,12 @@ export class CreatePostulacionDto {
   edad: number;
   @IsString() @IsNotEmpty() cursoPostula: string;
   @IsString() @IsNotEmpty() colegioOrigen: string;
+
+  // NecesidadEducativa anidado
+  @IsObject()
+  @ValidateNested()
+  @Type(() => NecesidadEducativaDto)
+  necesidadEducativa: NecesidadEducativaDto;
 
   // MotivosCambio anidado
   @IsObject()
