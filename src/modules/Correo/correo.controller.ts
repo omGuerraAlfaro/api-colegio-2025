@@ -442,10 +442,12 @@ export class CorreoController {
         comuna,
         telefono,
         email,
+        ocupacion,
         pupilo,
         edad,
         cursoPostula,
         colegioOrigen,
+        necesidadEducativa,
         motivosCambio,
         expectativas,
         comentarios,
@@ -539,6 +541,7 @@ export class CorreoController {
                   <li><strong>Comuna:</strong> ${comuna}</li>
                   <li><strong>Teléfono:</strong> ${telefono}</li>
                   <li><strong>Email:</strong> ${email}</li>
+                  <li><strong>Ocupación:</strong> ${ocupacion}</li>
                 </ul>
               </div>
 
@@ -550,6 +553,7 @@ export class CorreoController {
                   <li><strong>Edad:</strong> ${edad}</li>
                   <li><strong>Curso al que postula:</strong> ${cursoPostula}</li>
                   <li><strong>Colegio de procedencia:</strong> ${colegioOrigen}</li>
+                  <li><strong>Necesidad educativa especial:</strong> ${necesidadEducativa ? necesidadEducativa.detalle : 'No'}</li>
                 </ul>
               </div>
 
@@ -727,6 +731,7 @@ export class CorreoController {
                 <li><strong>Comuna:</strong> ${comuna}</li>
                 <li><strong>Teléfono:</strong> ${telefono}</li>
                 <li><strong>Email:</strong> ${email}</li>
+                <li><strong>Ocupación:</strong> ${ocupacion}</li>
               </ul>
             </div>
 
@@ -738,6 +743,7 @@ export class CorreoController {
                 <li><strong>Edad:</strong> ${edad}</li>
                 <li><strong>Curso al que postula:</strong> ${cursoPostula}</li>
                 <li><strong>Colegio de procedencia:</strong> ${colegioOrigen}</li>
+                <li><strong>Necesidad educativa especial:</strong> ${necesidadEducativa ? necesidadEducativa.detalle : 'No'}</li>
               </ul>
             </div>
 
@@ -811,7 +817,7 @@ export class CorreoController {
       Saludos, Colegio Andes Chile (CACH).`;
 
       // 5) Destinatarios
-      const CORREO_INTERNO = 'omar.guerra@outlook.cl'; // interno que ya usabas
+      const CORREO_INTERNO = 'omar.guerra@outlook.cl';
 
       // 6) Opciones de los dos correos
       const mailToColegio: nodemailer.SendMailOptions = {
@@ -898,6 +904,7 @@ export class CorreoController {
   //     throw new Error('Hubo un problema al enviar el correo. Por favor, intenta nuevamente.');
   //   }
   // }
+
   @Post('/enviar/verano')
   @UsePipes(new ValidationPipe())
   async enviarCorreoVerano(@Body() formData: any): Promise<any> {
