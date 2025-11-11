@@ -63,7 +63,7 @@ import { CronTasksService } from './jobs/cron.jobs.service';
       host: '44.207.168.60',
       port: 3306,
       username: 'colegioa_omarignacio',
-      password: 'tZk+2t]rxUG3',
+      password: 'w1Wm5wmgQ8i0RY_L',
       database: 'colegioa_colegio2025',
       entities,
       synchronize: true
