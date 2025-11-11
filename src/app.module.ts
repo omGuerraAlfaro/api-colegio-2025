@@ -60,7 +60,7 @@ import { CronTasksService } from './jobs/cron.jobs.service';
     CierreSemestreModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: 'vcl42.wnpower.com',
+      host: 'vcl42.wnpower.net',
       port: 3306,
       username: 'colegioa_omarignacio',
       password: 'w1Wm5wmgQ8i0RY_L',
