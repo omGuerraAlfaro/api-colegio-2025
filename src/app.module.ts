@@ -60,11 +60,11 @@ import { CronTasksService } from './jobs/cron.jobs.service';
     CierreSemestreModule,
     TypeOrmModule.forRoot({
       type: 'mysql',
-      host: '44.207.168.60',
+      host: 'colegio-bd.cetmgc6qciga.us-east-1.rds.amazonaws.com',
       port: 3306,
-      username: 'colegioa_omarignacio',
-      password: 'w1Wm5wmgQ8i0RY_L',
-      database: 'colegioa_colegio2025',
+      username: 'admincolegio',
+      password: 'colegio3131.',
+      database: 'cachcolegio2025',
       entities,
       synchronize: true
     }),
