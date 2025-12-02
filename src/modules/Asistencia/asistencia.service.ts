@@ -325,8 +325,10 @@ async getAsistenciaByCurso(cursoId: number, fechaInicio?: string, fechaFin?: str
             const resultados = await this.asistenciaRepository
                 .createQueryBuilder('asistencia')
                 .innerJoinAndSelect('asistencia.estudiante', 'estudiante')
+                .innerJoinAndSelect('asistencia.calendario', 'calendario')
                 .where('asistencia.semestre.id_semestre = :semestreId', { semestreId })
                 .andWhere('estudiante.estado_estudiante = :estado', { estado: true })
+                .andWhere('calendario.es_clase = :esClase', { esClase: true })
                 .select([
                     'estudiante.id AS estudianteId',
                     `CONCAT(estudiante.primer_nombre_alumno, ' ', estudiante.primer_apellido_alumno, ' ', estudiante.segundo_apellido_alumno) AS nombreCompleto`,
