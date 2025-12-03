@@ -1,3 +1,5 @@
+import { IsInt, IsPositive, IsOptional } from 'class-validator';
+
 export class CreateNotasDto {
     cursoId: number;
     asignaturaId: number;
@@ -17,8 +19,13 @@ export class findNotasAlumnoDto {
 }
 
 export class findNotasCursoDto {
+    @IsInt({ message: 'cursoId debe ser un número entero' })
+    @IsPositive({ message: 'cursoId debe ser un número positivo' })
     cursoId: number;
-    semestreId: number;
+
+    @IsOptional()
+    @IsInt({ message: 'semestreId debe ser un número entero' })
+    semestreId?: number;
 }
 
 export class findNotasCursoAsignaturaDto {

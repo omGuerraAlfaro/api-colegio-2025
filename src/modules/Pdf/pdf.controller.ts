@@ -1,9 +1,9 @@
-import { Controller, Get, Res, Query, InternalServerErrorException, Body, Post, Header, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Res, Query, InternalServerErrorException, Body, Post, Header, BadRequestException, ParseIntPipe } from '@nestjs/common';
 import { PdfService } from './pdf.service';
 import { Response } from 'express';
 import { MatriculaDto } from 'src/dto/matricula.dto';
 import { AlumnoRegularDto } from 'src/dto/alumno-regular.dto';
-import { findNotasAlumnoDto } from 'src/dto/notas.dto';
+import { findNotasAlumnoDto, findNotasCursoDto } from 'src/dto/notas.dto';
 import { CursoService } from '../Curso/curso.service';
 
 @Controller('pdf')
@@ -99,24 +99,40 @@ export class PdfController {
   }
 
   @Post('generate/curso-notas-parcial')
-  async generatePdfCursoNotasParcial(@Res() res: Response, @Query('cursoId') cursoId: number, @Query('semestreId') semestreId: number) {
-    const buffer = await this.pdfService.generatePdfCursoNotas('pdf-alumno-notas', cursoId, semestreId, 'parcial');
+  async generatePdfCursoNotasParcial(
+    @Res() res: Response,
+    @Body() datosCurso: findNotasCursoDto
+  ) {
+    const buffer = await this.pdfService.generatePdfCursoNotas(
+      'pdf-alumno-notas',
+      datosCurso.cursoId,
+      datosCurso.semestreId,
+      'parcial'
+    );
 
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename=curso-${cursoId}-semestre-${semestreId}.pdf`,
+      'Content-Disposition': `attachment; filename=curso-${datosCurso.cursoId}-semestre-${datosCurso.semestreId}.pdf`,
     });
 
     return res.send(buffer);
   }
 
   @Post('generate/curso-notas-final')
-  async generatePdfCursoNotasFinal(@Res() res: Response, @Query('cursoId') cursoId: number, @Query('semestreId') semestreId: number) {
-    const buffer = await this.pdfService.generatePdfCursoNotas('pdf-alumno-notas', cursoId, semestreId, 'final');
+  async generatePdfCursoNotasFinal(
+    @Res() res: Response,
+    @Body() datosCurso: findNotasCursoDto
+  ) {
+    const buffer = await this.pdfService.generatePdfCursoNotasFinal(
+      'pdf-alumno-notas-final',
+      datosCurso.cursoId,
+      datosCurso.semestreId,
+      'final'
+    );
 
     res.set({
       'Content-Type': 'application/pdf',
-      'Content-Disposition': `attachment; filename=curso-${cursoId}-semestre-${semestreId}.pdf`,
+      'Content-Disposition': `attachment; filename=curso-${datosCurso.cursoId}-semestre-${datosCurso.semestreId}-final.pdf`,
     });
 
     return res.send(buffer);
