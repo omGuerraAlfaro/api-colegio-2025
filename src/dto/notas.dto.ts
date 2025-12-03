@@ -12,7 +12,7 @@ export class CreateNotasDto {
 
 export class findNotasAlumnoDto {
     estudianteId: number;
-    semestreId: number;
+    semestreId?: number;
     cursoId: number;
 }
 

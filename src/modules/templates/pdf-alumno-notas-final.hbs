@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang='es'>
+<head>
+  <meta charset='UTF-8' />
+  <meta name='viewport' content='width=device-width, initial-scale=1.0' />
+  <title>Informe de Notas</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+    }
+
+    .content {
+      padding: 20px;
+    }
+
+    .text-center {
+      text-align: center;
+    }
+
+    .tabla {
+      border-collapse: collapse;
+      width: 100%;
+      margin-bottom: 20px;
+    }
+
+    .tabla th,
+    .tabla td {
+      border: 1px solid #000;
+      padding: 6px;
+      font-size: 11px;
+    }
+
+    .tabla th {
+      background-color: #838282;
+      font-weight: bold;
+      text-align: center;
+      color: #fff;
+    }
+
+    .sin-notas {
+      color: #777;
+      font-style: italic;
+      text-align: center;
+    }
+
+.firmas-superpuestas-container {
+  display: flex;
+  justify-content: space-around;
+  gap: 10px;
+  margin-bottom: 30px;
+  page-break-inside: avoid;
+}
+
+.firma-superpuesta {
+  position: relative;
+  width: 200px;
+  text-align: center;
+  font-size: small;
+  min-height: 100px;
+}
+
+.firma-superpuesta .firma {
+  position: absolute;
+  width: 150px;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%) translateY(-30%);
+  z-index: 1;
+}
+
+.firma-superpuesta .timbre {
+  position: absolute;
+  width: 70px;
+  top: -10px;
+  left: 50%;
+  transform: translateX(-40%);
+  opacity: 0.4;
+  z-index: 0;
+}
+
+.firma-superpuesta .info {
+  margin-top: 35px;
+  position: relative;
+  z-index: 2;
+}
+.firma-superpuesta .info p {
+  margin: 2px 0;
+}
+
+.pies{
+  font-size: xx-small;
+  font-weight: bolder;
+  text-align: center;
+  margin-top: 10px;
+}
+
+    @media print {
+      .contenidoCabeza {
+        top: 0;
+        width: 100%;
+        position: fixed;
+      }
+
+      .cabeza {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: bolder;
+      }
+
+      .cabeza img {
+        max-width: 3%;
+        margin-right: 50px;
+        height: auto;
+      }
+
+      .content {
+        margin-top: 30px;
+      }
+
+      .firmas-container {
+        margin-top: 40px;
+        margin-bottom: 60px;
+      }
+
+      .page-break {
+        page-break-after: always;
+      }
+    }
+  </style>
+  
+</head>
+
+<body>
+  <!-- Encabezado fijo -->
+  <div class='contenidoCabeza'>
+    <div class='cabeza'>
+      <p>Informe de Notas</p>
+      <img class='logo' src='https://www.colegioandeschile.cl/img/LOGO.png' alt='Colegio Andes Chile' />
+    </div>
+    <hr />
+  </div>
+
+  <div class='content'>
+    {{#if promedioFinal}}
+      <h3 class='text-center'>INFORME FINAL DE CALIFICACIONES 2025</h3>
+    {{else if promedioParcial}}
+      <h3 class='text-center'>INFORME PARCIAL DE CALIFICACIONES 2025</h3>
+    {{else}}
+      <h3 class='text-center'>INFORME DE CALIFICACIONES 2025</h3>
+    {{/if}}
+    <h4 class='text-center'>COLEGIO PARTICULAR ANDES-CHILE (14762)</h4>
+
+    <p style='text-align: justify; line-height: 1.4;'>
+      Se otorga el presente certificado de calificaciones a
+      <strong>{{estudiante.primer_nombre_alumno}} {{estudiante.segundo_nombre_alumno}} {{estudiante.primer_apellido_alumno}} {{estudiante.segundo_apellido_alumno}}</strong>.
+      {{#if estudiante.rut}}
+        <strong>RUN: {{formatRutMiles estudiante.rut}}-{{estudiante.dv}}</strong>,
+      {{else}}
+        <strong>RUN: – sin RUT –</strong>,
+      {{/if}}
+      estudiante del <strong>{{getCursoName cursoId}}</strong> de <strong>{{getCursoNameType cursoId}}</strong> con fecha:
+      <strong><span id='fecha-informe'></span></strong>, de acuerdo al plan y programas de estudios aprobados por decreto o resolución exenta de educación
+      <strong>Nº 2960 de 2012</strong> y reglamento de evaluación y promoción escolar decreto exento <strong>Nº DECRETO 67 de 2020.</strong>
+    </p>
+
+    <div style='height: 20px;'></div>
+
+    <!-- Tabla de Notas -->
+    <table class='tabla'>
+      <thead>
+        <tr>
+          <th rowspan='2' style='width: 25%;'>Asignaturas</th>
+          <th colspan='{{maxNotas}}'>
+            {{#esPrimerSemestre semestre}}1° Semestre{{else}}2° Semestre{{/esPrimerSemestre}}
+          </th>
+          <th rowspan='2'>Prom. S1</th>
+          <th rowspan='2'>Prom. S2</th>
+          <th rowspan='2'>Prom. Final</th>
+
+        </tr>
+        <tr>
+          {{#times maxNotas}}<th>{{inc this}}°</th>{{/times}}
+        </tr>
+      </thead>
+      <tbody>
+        {{#each asignaturasConValores}}
+        <tr>
+          <td style='text-transform: capitalize;'>{{this.nombre}}</td>
+          {{#each this.valores}}
+          <td style='text-align: center;'>
+            {{#if this}}{{evaluacionNotaIndividual ../this.nombre this}}{{else}}<span class='sin-notas'>–</span>{{/if}}
+          </td>
+          {{/each}}
+          
+          <td style='text-align: center; font-weight: bold;'>
+            {{#if this.promedioS1}}{{this.promedioS1}}{{#if this.excluirDelPromedio}}**{{/if}}{{else}}-{{/if}}
+          </td>
+          <td style='text-align: center; font-weight: bold;'>
+            {{#if this.promedioS2}}{{this.promedioS2}}{{#if this.excluirDelPromedio}}**{{/if}}{{else}}-{{/if}}
+          </td>
+          <td style='text-align: center; font-weight: bold;'>
+            {{#if this.promedioFinal}}{{this.promedioFinal}}{{#if this.excluirDelPromedio}}**{{/if}}{{else}}-{{/if}}
+          </td>
+        </tr>
+        {{/each}}
+      </tbody>
+    </table>
+
+    {{#if (includes excluidasDelPromedio "ingles")}}
+      <p style="font-size: 10px; margin-top: 10px;">
+        <strong>**</strong> La nota de Inglés no ha sido incluida en el cálculo del promedio final.
+      </p>
+    {{/if}}
+
+    <!-- Tabla resumen de promedios -->
+   {{#if promedioFinal}}
+  <table style='float: right; width: 250px; margin-top: 20px; border-collapse: collapse; font-size: 13px;'>
+    <tr>
+      <th style='border: 1px solid #000; padding: 6px; text-align: left; background-color: #838282; color: #fff; font-weight: bold;'>
+        PROMEDIO FINAL
+      </th>
+      <td style='border: 1px solid #000; padding: 6px; text-align: center;'>{{promedioFinal}}</td>
+    </tr>
+    <tr>
+      <th style='border: 1px solid #000; padding: 6px; text-align: left; background-color: #838282; color: #fff; font-weight: bold;'>
+        PORCENTAJE DE ASISTENCIA
+      </th>
+      <td style='border: 1px solid #000; padding: 6px; text-align: center;'>{{#if porcentajeAsistencia}}{{porcentajeAsistencia}}%{{else}}—{{/if}}</td>
+    </tr>
+  </table>
+{{else if promedioParcial}}
+  <table style='float: right; width: 250px; margin-top: 20px; border-collapse: collapse; font-size: 13px;'>
+    <tr>
+      <th style='border: 1px solid #000; padding: 6px; text-align: left; background-color: #838282; color: #fff; font-weight: bold;'>
+        PROMEDIO FINAL PARCIAL
+      </th>
+      <td style='border: 1px solid #000; padding: 6px; text-align: center;'>{{promedioParcial}}</td>
+    </tr>
+    <tr>
+      <th style='border: 1px solid #000; padding: 6px; text-align: left; background-color: #838282; color: #fff; font-weight: bold;'>
+        PORCENTAJE DE ASISTENCIA
+      </th>
+      <td style='border: 1px solid #000; padding: 6px; text-align: center;'>{{#if porcentajeAsistencia}}{{porcentajeAsistencia}}%{{else}}—{{/if}}</td>
+    </tr>
+  </table>
+{{/if}}
+
+  </div>
+
+  <div class="firmas-superpuestas-container">
+    <!-- Firma 1 -->
+    <div class="firma-superpuesta">
+      <img src="https://www.colegioandeschile.cl/img/firmas_profesores/{{cursoId}}.png" class="firma" />
+      <div class="info">
+        <p><b>{{curso.profesorConnection.primer_nombre}} {{curso.profesorConnection.primer_apellido}} {{curso.profesorConnection.segundo_apellido}}</b></p>
+        <p><b>Profesor Jefe</b></p>
+        <p><b>Colegio Andes Chile</b></p>
+      </div>
+    </div>
+
+    <!-- Firma 2 -->
+    <div class="firma-superpuesta">
+      <img src="https://www.colegioandeschile.cl/img/firma.png" class="firma" />
+      <img src="https://www.colegioandeschile.cl/img/timbre.png" class="timbre" />
+      <div class="info">
+        <p><b>Alfredo Gallegos Ávila</b></p>
+        <p><b>Director Académico</b></p>
+        <p><b>Colegio Andes Chile</b></p>
+      </div>
+    </div>
+
+    <!-- Firma 3 (UTP) -->
+    {{#if (lte cursoId 5)}}
+      <div class="firma-superpuesta">
+        <img src="https://www.colegioandeschile.cl/img/firmas_profesores/4.png" class="firma" />
+        <div class="info">
+          <p><b>Diana Guerrero Arellano</b></p>
+          <p><b>Jefa UTP</b></p>
+          <p><b>Colegio Andes Chile</b></p>
+        </div>
+      </div>
+    {{else}}
+      <div class="firma-superpuesta">
+        <img src="https://www.colegioandeschile.cl/img/firmas_profesores/6.png" class="firma" />
+        <div class="info">
+          <p><b>Marlenne Rodriguez Banda</b></p>
+          <p><b>Jefa UTP</b></p>
+          <p><b>Colegio Andes Chile</b></p>
+        </div>
+      </div>
+    {{/if}}
+
+  </div>
+
+
+  <!-- Pie de página -->
+  <div class='pies'>
+    <p>Colegio Andes Chile – Rodríguez 1064, Los Andes – Tel.: 342402858 – Mail: colegioandeschile@gmail.com</p>
+    <p>www.colegioandeschile.cl</p>
+  </div>
+
+  <!-- Script para fecha -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const fechaSpan = document.getElementById('fecha-informe');
+      if (fechaSpan) {
+        const hoy = new Date();
+        const dia = String(hoy.getDate()).padStart(2, '0');
+        const mes = String(hoy.getMonth() + 1).padStart(2, '0');
+        const año = hoy.getFullYear();
+        fechaSpan.textContent = `${dia}/${mes}/${año}`;
+      }
+    });
+  </script>
+</body>
+</html>

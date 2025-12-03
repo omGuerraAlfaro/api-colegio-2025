@@ -547,7 +547,343 @@ export class PdfService {
       }
     }
   }
+async generatePdfAlumnoNotasFinal(
+    templateName: string,
+    data: findNotasAlumnoDto,
+    tipo: string
+  ): Promise<Buffer> {
+    // Para el informe final, usar el semestre 4 (cierre anual) si no viene semestreId
+    const semestre = data.semestreId ?? 4;
+    const cursoId = data.cursoId;
 
+    const asignaturas = (
+      data.cursoId === 1 || data.cursoId === 2
+        ? await this.asignaturaService.getAllAsignaturasPreBasica()
+        : await this.asignaturaService.getAllAsignaturasBasica()
+    ) as any[];
+
+    let notas: any[] = [];
+
+    try {
+      // Para el informe final (semestre 4), mostrar notas del segundo semestre
+      if (semestre === 4) {
+        const notasSemestre2 = await this.notasService.getTodasNotasPorEstudianteSemestre(
+          data.estudianteId,
+          2,
+          data.cursoId
+        );
+
+        // Usar las notas del semestre 2 como base (para mostrar en la tabla)
+        notas = notasSemestre2;
+      } else {
+        notas = await this.notasService.getTodasNotasPorEstudianteSemestre(
+          data.estudianteId,
+          data.semestreId,
+          data.cursoId
+        );
+      }
+
+      if (!notas || notas.length === 0) {
+        throw new BadRequestException(
+          'El estudiante no tiene notas registradas para generar el informe.'
+        );
+      }
+    } catch (error) {
+      if (error instanceof BadRequestException) throw error;
+      console.error('Error obteniendo notas del estudiante:', error);
+      throw new InternalServerErrorException('Error al obtener las notas del estudiante.');
+    }
+
+    const todayStr = format(new Date(), 'yyyy-MM-dd');
+    const estudiante = await this.estudianteService.findById(data.estudianteId);
+    const curso = await this.cursoService.findOneWithCurse(data.cursoId);
+
+    let porcentajeAsistencia: number | null = null;
+
+    try {
+      const asistencia = await this.asistenciaService.getAsistenciasResumenPorAlumnoToday(
+        data.semestreId,
+        data.estudianteId,
+        todayStr
+      );
+
+      if (asistencia?.porcentajeAsistencia !== undefined) {
+        porcentajeAsistencia = Math.round(asistencia.porcentajeAsistencia);
+      }
+    } catch (err) {
+      console.warn(`No se pudo obtener asistencia del alumno ${estudiante.primer_nombre_alumno} ${estudiante.primer_apellido_alumno} (ID: ${data.estudianteId}) en semestre ${data.semestreId}:`, err.message);
+      porcentajeAsistencia = null;
+    }
+
+    function convertToLetra(notaStr: string | undefined): string | null {
+      const nota = parseFloat(notaStr ?? '');
+      if (isNaN(nota)) return null;
+      if (nota >= 6) return 'MB';
+      if (nota >= 5) return 'B';
+      if (nota >= 4) return 'S';
+      return 'I';
+    }
+
+    const notasMap: Record<number, any[]> = {};
+    const finalesMap: Record<number, any[]> = {};
+    notas.forEach((n) => {
+      notasMap[n.asignaturaId] = n.notas;
+      finalesMap[n.asignaturaId] = n.finales ?? [];
+    });
+
+    const maxNotas = Math.max(...notas.map((n) => n.notas.length));
+
+    // Para el informe final, obtener notas de ambos semestres por asignatura
+    let notasSemestre1Map: Record<number, any[]> = {};
+    let notasSemestre2Map: Record<number, any[]> = {};
+
+    if (semestre === 4 && tipo === 'final') {
+      try {
+        const notasS1 = await this.notasService.getTodasNotasPorEstudianteSemestre(
+          data.estudianteId,
+          1,
+          data.cursoId
+        );
+        const notasS2 = await this.notasService.getTodasNotasPorEstudianteSemestre(
+          data.estudianteId,
+          2,
+          data.cursoId
+        );
+
+        notasS1.forEach((n) => {
+          notasSemestre1Map[n.asignaturaId] = n.finales ?? [];
+        });
+        notasS2.forEach((n) => {
+          notasSemestre2Map[n.asignaturaId] = n.finales ?? [];
+        });
+      } catch (error) {
+        console.warn('No se pudieron obtener las notas de los semestres 1 y 2 por asignatura:', error);
+      }
+    }
+
+    const asignaturasConValores = asignaturas.map((a) => {
+      const nombreAsignatura = a.nombre_asignatura?.toLowerCase().trim();
+      if (nombreAsignatura === 'no aplica') return null;
+      const esCualitativa = ['religión', 'religion', 'orientación', 'orientacion'].includes(nombreAsignatura);
+      const arregloNotas = notasMap[a.id] ?? [];
+      const arregloFinales = finalesMap[a.id] ?? [];
+
+      const valores: (string | null)[] = Array(maxNotas).fill(null);
+      arregloNotas.forEach((objNota, idx) => {
+        if (idx < maxNotas) valores[idx] = objNota.nota;
+      });
+
+      let promedio: string | null = null;
+      let promedioS1: string | null = null;
+      let promedioS2: string | null = null;
+      let promedioFinalAsignatura: string | null = null;
+
+      // Verificar si es inglés y debe excluirse del promedio general (cursos <= 6)
+      const esIngles = nombreAsignatura === 'inglés' || nombreAsignatura === 'ingles';
+      const excluirDelPromedio = cursoId <= 6 && esIngles;
+
+      if (tipo === 'final') {
+        // Para el informe final, calcular promedios por semestre
+        if (semestre === 4) {
+          const finalesS1 = notasSemestre1Map[a.id] ?? [];
+          const finalesS2 = notasSemestre2Map[a.id] ?? [];
+
+          const notaFinalS1 = finalesS1.find(
+            (f) => f.nombreEvaluacion?.toLowerCase().trim() === 'final'
+          );
+          const notaFinalS2 = finalesS2.find(
+            (f) => f.nombreEvaluacion?.toLowerCase().trim() === 'final'
+          );
+
+          if (notaFinalS1?.nota) {
+            promedioS1 = esCualitativa
+              ? convertToLetra(notaFinalS1.nota)
+              : parseFloat(notaFinalS1.nota).toFixed(1);
+          }
+
+          if (notaFinalS2?.nota) {
+            promedioS2 = esCualitativa
+              ? convertToLetra(notaFinalS2.nota)
+              : parseFloat(notaFinalS2.nota).toFixed(1);
+          }
+
+          // Calcular promedio final: (S1 + S2) / 2
+          if (!esCualitativa && promedioS1 && promedioS2) {
+            const s1 = parseFloat(promedioS1);
+            const s2 = parseFloat(promedioS2);
+            if (!isNaN(s1) && !isNaN(s2)) {
+              promedioFinalAsignatura = ((s1 + s2) / 2).toFixed(1);
+            }
+          } else if (esCualitativa) {
+            // Para cualitativas, tomar el ultimo concepto
+            promedioFinalAsignatura = promedioS2 || promedioS1;
+          }
+        } else {
+          const notaFinal = arregloFinales.find(
+            (f) => f.nombreEvaluacion?.toLowerCase().trim() === 'final'
+          );
+          promedio = esCualitativa
+            ? convertToLetra(notaFinal?.nota)
+            : notaFinal?.nota?.toString() ?? null;
+        }
+      } else {
+        const notasNumericas = arregloNotas
+          .map(n => parseFloat(n.nota))
+          .filter(n => !isNaN(n));
+
+        if (notasNumericas.length > 0) {
+          const sumaNotas = notasNumericas.reduce((sum, n) => sum + n, 0);
+          const promedioNumerico = (sumaNotas / notasNumericas.length).toFixed(1);
+
+          promedio = esCualitativa
+            ? convertToLetra(promedioNumerico)
+            : promedioNumerico;
+        }
+      }
+
+      return {
+        nombre: nombreAsignatura,
+        nombreOriginal: a.nombre_asignatura,
+        valores,
+        promedio,
+        promedioS1,
+        promedioS2,
+        promedioFinal: promedioFinalAsignatura,
+        excluirDelPromedio,
+      };
+    }).filter(Boolean);
+
+    let suma = 0;
+    let cantidad = 0;
+    const excluidasDelPromedio: string[] = [];
+
+    for (const [asignaturaId, finales] of Object.entries(finalesMap)) {
+      const asignatura = asignaturas.find((a) => a.id === Number(asignaturaId));
+      const nombre = asignatura?.nombre_asignatura?.toLowerCase().trim();
+      if (!nombre) continue;
+
+      const esCualitativa = ['religión', 'religion', 'orientación', 'orientacion'].includes(nombre);
+      const esIngles = nombre === 'inglés' || nombre === 'ingles';
+
+      const notaFinal = finales.find(
+        (f) => f.nombreEvaluacion?.toLowerCase().trim() === 'final'
+      );
+
+      const valor = parseFloat(notaFinal?.nota ?? '');
+      if (isNaN(valor) || esCualitativa) continue;
+
+      if (cursoId <= 6 && esIngles) {
+        excluidasDelPromedio.push('ingles');
+        continue;
+      }
+
+      suma += valor;
+      cantidad++;
+    }
+
+    let promedioParcial: string | null = null;
+    let promedioFinal: string | null = null;
+
+    // Llenar el array de excluidas del promedio basándose en las asignaturas
+    asignaturasConValores.forEach(a => {
+      if (a.excluirDelPromedio) {
+        excluidasDelPromedio.push('ingles');
+      }
+    });
+
+    if (tipo === 'final') {
+      const auxPromedioFinal = await this.cierreSemestreService.obtenerPorEstudianteySemestre(data.estudianteId, semestre);
+      promedioFinal = auxPromedioFinal[0]?.nota_final.toString() ?? null;
+    } else {
+      const promediosNumericos = asignaturasConValores
+        .filter(a => {
+          const nombre = a.nombre?.toLowerCase();
+          if (cursoId <= 6 && (nombre === 'inglés' || nombre === 'ingles')) {
+            return false;
+          }
+          return true;
+        })
+        .map(a => parseFloat(a.promedio))
+        .filter(n => !isNaN(n));
+
+      if (promediosNumericos.length > 0) {
+        const sumaPromedios = promediosNumericos.reduce((acc, val) => acc + val, 0);
+        promedioParcial = (sumaPromedios / promediosNumericos.length).toFixed(1);
+      }
+    }
+
+    // Obtener promedios de cierre de semestres 1 y 2 para las columnas adicionales
+    const cierreSemestre1 = await this.cierreSemestreService.obtenerPorEstudianteySemestre(data.estudianteId, 1);
+    const cierreSemestre2 = await this.cierreSemestreService.obtenerPorEstudianteySemestre(data.estudianteId, 2);
+    const promedioSemestre1 = cierreSemestre1[0]?.nota_final?.toString() ?? null;
+    const promedioSemestre2 = cierreSemestre2[0]?.nota_final?.toString() ?? null;
+
+    const templatePath = path.join(process.cwd(), 'src', 'modules', 'templates', `${templateName}.hbs`);
+    if (!fs.existsSync(templatePath)) throw new Error('Template file does not exist.');
+
+    const htmlTemplate = fs.readFileSync(templatePath, 'utf-8');
+    const template = handlebars.compile(htmlTemplate);
+
+    this.registerHandlebarsHelpers();
+
+    const context = {
+      asignaturasConValores,
+      estudiante,
+      curso,
+      semestre,
+      maxNotas,
+      promedioFinal,
+      promedioParcial,
+      cursoId,
+      porcentajeAsistencia,
+      excluidasDelPromedio,
+      promedioSemestre1,
+      promedioSemestre2,
+    };
+
+    const html = template(context);
+
+    let browser: puppeteer.Browser | null = null;
+    let page: puppeteer.Page | null = null;
+
+    try {
+      browser = await timeout(
+        puppeteer.launch({ headless: true, args: ['--no-sandbox', '--disable-setuid-sandbox'] }),
+        15000 
+      );
+    } catch (err) {
+      console.error('Puppeteer no pudo iniciarse dentro del tiempo límite:', err.message);
+      throw new InternalServerErrorException('Error generando PDF. Timeout al iniciar navegador.');
+    }
+
+    try {
+      page = await browser.newPage();
+      await page.setContent(html);
+
+      const pdfBuffer = Buffer.from(await page.pdf({
+        width: '21.5cm',
+        height: '33cm',
+        landscape: true,
+        printBackground: true,
+        margin: { top: '20px', bottom: '20px', left: '20mm', right: '20mm' },
+        displayHeaderFooter: true,
+        headerTemplate: `<p></p>`,
+        footerTemplate: `<div style="font-size:10px; width:100%; text-align:center;">Página <span class="pageNumber"></span> de <span class="totalPages"></span></div>`,
+      }));
+
+      return pdfBuffer;
+    } catch (error) {
+      console.error('Error al generar página PDF:', error.message);
+      throw new InternalServerErrorException('Error generando contenido del PDF.');
+    } finally {
+      try {
+        if (page) await page.close();
+        if (browser) await browser.close();
+      } catch (closeErr) {
+        console.error('Error cerrando Puppeteer:', closeErr);
+      }
+    }
+  }
   async generatePdfCursoNotas(
     templateName: string,
     cursoId: number,

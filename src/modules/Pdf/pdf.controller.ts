@@ -88,7 +88,7 @@ export class PdfController {
   @Post('generate/alumno-notas-final')
   async generatePdfAlumnoNotasFinal(@Res() res: Response, @Body() datosNotas: findNotasAlumnoDto) {
 
-    const pdf = await this.pdfService.generatePdfAlumnoNotas('pdf-alumno-notas', datosNotas, 'final');
+    const pdf = await this.pdfService.generatePdfAlumnoNotasFinal('pdf-alumno-notas-final', datosNotas, 'final');
 
     res.set({
       'Content-Type': 'application/pdf',
